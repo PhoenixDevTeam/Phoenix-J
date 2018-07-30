@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="16dp">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="?colorPrimary" />
+
+    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        card_view:cardBackgroundColor="#ffffff"
+        card_view:cardCornerRadius="0dp"
+        card_view:cardUseCompatPadding="true">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/avatar_letter"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:background="#D32F2F"
+                android:gravity="center"
+                android:text="G"
+                android:textAllCaps="true"
+                android:textColor="#ffffff"
+                android:textSize="36dp" />
+
+            <ImageView
+                android:id="@id/avatar"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop" />
+
+            <View
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:background="@drawable/gradient_card_background" />
+
+            <RelativeLayout
+                android:id="@+id/change_avatar_button"
+                android:layout_width="200dp"
+                android:layout_height="48dp"
+                android:layout_below="@+id/avatar_letter"
+                android:background="?attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="@string/change_avatar"
+                    android:textAllCaps="true"
+                    android:textColor="?attr/textColorPrimary"
+                    android:textSize="14sp" />
+
+            </RelativeLayout>
+        </RelativeLayout>
+    </android.support.v7.widget.CardView>
+</RelativeLayout>

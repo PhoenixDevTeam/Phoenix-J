@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="login_components_width">250dp</dimen>
+
+    <integer name="photos_albums_column_count">2</integer>
+    <integer name="local_gallery_column_count">3</integer>
+
+    <dimen name="toolbar_title_size">20dp</dimen>
+    <dimen name="toolbar_subtitle_size">12dp</dimen>
+</resources>

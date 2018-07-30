@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="4dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp">
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/enable"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/enable"
+        android:textColor="?attr/textColorPrimary"
+        android:textSize="16sp" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/vibration"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        android:text="@string/vibration"
+        android:textColor="?attr/textColorPrimary"
+        android:textSize="16sp" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/light"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        android:text="@string/light"
+        android:textColor="?attr/textColorPrimary"
+        android:textSize="16sp" />
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/sound"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
+        android:text="@string/sound"
+        android:textColor="?attr/textColorPrimary"
+        android:textSize="16sp" />
+
+    <RelativeLayout
+        android:id="@+id/ringrone_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp">
+
+        <TextView
+            android:id="@+id/ringnote_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:text="@string/ringtone"
+            android:textColor="?attr/textColorPrimary"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_to_right" />
+
+    </RelativeLayout>
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/ok"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_ok" />
+
+</LinearLayout>

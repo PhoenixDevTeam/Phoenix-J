@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        card_view:cardBackgroundColor="@color/white"
+        card_view:cardCornerRadius="2dp"
+        card_view:cardElevation="2dp"
+        card_view:contentPadding="4dp">
+
+        <RelativeLayout
+            android:id="@+id/view_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/button_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/ic_custom_search_view_icon_vector" />
+
+            <AutoCompleteTextView
+                android:id="@+id/input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_toEndOf="@+id/button_left"
+                android:layout_toLeftOf="@+id/right_buttons"
+                android:layout_toRightOf="@+id/button_left"
+                android:layout_toStartOf="@+id/right_buttons"
+                android:background="@null"
+                android:dropDownAnchor="@id/view_container"
+                android:hint="Hint"
+                android:imeOptions="actionSearch"
+                android:inputType="text|textAutoComplete|textNoSuggestions"
+                android:maxLines="1"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
+                android:textColor="@color/textColorSecondary"
+                android:textColorHint="@color/textColorHint"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:id="@+id/right_buttons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/clear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_custom_search_view_clear_vector" />
+
+                <ImageView
+                    android:id="@+id/button_additional"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_custom_search_view_options_vector" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+
+</FrameLayout>

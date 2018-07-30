@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_chats"
+            android:id="@id/imageView"
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+
+        <LinearLayout
+            android:layout_centerVertical="true"
+            android:id="@+id/counter_root"
+            android:background="@drawable/circle_stroke_background"
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:paddingLeft="6dp"
+            android:paddingRight="6dp"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/imageView"
+            android:layout_marginLeft="-4dp">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/counter"
+                android:text="3"
+                android:textColor="#ffffff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+</LinearLayout>

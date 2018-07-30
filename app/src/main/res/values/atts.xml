@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="textColorPrimary" format="color" />
+    <attr name="textColorSecondary" format="color" />
+    <attr name="textColorDisabled" format="color" />
+    <attr name="textColorPrimaryInverse" format="color"/>
+    <attr name="textColorSecondaryInverse" format="color"/>
+
+    <declare-styleable name="AspectRatioImageView">
+        <attr name="aspect_ration_height" format="integer" />
+        <attr name="aspect_ration_width" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="LimitedWidthSeekbar">
+        <attr name="seekbar_max_width" format="dimension"/>
+    </declare-styleable>
+
+</resources>

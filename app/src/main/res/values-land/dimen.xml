@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <integer name="photos_albums_column_count">4</integer>
+    <integer name="local_gallery_column_count">4</integer>
+
+    <dimen name="toolbar_title_size">16dp</dimen>
+    <dimen name="toolbar_subtitle_size">12dp</dimen>
+</resources>

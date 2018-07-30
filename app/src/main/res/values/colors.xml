@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="color_accent">#64B5F6</color>
+
+    <color name="textColorPrimary">#0D0D0D</color>
+    <color name="textColorSecondary">#707070</color>
+    <color name="textColorHint">#a1a1a1</color>
+    <color name="textColorDisabled">#39000000</color>
+
+    <color name="listDividerColor">#39888888</color>
+    <color name="white">#ffffff</color>
+
+</resources>

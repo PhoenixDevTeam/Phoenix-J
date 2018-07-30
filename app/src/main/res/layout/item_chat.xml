@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/header_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:paddingBottom="12dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="12dp"
+            android:text="example@server.com"
+            android:textColor="?colorAccent"
+            android:textStyle="bold" />
+
+        <include layout="@layout/divider"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingBottom="12dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="12dp">
+
+        <FrameLayout
+            android:id="@+id/avatar_root"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:background="@drawable/circle_red">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/avatar_letter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="R"
+                android:textColor="#ffffff"
+                android:textSize="28dp" />
+
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_toEndOf="@+id/avatar_root"
+            android:layout_toRightOf="@+id/avatar_root"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/has_unread"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/buble_background"
+                    android:paddingBottom="1dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="1dp"
+                    android:text="5"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginRight="8dp"/>
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/interlocutor_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@+id/has_unread"
+                    android:layout_toLeftOf="@+id/time"
+                    android:layout_toRightOf="@+id/has_unread"
+                    android:layout_toStartOf="@+id/time"
+                    android:text="Henry Curtis"
+                    android:textColor="?textColorPrimary"
+                    android:textIsSelectable="false"
+                    android:textSize="16sp" />
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
+                    android:text="10:25 AM"
+                    android:textSize="12sp" />
+
+            </RelativeLayout>
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:maxLines="4"
+                android:text="Hey there, A few months back, we shared…"
+                android:textColor="?textColorSecondary"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+</LinearLayout>

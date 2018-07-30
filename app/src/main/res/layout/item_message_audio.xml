@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingBottom="8dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="8dp">
+
+    <LinearLayout
+        android:id="@+id/message_body_root"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:background="#ffffff">
+
+        <FrameLayout
+            android:id="@+id/avatar_root"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_red">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/avatar_letter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="R"
+                android:textColor="#ffffff"
+                android:textSize="28dp" />
+
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </FrameLayout>
+
+        <ImageView
+            android:id="@+id/play_pause_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_play_oval_vector" />
+
+        <RelativeLayout
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:orientation="vertical"
+            android:layout_marginRight="12dp">
+
+            <biz.dealnote.xmpp.view.LimitedWidthSeekbar
+                android:id="@+id/seekbar"
+                app:seekbar_max_width="260dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <RelativeLayout
+                android:layout_alignLeft="@+id/seekbar"
+                android:layout_alignRight="@+id/seekbar"
+                android:layout_alignEnd="@+id/seekbar"
+                android:layout_alignStart="@+id/seekbar"
+                android:layout_below="@+id/seekbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp">
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/current_position"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0:00"
+                    android:textColor="?attr/textColorSecondary" />
+
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:text="1:10"
+                    android:textColor="?attr/textColorSecondary" />
+
+            </RelativeLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
+</LinearLayout>

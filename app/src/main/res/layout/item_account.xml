@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/header_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:paddingBottom="12dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="12dp"
+            android:id="@+id/header_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="header text"
+            android:textColor="?colorAccent"
+            android:textStyle="bold"/>
+
+        <include layout="@layout/divider" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/content_root"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp">
+
+        <FrameLayout
+            android:id="@+id/avatar_root"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/circle_red">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/avatar_letter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="G"
+                android:textAllCaps="true"
+                android:textColor="#ffffff"
+                android:textSize="28dp" />
+
+            <ImageView
+                android:id="@id/avatar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_toLeftOf="@+id/imageView"
+            android:layout_toRightOf="@+id/avatar_root"
+            android:layout_toStartOf="@+id/imageView"
+            android:orientation="vertical"
+            android:paddingRight="16dp">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/jid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:text="Name"
+                android:textColor="?attr/textColorPrimary"
+                android:textSize="16sp" />
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/first_last_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:text="Name"
+                android:textColor="?attr/textColorSecondary"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_to_right" />
+
+    </RelativeLayout>
+</LinearLayout>

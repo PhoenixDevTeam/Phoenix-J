@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/selectableItemBackground"
+    android:orientation="vertical"
+    android:paddingBottom="4dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="4dp">
+
+    <FrameLayout
+        android:id="@+id/avatar_root"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/circle_red">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/avatar_letter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="R"
+            android:textColor="#ffffff"
+            android:textSize="20dp" />
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/user_avatar" />
+
+    </FrameLayout>
+
+        <LinearLayout
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:id="@+id/message_body_root"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@+id/avatar_root"
+            android:background="@color/white">
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/messge_body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hi Thomas! How are you?"
+                android:textColor="?attr/textColorPrimary" />
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5 minutes ago"
+                android:textColor="?attr/textColorSecondary"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+</RelativeLayout>

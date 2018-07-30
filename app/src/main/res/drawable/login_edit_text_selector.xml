@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@drawable/login_input_text_focus_background" android:state_focused="true" />
+    <item android:drawable="@drawable/login_input_text_nofocus_background" />
+
+</selector>
