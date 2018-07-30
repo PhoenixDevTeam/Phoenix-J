@@ -19,8 +19,6 @@ import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.service.IConnectionManager;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.request.Request;
-import biz.dealnote.xmpp.service.request.exception.CustomRequestException;
-import biz.dealnote.xmpp.service.request.exception.DataException;
 import biz.dealnote.xmpp.util.Logger;
 
 public class ConnectToAccountsOperation extends AbsXmppOperation {

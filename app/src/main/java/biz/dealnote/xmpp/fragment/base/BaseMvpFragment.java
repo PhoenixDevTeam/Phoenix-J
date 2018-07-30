@@ -4,9 +4,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
+import biz.dealnote.mvp.compat.AbsMvpFragment;
 import biz.dealnote.mvp.core.AbsPresenter;
 import biz.dealnote.mvp.core.IMvpView;
-import biz.dealnote.mvp.compat.AbsPresenterFragment;
 import biz.dealnote.xmpp.mvp.view.IErrorView;
 import biz.dealnote.xmpp.mvp.view.IToastView;
 import biz.dealnote.xmpp.util.Objects;
@@ -15,8 +15,8 @@ import biz.dealnote.xmpp.util.Objects;
  * Created by ruslan.kolbasa on 01.11.2016.
  * phoenix_for_xmpp
  */
-public abstract class BasePresenterFragment<P extends AbsPresenter<V>, V extends IMvpView>
-        extends AbsPresenterFragment<P, V> implements IMvpView, IErrorView, IToastView {
+public abstract class BaseMvpFragment<P extends AbsPresenter<V>, V extends IMvpView>
+        extends AbsMvpFragment<P, V> implements IMvpView, IErrorView, IToastView {
 
     @Override
     public void showError(String text) {

@@ -1,19 +1,13 @@
 package biz.dealnote.xmpp.service
 
+import biz.dealnote.xmpp.model.Account
+import io.reactivex.Flowable
 import org.jivesoftware.smack.AbstractXMPPConnection
 import org.jivesoftware.smack.packet.Message
 import org.jivesoftware.smack.packet.Presence
 import org.jivesoftware.smack.roster.RosterEntry
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest
 import org.jxmpp.jid.Jid
-
-import java.io.IOException
-
-import biz.dealnote.xmpp.model.Account
-import biz.dealnote.xmpp.service.exception.ConnectionAlreadyRegisteredException
-import biz.dealnote.xmpp.util.Pair
-import io.reactivex.Flowable
-import io.reactivex.Observable
 
 /**
  * Created by admin on 05.11.2016.

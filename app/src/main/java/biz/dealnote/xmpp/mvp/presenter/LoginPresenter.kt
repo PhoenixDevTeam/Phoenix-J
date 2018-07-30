@@ -12,7 +12,6 @@ import biz.dealnote.xmpp.mvp.presenter.base.RequestSupportPresenter
 import biz.dealnote.xmpp.mvp.view.ILoginView
 import biz.dealnote.xmpp.service.request.Request
 import biz.dealnote.xmpp.service.request.RequestFactory
-import biz.dealnote.xmpp.util.Logger
 import org.jxmpp.jid.impl.JidCreate
 
 /**

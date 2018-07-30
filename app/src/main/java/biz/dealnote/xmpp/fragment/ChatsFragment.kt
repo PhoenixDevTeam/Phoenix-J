@@ -14,13 +14,13 @@ import biz.dealnote.xmpp.activity.ActivityUtils
 import biz.dealnote.xmpp.adapter.ChatsAdapter
 import biz.dealnote.xmpp.callback.PicassoPauseOnScrollListener
 import biz.dealnote.xmpp.dialog.ChatContextDialog
-import biz.dealnote.xmpp.fragment.base.BasePresenterFragment
+import biz.dealnote.xmpp.fragment.base.BaseMvpFragment
 import biz.dealnote.xmpp.model.Chat
 import biz.dealnote.xmpp.mvp.presenter.ChatsPresenter
 import biz.dealnote.xmpp.mvp.view.IChatsView
 import biz.dealnote.xmpp.place.PlaceFactory
 
-class ChatsFragment : BasePresenterFragment<ChatsPresenter, IChatsView>(), ChatsAdapter.ClickListener, IChatsView {
+class ChatsFragment : BaseMvpFragment<ChatsPresenter, IChatsView>(), ChatsAdapter.ClickListener, IChatsView {
 
     private var mEmptyText: TextView? = null
     private var mAdapter: ChatsAdapter? = null

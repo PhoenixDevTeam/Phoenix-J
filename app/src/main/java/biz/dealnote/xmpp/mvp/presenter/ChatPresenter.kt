@@ -113,20 +113,20 @@ class ChatPresenter(private val mAccountId: Int,
         appendDisposable(Repositories.instance.messages
                 .createAddMessageObservable()
                 .filter { message -> message.accountId == mAccountId && message.destination == mDestination }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onNewMessageAdded))
+                .toMainThread()
+                .subscribe(Consumer { message -> onNewMessageAdded(message) }, ignore()))
 
         appendDisposable(Repositories.instance.messages
                 .createMessageUpdateObservable()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onMessageUpdate))
+                .toMainThread()
+                .subscribe(Consumer { update -> onMessageUpdate(update) }, ignore()))
 
         appendDisposable(Repositories.instance.messages
                 .createMessageDeleteObservable()
                 .filter { integerSetPair -> chatId != null && Objects.equals(integerSetPair.first, chatId) }
                 .map { it -> it.second }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onMessagesRemoved))
+                .toMainThread()
+                .subscribe(Consumer { deletion -> onMessagesRemoved(deletion) }, ignore()))
 
         if (mAccount == null) {
             loadAccountInfo()

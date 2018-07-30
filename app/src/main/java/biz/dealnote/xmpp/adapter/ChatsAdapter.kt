@@ -8,19 +8,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-
-import com.squareup.picasso.Transformation
-
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
 import biz.dealnote.xmpp.R
-import biz.dealnote.xmpp.model.Chat
 import biz.dealnote.xmpp.model.AppMessage
+import biz.dealnote.xmpp.model.Chat
 import biz.dealnote.xmpp.util.Avatars
 import biz.dealnote.xmpp.util.RoundTransformation
 import biz.dealnote.xmpp.util.Utils
+import com.squareup.picasso.Transformation
+import java.text.SimpleDateFormat
+import java.util.*
 
 private const val DIV_DISABLE = 0
 private const val DIV_TODAY = 1

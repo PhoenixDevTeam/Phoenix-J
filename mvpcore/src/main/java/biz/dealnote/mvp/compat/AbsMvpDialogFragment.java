@@ -3,7 +3,7 @@ package biz.dealnote.mvp.compat;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.view.View;
 
 import biz.dealnote.mvp.core.IMvpView;
@@ -14,19 +14,23 @@ import biz.dealnote.mvp.core.ViewHostDelegate;
  * Created by ruslan.kolbasa on 08.09.2016.
  * mvpcore
  */
-public abstract class AbsPresenterFragment<P extends IPresenter<V>, V extends IMvpView> extends Fragment implements ViewHostDelegate.IFactoryProvider<P,V> {
+public abstract class AbsMvpDialogFragment<P extends IPresenter<V>, V extends IMvpView> extends DialogFragment implements ViewHostDelegate.IFactoryProvider<P,V> {
 
-    private ViewHostDelegate<P, V> mViewHostDelegate = new ViewHostDelegate<>();
+    private final ViewHostDelegate<P, V> mViewHostDelegate = new ViewHostDelegate<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewHostDelegate.onCreate(getActivity(), getPresenterViewHost(), this, getLoaderManager(), savedInstanceState);
+        mViewHostDelegate.onCreate(requireActivity(), getPresenterViewHost(), this, getLoaderManager(), savedInstanceState);
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        fireViewCreated();
+    }
+
+    public void fireViewCreated(){
         mViewHostDelegate.onViewCreated();
     }
 
@@ -67,18 +71,7 @@ public abstract class AbsPresenterFragment<P extends IPresenter<V>, V extends IM
         return (V) this;
     }
 
-    private final Object toString = new Object();
-
-    @Override
-    public String toString() {
-        return toString.toString();
-    }
-
     protected P getPresenter(){
         return mViewHostDelegate.getPresenter();
-    }
-
-    protected boolean isPresenterPrepared(){
-        return mViewHostDelegate.isPresenterPrepared();
     }
 }

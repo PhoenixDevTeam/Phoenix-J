@@ -15,7 +15,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 object Injection {
 
     private val fileTransferer: IFileTransferer by lazy { FileTransferer(App.getInstance(), Repositories.instance.messages) }
-    private val otrManager: IOtrManager by lazy {OTRManager(App.getInstance())}
+    private val otrManager: IOtrManager by lazy { OTRManager(App.getInstance()) }
 
     fun provideMainThreadScheduler(): Scheduler {
         return AndroidSchedulers.mainThread()

@@ -13,7 +13,7 @@ import biz.dealnote.xmpp.mvp.view.IChatsView
 import biz.dealnote.xmpp.util.Utils
 import biz.dealnote.xmpp.util.Utils.addElementToList
 import biz.dealnote.xmpp.util.Utils.indexOf
-import biz.dealnote.xmpp.util.toMain
+import biz.dealnote.xmpp.util.toMainThread
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import java.util.*
@@ -33,19 +33,19 @@ class ChatsPresenter(savedInstanceState: Bundle?) : RequestSupportPresenter<ICha
         val repositories = Repositories.instance
 
         appendDisposable(repositories.chats.observeChatUpdate()
-                .toMain()
+                .toMainThread()
                 .subscribe(this::onChatUpdate))
 
         appendDisposable(repositories.chats.observeChatCreation()
-                .toMain()
+                .toMainThread()
                 .subscribe(this::onChatCreated))
 
         appendDisposable(repositories.chats.observeChatDeletion()
-                .toMain()
+                .toMainThread()
                 .subscribe(this::onChatDelete))
 
         appendDisposable(repositories.accountsRepository.observeDeletion()
-                .toMain()
+                .toMainThread()
                 .subscribe(this::onAccountDelete))
     }
 

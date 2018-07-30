@@ -8,8 +8,6 @@ import biz.dealnote.xmpp.model.Contact;
 import biz.dealnote.xmpp.util.Optional;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
-import io.reactivex.Maybe;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 
 /**

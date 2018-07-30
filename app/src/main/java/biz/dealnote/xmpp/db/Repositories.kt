@@ -3,8 +3,6 @@ package biz.dealnote.xmpp.db
 import android.content.Context
 import android.content.ContextWrapper
 import biz.dealnote.xmpp.App
-
-import biz.dealnote.xmpp.Injection
 import biz.dealnote.xmpp.db.impl.AccountsRepository
 import biz.dealnote.xmpp.db.impl.ChatsRepository
 import biz.dealnote.xmpp.db.impl.ContactsRepository

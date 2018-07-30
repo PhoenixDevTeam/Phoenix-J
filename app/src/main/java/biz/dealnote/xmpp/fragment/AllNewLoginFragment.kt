@@ -12,13 +12,13 @@ import biz.dealnote.mvp.core.IPresenterFactory
 import biz.dealnote.xmpp.R
 import biz.dealnote.xmpp.activity.LoginActivity
 import biz.dealnote.xmpp.activity.MainActivity
-import biz.dealnote.xmpp.fragment.base.BasePresenterFragment
+import biz.dealnote.xmpp.fragment.base.BaseMvpFragment
 import biz.dealnote.xmpp.model.AccountContactPair
 import biz.dealnote.xmpp.mvp.presenter.LoginPresenter
 import biz.dealnote.xmpp.mvp.view.ILoginView
 import biz.dealnote.xmpp.view.SimpleTextWatcher
 
-class AllNewLoginFragment : BasePresenterFragment<LoginPresenter, ILoginView>(), ILoginView {
+class AllNewLoginFragment : BaseMvpFragment<LoginPresenter, ILoginView>(), ILoginView {
 
     private var mLogin: EditText? = null
     private var mPassword: EditText? = null

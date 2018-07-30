@@ -23,7 +23,7 @@ import biz.dealnote.xmpp.activity.ActivityUtils
 import biz.dealnote.xmpp.activity.FileManagerActivity
 import biz.dealnote.xmpp.adapter.MessagesAdapter
 import biz.dealnote.xmpp.callback.*
-import biz.dealnote.xmpp.fragment.base.BasePresenterFragment
+import biz.dealnote.xmpp.fragment.base.BaseMvpFragment
 import biz.dealnote.xmpp.model.AppFile
 import biz.dealnote.xmpp.model.AppMessage
 import biz.dealnote.xmpp.mvp.presenter.ChatPresenter
@@ -35,7 +35,7 @@ import biz.dealnote.xmpp.util.Utils.getDurationString
 import biz.dealnote.xmpp.view.SimpleTextWatcher
 import java.io.File
 
-class ChatFragment : BasePresenterFragment<ChatPresenter, IChatView>(), OnBackButtonCallback, MessagesAdapter.ActionListener, ActionMode.Callback,
+class ChatFragment : BaseMvpFragment<ChatPresenter, IChatView>(), OnBackButtonCallback, MessagesAdapter.ActionListener, ActionMode.Callback,
         MessagesAdapter.SubscriptionActionListener, IChatView, MessagesAdapter.AudioBindCallback {
 
     private var mAdapter: MessagesAdapter? = null

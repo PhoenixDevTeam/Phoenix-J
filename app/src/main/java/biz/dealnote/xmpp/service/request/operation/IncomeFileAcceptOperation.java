@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 
 import java.io.File;
@@ -24,7 +23,6 @@ import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.TransferNotFoundException;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.exception.CustomRequestException;
-import biz.dealnote.xmpp.service.request.exception.DataException;
 import biz.dealnote.xmpp.transfer.IFileTransferer;
 import biz.dealnote.xmpp.util.AppPerms;
 

@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 
 import biz.dealnote.xmpp.Extra;
-import biz.dealnote.xmpp.db.ChatContentProvider;
 import biz.dealnote.xmpp.db.DBHelper;
 import biz.dealnote.xmpp.db.columns.ContactsColumns;
 import biz.dealnote.xmpp.exception.CustomAppException;

@@ -3,7 +3,8 @@ package biz.dealnote.mvp.compat;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
+import android.view.View;
 
 import biz.dealnote.mvp.core.IMvpView;
 import biz.dealnote.mvp.core.IPresenter;
@@ -13,43 +14,48 @@ import biz.dealnote.mvp.core.ViewHostDelegate;
  * Created by ruslan.kolbasa on 08.09.2016.
  * mvpcore
  */
-public abstract class AbsPresenterActivity<P extends IPresenter<V>, V extends IMvpView> extends AppCompatActivity implements ViewHostDelegate.IFactoryProvider<P,V> {
+public abstract class AbsMvpFragment<P extends IPresenter<V>, V extends IMvpView> extends Fragment implements ViewHostDelegate.IFactoryProvider<P,V> {
 
-    private final ViewHostDelegate<P, V> mViewHostDelegate = new ViewHostDelegate<>();
+    private ViewHostDelegate<P, V> mViewHostDelegate = new ViewHostDelegate<>();
 
     @Override
-    protected final void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewHostDelegate.onCreate(this, getPresenterViewHost(), this, getSupportLoaderManager(), savedInstanceState);
+        mViewHostDelegate.onCreate(requireActivity(), getPresenterViewHost(), this, getLoaderManager(), savedInstanceState);
     }
 
     @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         mViewHostDelegate.onViewCreated();
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         mViewHostDelegate.onSaveInstanceState(outState);
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         mViewHostDelegate.onPause();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         mViewHostDelegate.onResume();
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroyView() {
+        super.onDestroyView();
         mViewHostDelegate.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
         mViewHostDelegate.onDestroy();
         super.onDestroy();
     }
@@ -61,7 +67,18 @@ public abstract class AbsPresenterActivity<P extends IPresenter<V>, V extends IM
         return (V) this;
     }
 
+    private final Object toString = new Object();
+
+    @Override
+    public String toString() {
+        return toString.toString();
+    }
+
     protected P getPresenter(){
         return mViewHostDelegate.getPresenter();
+    }
+
+    protected boolean isPresenterPrepared(){
+        return mViewHostDelegate.isPresenterPrepared();
     }
 }

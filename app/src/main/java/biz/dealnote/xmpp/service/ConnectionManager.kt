@@ -10,8 +10,6 @@ import io.reactivex.processors.PublishProcessor
 import org.jivesoftware.smack.AbstractXMPPConnection
 import org.jivesoftware.smack.ConnectionConfiguration
 import org.jivesoftware.smack.ReconnectionManager
-import org.jivesoftware.smack.StanzaListener
-import org.jivesoftware.smack.filter.StanzaFilter
 import org.jivesoftware.smack.packet.Message
 import org.jivesoftware.smack.packet.Presence
 import org.jivesoftware.smack.roster.Roster
@@ -23,8 +21,6 @@ import org.jivesoftware.smackx.filetransfer.FileTransferManager
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest
 import org.jxmpp.jid.Jid
 import org.jxmpp.jid.impl.JidCreate
-import org.jxmpp.stringprep.XmppStringprepException
-import java.io.IOException
 import java.security.KeyManagementException
 import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
@@ -42,26 +38,17 @@ internal class ConnectionManager(context: Context) : IConnectionManager {
     private val connectionsMap: MutableMap<Account, XMPPTCPConnection>
     private var sslContext: SSLContext? = null
 
-    private val rosterAddingPublisher: PublishProcessor<AccountAction<Collection<RosterEntry>>>
-    private val rosterUpdatesPublisher: PublishProcessor<AccountAction<Collection<RosterEntry>>>
-    private val rosterDeletionPublisher: PublishProcessor<AccountAction<Collection<Jid>>>
-    private val rosterPresenseChangesPublisher: PublishProcessor<AccountAction<Presence>>
+    private val rosterAddingPublisher: PublishProcessor<AccountAction<Collection<RosterEntry>>> = PublishProcessor.create()
+    private val rosterUpdatesPublisher: PublishProcessor<AccountAction<Collection<RosterEntry>>> = PublishProcessor.create()
+    private val rosterDeletionPublisher: PublishProcessor<AccountAction<Collection<Jid>>> = PublishProcessor.create()
+    private val rosterPresenseChangesPublisher: PublishProcessor<AccountAction<Presence>> = PublishProcessor.create()
 
-    private val messagesAddingPublisher: PublishProcessor<AccountAction<Message>>
-    private val presensePublisher: PublishProcessor<AccountAction<Presence>>
-    private val fileTransferPublisher: PublishProcessor<AccountAction<FileTransferRequest>>
+    private val messagesAddingPublisher: PublishProcessor<AccountAction<Message>> = PublishProcessor.create()
+    private val presensePublisher: PublishProcessor<AccountAction<Presence>> = PublishProcessor.create()
+    private val fileTransferPublisher: PublishProcessor<AccountAction<FileTransferRequest>> = PublishProcessor.create()
 
     init {
         this.connectionsMap = ConcurrentHashMap()
-
-        this.rosterAddingPublisher = PublishProcessor.create()
-
-        this.rosterUpdatesPublisher = PublishProcessor.create()
-        this.rosterDeletionPublisher = PublishProcessor.create()
-        this.rosterPresenseChangesPublisher = PublishProcessor.create()
-        this.messagesAddingPublisher = PublishProcessor.create()
-        this.presensePublisher = PublishProcessor.create()
-        this.fileTransferPublisher = PublishProcessor.create()
 
         try {
             val trustManager = MemorizingTrustManager(context)
@@ -72,7 +59,6 @@ internal class ConnectionManager(context: Context) : IConnectionManager {
         } catch (e: KeyManagementException) {
             throw IllegalStateException("Unable to create SSL Context")
         }
-
     }
 
     override fun registerConnectionFor(account: Account): AbstractXMPPConnection {
@@ -90,6 +76,8 @@ internal class ConnectionManager(context: Context) : IConnectionManager {
     private fun createConnection(account: Account): XMPPTCPConnection {
         val domain = JidCreate.domainBareFrom(account.buildBareJid())
 
+        val timeout = 30 * 1000
+
         val conf = XMPPTCPConnectionConfiguration.builder()
                 .setXmppDomain(domain)
                 .setPort(account.port)
@@ -98,13 +86,13 @@ internal class ConnectionManager(context: Context) : IConnectionManager {
                 .setSendPresence(true)
                 .setDebuggerEnabled(true)
                 .setResource(Constants.APP_RESOURCE)
-                .setConnectTimeout(TIMEOUT)
+                .setConnectTimeout(timeout)
                 .setSecurityMode(ConnectionConfiguration.SecurityMode.required)
                 .setCustomSSLContext(sslContext!!)
                 .build()
 
         val connection = XMPPTCPConnection(conf)
-        connection.packetReplyTimeout = TIMEOUT.toLong()
+        connection.packetReplyTimeout = timeout.toLong()
 
         val roster = Roster.getInstanceFor(connection)
         roster.addRosterListener(object : RosterListener {
@@ -127,8 +115,8 @@ internal class ConnectionManager(context: Context) : IConnectionManager {
             }
         })
 
-        connection.addAsyncStanzaListener(StanzaListener{ messagesAddingPublisher.onNext(AccountAction(account, it as Message))  }, MESSAGES_FILTER)
-        connection.addAsyncStanzaListener(StanzaListener{ presensePublisher.onNext(AccountAction(account, it as Presence)) }, PRESENSE_FILTER)
+        connection.addAsyncStanzaListener({ messagesAddingPublisher.onNext(AccountAction(account, it as Message)) }, { stanza -> stanza is Message })
+        connection.addAsyncStanzaListener({ presensePublisher.onNext(AccountAction(account, it as Presence)) }, { stanza -> stanza is Presence })
 
         val manager = ReconnectionManager.getInstanceFor(connection)
         manager.setReconnectionPolicy(ReconnectionManager.ReconnectionPolicy.RANDOM_INCREASING_DELAY)
@@ -207,13 +195,5 @@ internal class ConnectionManager(context: Context) : IConnectionManager {
         }
 
         return entries
-    }
-
-    companion object {
-
-        private val MESSAGES_FILTER = StanzaFilter{ stanza -> stanza is Message }
-        private val PRESENSE_FILTER = StanzaFilter{ stanza -> stanza is Presence }
-
-        private const val TIMEOUT = 30 * 1000
     }
 }
