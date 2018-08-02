@@ -22,7 +22,7 @@ import java.util.Map;
 
 import biz.dealnote.xmpp.db.columns.AccountsColumns;
 import biz.dealnote.xmpp.db.columns.ChatsColumns;
-import biz.dealnote.xmpp.db.columns.ContactsColumns;
+import biz.dealnote.xmpp.db.columns.UsersColumns;
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
 import biz.dealnote.xmpp.db.columns.RosterColumns;
 
@@ -130,11 +130,11 @@ public class ChatContentProvider extends ContentProvider {
         sChatsProjectionMap.put(ChatsColumns.LAST_MESSAGE_OUT, ChatsColumns.FULL_LAST_MESSAGE_OUT);
         sChatsProjectionMap.put(ChatsColumns.LAST_MESSAGE_TYPE, ChatsColumns.FULL_LAST_MESSAGE_TYPE);
 
-        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_JID, ContactsColumns.FULL_JID + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_JID);
-        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_FIRST_NAME, ContactsColumns.FULL_FIRST_NAME + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_FIRST_NAME);
-        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_LAST_NAME, ContactsColumns.FULL_LAST_NAME + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_LAST_NAME);
-        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_PHOTO_HASH, ContactsColumns.FULL_PHOTO_HASH + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_PHOTO_HASH);
-        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_PHOTO, ContactsColumns.FULL_PHOTO + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_PHOTO);
+        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_JID, UsersColumns.FULL_JID + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_JID);
+        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_FIRST_NAME, UsersColumns.FULL_FIRST_NAME + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_FIRST_NAME);
+        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_LAST_NAME, UsersColumns.FULL_LAST_NAME + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_LAST_NAME);
+        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_PHOTO_HASH, UsersColumns.FULL_PHOTO_HASH + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_PHOTO_HASH);
+        sChatsProjectionMap.put(ChatsColumns.FOREIGN_INTERLOCUTOR_PHOTO, UsersColumns.FULL_PHOTO + " AS " + ChatsColumns.FOREIGN_INTERLOCUTOR_PHOTO);
         //sChatsProjectionMap.put(ChatsColumns.FOREIGN_ACCOUNT_LOGIN, AccountsColumns.FULL_LOGIN + " AS " + ChatsColumns.FOREIGN_ACCOUNT_LOGIN);
         //sChatsProjectionMap.put(ChatsColumns.FOREIGN_ACCOUNT_PASSWORD, AccountsColumns.FULL_PASSWORD + " AS " + ChatsColumns.FOREIGN_ACCOUNT_PASSWORD);
         //sChatsProjectionMap.put(ChatsColumns.FOREIGN_ACCOUNT_DISABLE, AccountsColumns.FULL_DISABLE + " AS " + ChatsColumns.FOREIGN_ACCOUNT_DISABLE);
@@ -148,7 +148,7 @@ public class ChatContentProvider extends ContentProvider {
         sRosterEntriesProjectionMap.put(RosterColumns.ACCOUNT_ID, RosterColumns.FULL_ACCOUNT_ID);
         sRosterEntriesProjectionMap.put(RosterColumns.JID, RosterColumns.FULL_JID);
         sRosterEntriesProjectionMap.put(RosterColumns.RESOURCE, RosterColumns.FULL_RESOURCE);
-        sRosterEntriesProjectionMap.put(RosterColumns.CONTACT_ID, RosterColumns.FULL_CONTACT_ID);
+        sRosterEntriesProjectionMap.put(RosterColumns.USER_ID, RosterColumns.FULL_CONTACT_ID);
         sRosterEntriesProjectionMap.put(RosterColumns.FLAGS, RosterColumns.FULL_FLAGS);
         sRosterEntriesProjectionMap.put(RosterColumns.AVAILABLE_RECEIVE_MESSAGES, RosterColumns.FULL_AVAILABLE_RECEIVE_MESSAGES);
         sRosterEntriesProjectionMap.put(RosterColumns.IS_AWAY, RosterColumns.FULL_IS_AWAY);
@@ -159,18 +159,18 @@ public class ChatContentProvider extends ContentProvider {
         sRosterEntriesProjectionMap.put(RosterColumns.NICK, RosterColumns.FULL_NICK);
         sRosterEntriesProjectionMap.put(RosterColumns.PRIORITY, RosterColumns.FULL_PRIORITY);
 
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_FIRST_NAME, ContactsColumns.FULL_FIRST_NAME + " AS " + RosterColumns.FOREIGN_CONTACT_FIRST_NAME);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_LAST_NAME, ContactsColumns.FULL_LAST_NAME + " AS " + RosterColumns.FOREIGN_CONTACT_LAST_NAME);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_MIDDLE_NAME, ContactsColumns.FULL_MIDDLE_NAME + " AS " + RosterColumns.FOREIGN_CONTACT_MIDDLE_NAME);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_PREFIX, ContactsColumns.FULL_PREFIX + " AS " + RosterColumns.FOREIGN_CONTACT_PREFIX);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_SUFFIX, ContactsColumns.FULL_SUFFIX + " AS " + RosterColumns.FOREIGN_CONTACT_SUFFIX);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_EMAIL_HOME, ContactsColumns.FULL_EMAIL_HOME + " AS " + RosterColumns.FOREIGN_CONTACT_EMAIL_HOME);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_EMAIL_WORK, ContactsColumns.FULL_EMAIL_WORK + " AS " + RosterColumns.FOREIGN_CONTACT_EMAIL_WORK);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_ORGANIZATION, ContactsColumns.FULL_ORGANIZATION + " AS " + RosterColumns.FOREIGN_CONTACT_ORGANIZATION);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_ORGANIZATION_UNIT, ContactsColumns.FULL_ORGANIZATION_UNIT + " AS " + RosterColumns.FOREIGN_CONTACT_ORGANIZATION_UNIT);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_PHOTO_MIME_TYPE, ContactsColumns.FULL_PHOTO_MIME_TYPE + " AS " + RosterColumns.FOREIGN_CONTACT_PHOTO_MIME_TYPE);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_PHOTO_HASH, ContactsColumns.FULL_PHOTO_HASH + " AS " + RosterColumns.FOREIGN_CONTACT_PHOTO_HASH);
-        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_PHOTO, ContactsColumns.FULL_PHOTO + " AS " + RosterColumns.FOREIGN_CONTACT_PHOTO);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_FIRST_NAME, UsersColumns.FULL_FIRST_NAME + " AS " + RosterColumns.FOREIGN_CONTACT_FIRST_NAME);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_LAST_NAME, UsersColumns.FULL_LAST_NAME + " AS " + RosterColumns.FOREIGN_CONTACT_LAST_NAME);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_MIDDLE_NAME, UsersColumns.FULL_MIDDLE_NAME + " AS " + RosterColumns.FOREIGN_CONTACT_MIDDLE_NAME);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_PREFIX, UsersColumns.FULL_PREFIX + " AS " + RosterColumns.FOREIGN_CONTACT_PREFIX);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_SUFFIX, UsersColumns.FULL_SUFFIX + " AS " + RosterColumns.FOREIGN_CONTACT_SUFFIX);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_EMAIL_HOME, UsersColumns.FULL_EMAIL_HOME + " AS " + RosterColumns.FOREIGN_CONTACT_EMAIL_HOME);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_EMAIL_WORK, UsersColumns.FULL_EMAIL_WORK + " AS " + RosterColumns.FOREIGN_CONTACT_EMAIL_WORK);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_ORGANIZATION, UsersColumns.FULL_ORGANIZATION + " AS " + RosterColumns.FOREIGN_CONTACT_ORGANIZATION);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_ORGANIZATION_UNIT, UsersColumns.FULL_ORGANIZATION_UNIT + " AS " + RosterColumns.FOREIGN_CONTACT_ORGANIZATION_UNIT);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_PHOTO_MIME_TYPE, UsersColumns.FULL_PHOTO_MIME_TYPE + " AS " + RosterColumns.FOREIGN_CONTACT_PHOTO_MIME_TYPE);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_PHOTO_HASH, UsersColumns.FULL_PHOTO_HASH + " AS " + RosterColumns.FOREIGN_CONTACT_PHOTO_HASH);
+        sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_CONTACT_PHOTO, UsersColumns.FULL_PHOTO + " AS " + RosterColumns.FOREIGN_CONTACT_PHOTO);
         sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_ACCOUNT_LOGIN, AccountsColumns.FULL_LOGIN + " AS " + RosterColumns.FOREIGN_ACCOUNT_LOGIN);
         sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_ACCOUNT_PASSWORD, AccountsColumns.FULL_PASSWORD + " AS " + RosterColumns.FOREIGN_ACCOUNT_PASSWORD);
         sRosterEntriesProjectionMap.put(RosterColumns.FOREIGN_ACCOUNT_DISABLE, AccountsColumns.FULL_DISABLE + " AS " + RosterColumns.FOREIGN_ACCOUNT_DISABLE);
@@ -282,7 +282,7 @@ public class ChatContentProvider extends ContentProvider {
 
             case URI_CHATS:
                 _QB.setTables(ChatsColumns.TABLENAME +
-                        " LEFT OUTER JOIN " + ContactsColumns.TABLENAME + " ON " + ChatsColumns.FULL_INTERLOCUTOR_ID + " = " + ContactsColumns.FULL_ID);
+                        " LEFT OUTER JOIN " + UsersColumns.TABLENAME + " ON " + ChatsColumns.FULL_INTERLOCUTOR_ID + " = " + UsersColumns.FULL_ID);
                         //" LEFT OUTER JOIN " + AccountsColumns.TABLENAME + " ON " + ChatsColumns.FULL_ACCOUNT_ID + " = " + AccountsColumns.FULL_ID);
                 _QB.setProjectionMap(sChatsProjectionMap);
                 _TableType = URI_CHATS;
@@ -290,7 +290,7 @@ public class ChatContentProvider extends ContentProvider {
 
             case URI_CHATS_ID:
                 _QB.setTables(ChatsColumns.TABLENAME +
-                        " LEFT OUTER JOIN " + ContactsColumns.TABLENAME + " ON " + ChatsColumns.FULL_INTERLOCUTOR_ID + " = " + ContactsColumns.FULL_ID);
+                        " LEFT OUTER JOIN " + UsersColumns.TABLENAME + " ON " + ChatsColumns.FULL_INTERLOCUTOR_ID + " = " + UsersColumns.FULL_ID);
                         //" LEFT OUTER JOIN " + AccountsColumns.TABLENAME + " ON " + ChatsColumns.FULL_ACCOUNT_ID + " = " + AccountsColumns.FULL_ID);
                 _QB.setProjectionMap(sChatsProjectionMap);
                 _QB.appendWhere(ChatsColumns.FULL_ID + "=" + uri.getPathSegments().get(1));
@@ -299,7 +299,7 @@ public class ChatContentProvider extends ContentProvider {
 
             case URI_ROSTERS_ENTRIES:
                 _QB.setTables(RosterColumns.TABLENAME +
-                        " LEFT OUTER JOIN " + ContactsColumns.TABLENAME + " ON " + RosterColumns.FULL_CONTACT_ID + " = " + ContactsColumns.FULL_ID +
+                        " LEFT OUTER JOIN " + UsersColumns.TABLENAME + " ON " + RosterColumns.FULL_CONTACT_ID + " = " + UsersColumns.FULL_ID +
                         " LEFT OUTER JOIN " + AccountsColumns.TABLENAME + " ON " + RosterColumns.FULL_ACCOUNT_ID + " = " + AccountsColumns.FULL_ID);
                 _QB.setProjectionMap(sRosterEntriesProjectionMap);
                 _TableType = URI_ROSTERS_ENTRIES;
@@ -307,7 +307,7 @@ public class ChatContentProvider extends ContentProvider {
 
             case URI_ROSTERS_ENTRIES_ID:
                 _QB.setTables(RosterColumns.TABLENAME +
-                        " LEFT OUTER JOIN " + ContactsColumns.TABLENAME + " ON " + RosterColumns.FULL_CONTACT_ID + " = " + ContactsColumns.FULL_ID +
+                        " LEFT OUTER JOIN " + UsersColumns.TABLENAME + " ON " + RosterColumns.FULL_CONTACT_ID + " = " + UsersColumns.FULL_ID +
                         " LEFT OUTER JOIN " + AccountsColumns.TABLENAME + " ON " + RosterColumns.FULL_ACCOUNT_ID + " = " + AccountsColumns.FULL_ID);
                 _QB.setProjectionMap(sRosterEntriesProjectionMap);
                 _QB.appendWhere(RosterColumns.FULL_ID + "=" + uri.getPathSegments().get(1));

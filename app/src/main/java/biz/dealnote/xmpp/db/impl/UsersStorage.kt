@@ -5,8 +5,8 @@ import android.database.Cursor
 import biz.dealnote.xmpp.db.DBHelper
 import biz.dealnote.xmpp.db.Repositories
 import biz.dealnote.xmpp.db.columns.AccountsColumns
-import biz.dealnote.xmpp.db.columns.ContactsColumns
-import biz.dealnote.xmpp.db.columns.ContactsColumns.*
+import biz.dealnote.xmpp.db.columns.UsersColumns
+import biz.dealnote.xmpp.db.columns.UsersColumns.*
 import biz.dealnote.xmpp.db.columns.RosterColumns
 import biz.dealnote.xmpp.db.interfaces.IUsersStorage
 import biz.dealnote.xmpp.model.AccountId
@@ -20,6 +20,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.processors.PublishProcessor
+import org.jivesoftware.smack.roster.RosterEntry
 import org.jivesoftware.smackx.vcardtemp.packet.VCard
 import java.util.*
 
@@ -36,16 +37,10 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     override fun findById(id: Int): Single<Optional<User?>> {
         return Single.create { e ->
             synchronized(contactLock) {
-                val cursor = dbHelper.readableDatabase.query(ContactsColumns.TABLENAME, columns, "$_ID = ?", arrayOf(id.toString()))
+                val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, columns, "$_ID = ?", arrayOf(id.toString()))
 
-                var user: User? = null
-                if (cursor != null) {
-                    if (cursor.moveToNext()) {
-                        user = map(cursor)
-                    }
-
-                    cursor.close()
-                }
+                val user: User? = if (cursor.moveToNext()) map(cursor) else null
+                cursor.close()
 
                 e.onSuccess(Optional.wrap(user))
             }
@@ -73,30 +68,78 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
             synchronized(contactLock) {
                 val cursor = dbHelper.readableDatabase.query(TABLENAME, columns, "$JID LIKE ?", arrayOf(jid))
 
-                var user: User? = null
-                if (cursor != null) {
-                    if (cursor.moveToNext()) {
-                        user = map(cursor)
-                    }
-
-                    cursor.close()
-                }
+                val user: User? = if(cursor.moveToNext()) map(cursor) else null
+                cursor.close()
 
                 e.onSuccess(Optional.wrap(user))
             }
         }
     }
 
+    override fun putContacts(accountId: Int, contacts: Collection<RosterEntry>): Completable {
+        if(contacts.isEmpty()){
+            return Completable.complete()
+        }
+
+        return Completable.create {emitter ->
+            synchronized(contactLock){
+                val db = dbHelper.writableDatabase
+
+                db.beginTransaction()
+
+                try {
+                    for(contact in contacts){
+                        val jid = contact.jid.asBareJid().toString()
+
+                        val cv = ContentValues()
+                        cv.put(RosterColumns.TYPE, Contact.apiTypeToAppType(contact.type))
+                        cv.put(RosterColumns.NICK, contact.name)
+
+                        val rows = db.update(RosterColumns.TABLENAME, cv,
+                                RosterColumns.ACCOUNT_ID + " = ? AND " + RosterColumns.JID + " LIKE ?", arrayOf(accountId.toString(), jid))
+
+                        if(rows == 0){
+                            val userId = obtainUserId(jid)
+
+                            cv.put(RosterColumns.ACCOUNT_ID, accountId)
+                            cv.put(RosterColumns.JID, jid)
+                            cv.put(RosterColumns.USER_ID, userId)
+
+                            db.insert(RosterColumns.TABLENAME, null, cv)
+                        }
+                    }
+
+                    db.setTransactionSuccessful()
+                    db.endTransaction()
+                    emitter.onComplete()
+                } catch (e: Exception){
+                    db.endTransaction()
+                    emitter.onError(e)
+                }
+            }
+        }
+    }
+
+    private fun obtainUserId(jid: String): Int {
+        val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(UsersColumns._ID), "$JID LIKE ?", arrayOf(jid))
+
+        return cursor.use {
+            if(it.moveToNext()){
+                it.getInt(it.getColumnIndex(UsersColumns._ID))
+            } else {
+                val cv = ContentValues()
+                cv.put(JID, jid)
+                dbHelper.writableDatabase.insert(TABLENAME, null, cv).toInt()
+            }
+        }
+    }
+
     private fun findIdByBareJid(jid: String): Int? {
         synchronized(contactLock) {
-            val cursor = dbHelper.readableDatabase.query(ContactsColumns.TABLENAME, arrayOf(_ID), "$JID LIKE ?", arrayOf(jid))
+            val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(_ID), "$JID LIKE ?", arrayOf(jid))
 
             try {
-                return if (cursor != null && cursor.moveToNext()) {
-                    cursor.getInt(cursor.getColumnIndex(_ID))
-                } else {
-                    null
-                }
+                return if (cursor.moveToNext()) cursor.getInt(cursor.getColumnIndex(_ID)) else null
             } finally {
                 Utils.safelyCloseCursor(cursor)
             }
@@ -221,9 +264,9 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     override fun findPhotoByHash(hash: String): ByteArray? {
         val projection = arrayOf(PHOTO)
 
-        val cursor = dbHelper.readableDatabase.query(ContactsColumns.TABLENAME, projection, "$PHOTO_HASH LIKE ?", arrayOf(hash))
+        val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, projection, "$PHOTO_HASH LIKE ?", arrayOf(hash))
 
-        cursor?.run {
+        cursor.run {
             var photo: ByteArray? = null
             if (moveToNext()) {
                 photo = getBlob(getColumnIndex(PHOTO))
@@ -231,8 +274,6 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
 
             close()
             return photo
-        } ?: run {
-            return null
         }
     }
 
@@ -256,16 +297,17 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     override fun getContacts(): Single<List<Contact>> {
         return Single.create { emitter ->
             val table = RosterColumns.TABLENAME +
-                    " LEFT OUTER JOIN " + ContactsColumns.TABLENAME +
-                    " ON " + RosterColumns.TABLENAME + "." + RosterColumns.CONTACT_ID + " = " + ContactsColumns.TABLENAME + "." + ContactsColumns._ID +
+                    " LEFT OUTER JOIN " + UsersColumns.TABLENAME +
+                    " ON " + RosterColumns.TABLENAME + "." + RosterColumns.USER_ID + " = " + UsersColumns.TABLENAME + "." + UsersColumns._ID +
                     " LEFT OUTER JOIN " + AccountsColumns.TABLENAME +
-                    " ON " + RosterColumns.TABLENAME + "." + RosterColumns.CONTACT_ID + " = " + AccountsColumns.TABLENAME + "." + AccountsColumns._ID
+                    " ON " + RosterColumns.TABLENAME + "." + RosterColumns.ACCOUNT_ID + " = " + AccountsColumns.TABLENAME + "." + AccountsColumns._ID
 
             val columns: Array<String> = arrayOf(
+                    RosterColumns.TABLENAME + "." + RosterColumns._ID + " AS contact_id",
                     RosterColumns.ACCOUNT_ID,
                     RosterColumns.TABLENAME + "." + RosterColumns.JID + " AS user_jid",
                     RosterColumns.RESOURCE,
-                    RosterColumns.CONTACT_ID,
+                    RosterColumns.USER_ID,
                     RosterColumns.FLAGS,
                     RosterColumns.AVAILABLE_RECEIVE_MESSAGES,
                     RosterColumns.IS_AWAY,
@@ -275,24 +317,24 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
                     RosterColumns.TYPE,
                     RosterColumns.NICK,
                     RosterColumns.PRIORITY,
-                    ContactsColumns.FIRST_NAME,
-                    ContactsColumns.LAST_NAME,
-                    ContactsColumns.MIDDLE_NAME,
-                    ContactsColumns.PREFIX,
-                    ContactsColumns.SUFFIX,
-                    ContactsColumns.EMAIL_HOME,
-                    ContactsColumns.EMAIL_WORK,
-                    ContactsColumns.ORGANIZATION,
-                    ContactsColumns.ORGANIZATION_UNIT,
-                    ContactsColumns.PHOTO_MIME_TYPE,
-                    ContactsColumns.PHOTO_HASH,
-                    AccountsColumns.TABLENAME + "." + AccountsColumns.LOGIN + "AS account_jid"
+                    UsersColumns.FIRST_NAME,
+                    UsersColumns.LAST_NAME,
+                    UsersColumns.MIDDLE_NAME,
+                    UsersColumns.PREFIX,
+                    UsersColumns.SUFFIX,
+                    UsersColumns.EMAIL_HOME,
+                    UsersColumns.EMAIL_WORK,
+                    UsersColumns.ORGANIZATION,
+                    UsersColumns.ORGANIZATION_UNIT,
+                    UsersColumns.PHOTO_MIME_TYPE,
+                    UsersColumns.PHOTO_HASH,
+                    AccountsColumns.TABLENAME + "." + AccountsColumns.LOGIN + " AS account_jid"
             )
 
-            val cursor = dbHelper.readableDatabase.query(table, columns, null, null, null, null, null)
+            val cursor = dbHelper.readableDatabase.query(table, columns)
             val entries = ArrayList<Contact>()
             while (cursor.moveToNext()) {
-                if(emitter.isDisposed) break
+                if (emitter.isDisposed) break
 
                 entries.add(mapContact(cursor))
             }
@@ -303,33 +345,32 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     }
 
     private fun mapContact(cursor: Cursor): Contact {
-        val jid = cursor.getString(cursor.getColumnIndex("user_jid"))
-
-        val user = User()
-                .setId(cursor.getInt(cursor.getColumnIndex(RosterColumns.CONTACT_ID)))
-                .setJid(jid)
-                .setFirstName(cursor.getString(cursor.getColumnIndex(ContactsColumns.FIRST_NAME)))
-                .setLastName(cursor.getString(cursor.getColumnIndex(ContactsColumns.LAST_NAME)))
-                .setMiddleName(cursor.getString(cursor.getColumnIndex(ContactsColumns.MIDDLE_NAME)))
-                .setPrefix(cursor.getString(cursor.getColumnIndex(ContactsColumns.PREFIX)))
-                .setSuffix(cursor.getString(cursor.getColumnIndex(ContactsColumns.SUFFIX)))
-                .setEmailHome(cursor.getString(cursor.getColumnIndex(ContactsColumns.EMAIL_HOME)))
-                .setEmailWork(cursor.getString(cursor.getColumnIndex(ContactsColumns.EMAIL_WORK)))
-                .setOrganization(cursor.getString(cursor.getColumnIndex(ContactsColumns.ORGANIZATION)))
-                .setOrganizationUnit(cursor.getString(cursor.getColumnIndex(ContactsColumns.ORGANIZATION_UNIT)))
-                .setPhotoMimeType(cursor.getString(cursor.getColumnIndex(ContactsColumns.PHOTO_MIME_TYPE)))
-                .setPhotoHash(cursor.getString(cursor.getColumnIndex(ContactsColumns.PHOTO_HASH)))
+        val user = User().apply {
+            id = cursor.getInt(cursor.getColumnIndex(RosterColumns.USER_ID))
+            jid = cursor.getString(cursor.getColumnIndex("user_jid"))
+            firstName = cursor.getString(cursor.getColumnIndex(UsersColumns.FIRST_NAME))
+            lastName = cursor.getString(cursor.getColumnIndex(UsersColumns.LAST_NAME))
+            middleName = cursor.getString(cursor.getColumnIndex(UsersColumns.MIDDLE_NAME))
+            prefix = cursor.getString(cursor.getColumnIndex(UsersColumns.PREFIX))
+            suffix = cursor.getString(cursor.getColumnIndex(UsersColumns.SUFFIX))
+            emailHome = cursor.getString(cursor.getColumnIndex(UsersColumns.EMAIL_HOME))
+            emailWork = cursor.getString(cursor.getColumnIndex(UsersColumns.EMAIL_WORK))
+            organization = cursor.getString(cursor.getColumnIndex(UsersColumns.ORGANIZATION))
+            organizationUnit = cursor.getString(cursor.getColumnIndex(UsersColumns.ORGANIZATION_UNIT))
+            photoMimeType = cursor.getString(cursor.getColumnIndex(UsersColumns.PHOTO_MIME_TYPE))
+            photoHash = cursor.getString(cursor.getColumnIndex(UsersColumns.PHOTO_HASH))
+        }
 
         val entry = Contact()
 
-        entry.id = cursor.getInt(cursor.getColumnIndex(RosterColumns._ID))
+        entry.id = cursor.getInt(cursor.getColumnIndex("contact_id"))
 
         entry.accountId = AccountId(
                 cursor.getInt(cursor.getColumnIndex(RosterColumns.ACCOUNT_ID)),
                 cursor.getString(cursor.getColumnIndex("account_jid"))
         )
 
-        entry.jid = jid
+        entry.jid = user.jid
         entry.user = user
         entry.flags = cursor.getInt(cursor.getColumnIndex(RosterColumns.FLAGS))
         entry.availableToReceiveMessages = cursor.getInt(cursor.getColumnIndex(RosterColumns.AVAILABLE_RECEIVE_MESSAGES)) == 1

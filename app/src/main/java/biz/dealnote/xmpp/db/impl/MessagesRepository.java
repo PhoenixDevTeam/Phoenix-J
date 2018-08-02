@@ -15,7 +15,7 @@ import java.util.Set;
 import biz.dealnote.xmpp.db.ChatContentProvider;
 import biz.dealnote.xmpp.db.DBHelper;
 import biz.dealnote.xmpp.db.Repositories;
-import biz.dealnote.xmpp.db.columns.ContactsColumns;
+import biz.dealnote.xmpp.db.columns.UsersColumns;
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
 import biz.dealnote.xmpp.db.exception.AlreadyExistException;
 import biz.dealnote.xmpp.db.exception.DataValidateException;
@@ -318,7 +318,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
         });
     }
 
-    private static final String[] AVATARS_COLUMNS = {ContactsColumns._ID, ContactsColumns.PHOTO, ContactsColumns.PHOTO_HASH};
+    private static final String[] AVATARS_COLUMNS = {UsersColumns._ID, UsersColumns.PHOTO, UsersColumns.PHOTO_HASH};
 
     @Override
     public Single<Pair<List<AppMessage>, List<AvatarResorce.Entry>>> load(MessageCriteria criteria) {
@@ -380,16 +380,16 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
 
             List<AvatarResorce.Entry> avatarEntries = null;
             if (nonEmpty(contactIds)) {
-                String cWhere = ContactsColumns.FULL_ID + " IN (" + TextUtils.join(",", contactIds) + ")";
-                Cursor cCursor = dbHelper.getReadableDatabase().query(ContactsColumns.TABLENAME, AVATARS_COLUMNS, cWhere, null, null, null, null);
+                String cWhere = UsersColumns.FULL_ID + " IN (" + TextUtils.join(",", contactIds) + ")";
+                Cursor cCursor = dbHelper.getReadableDatabase().query(UsersColumns.TABLENAME, AVATARS_COLUMNS, cWhere, null, null, null, null);
 
                 if (cCursor != null) {
                     avatarEntries = new ArrayList<>(cCursor.getCount());
                     while (cCursor.moveToNext()) {
                         if (emitter.isDisposed()) break;
 
-                        int cid = cCursor.getInt(cCursor.getColumnIndex(ContactsColumns._ID));
-                        String hash = cCursor.getString(cCursor.getColumnIndex(ContactsColumns.PHOTO_HASH));
+                        int cid = cCursor.getInt(cCursor.getColumnIndex(UsersColumns._ID));
+                        String hash = cCursor.getString(cCursor.getColumnIndex(UsersColumns.PHOTO_HASH));
 
                         if (nonEmpty(hash)) {
                             avatarEntries.add(new AvatarResorce.Entry(cid, hash));

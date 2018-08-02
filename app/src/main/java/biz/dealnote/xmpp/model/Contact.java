@@ -7,7 +7,7 @@ import org.jivesoftware.smack.roster.packet.RosterPacket;
 
 import biz.dealnote.xmpp.util.ParcelUtils;
 
-public class Contact implements Parcelable, Identificable {
+public final class Contact implements Parcelable, Identificable {
 
     public static final int UNKNOWN = 0;
 

@@ -24,6 +24,8 @@ fun CountDownLatch.safelyWait(): Boolean {
     }
 }
 
-fun SQLiteDatabase.query(tablename: String, columns: Array<String>, where: String, args: Array<String>): Cursor? = query(tablename, columns, where, args, null, null, null)
+fun SQLiteDatabase.query(tablename: String, columns: Array<String>, where: String?, args: Array<String>?): Cursor = query(tablename, columns, where, args, null, null, null)
+
+fun SQLiteDatabase.query(tablename: String, columns: Array<String>): Cursor = query(tablename, columns, null, null)
 
 fun Cursor.getInt(columnName: String): Int? = getColumnIndex(columnName).let { if (isNull(it)) null else getInt(it) }

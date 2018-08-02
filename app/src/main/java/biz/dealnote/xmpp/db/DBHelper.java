@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import biz.dealnote.xmpp.db.columns.AccountsColumns;
 import biz.dealnote.xmpp.db.columns.ChatsColumns;
-import biz.dealnote.xmpp.db.columns.ContactsColumns;
+import biz.dealnote.xmpp.db.columns.UsersColumns;
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
 import biz.dealnote.xmpp.db.columns.RosterColumns;
 
@@ -58,7 +58,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 " [" + RosterColumns.ACCOUNT_ID + "] INTEGER NOT NULL, " +
                 " [" + RosterColumns.JID + "] TEXT NOT NULL, " +
                 " [" + RosterColumns.RESOURCE + "] TEXT, " +
-                " [" + RosterColumns.CONTACT_ID + "] INTEGER NOT NULL, " +
+                " [" + RosterColumns.USER_ID + "] INTEGER NOT NULL, " +
                 " [" + RosterColumns.FLAGS + "] INTEGER, " +
                 " [" + RosterColumns.AVAILABLE_RECEIVE_MESSAGES + "] BOOLEAN, " +
                 " [" + RosterColumns.IS_AWAY + "] BOOLEAN, " +
@@ -69,8 +69,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 //" [" + RosterColumns.STATUS + "] INTEGER, " +
                 " [" + RosterColumns.NICK + "] TEXT, " +
                 " [" + RosterColumns.PRIORITY + "] INTEGER, " +
-                " CONSTRAINT [] UNIQUE ([" + RosterColumns.ACCOUNT_ID + "], [" + RosterColumns.CONTACT_ID + "]) ON CONFLICT REPLACE " +
-                " FOREIGN KEY([" + RosterColumns.CONTACT_ID + "]) REFERENCES " + ContactsColumns.TABLENAME + "([" + ContactsColumns._ID + "]) " +
+                " CONSTRAINT [] UNIQUE ([" + RosterColumns.ACCOUNT_ID + "], [" + RosterColumns.USER_ID + "]) ON CONFLICT REPLACE " +
+                " FOREIGN KEY([" + RosterColumns.USER_ID + "]) REFERENCES " + UsersColumns.TABLENAME + "([" + UsersColumns._ID + "]) " +
                 " FOREIGN KEY([" + RosterColumns.ACCOUNT_ID + "]) REFERENCES " + AccountsColumns.TABLENAME + "([" + AccountsColumns._ID + "]) ON DELETE CASCADE ON UPDATE CASCADE);";
         db.execSQL(sql);
     }
@@ -136,22 +136,22 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private void createContactsTable(SQLiteDatabase db) {
-        String sql = "CREATE TABLE [" + ContactsColumns.TABLENAME + "] ( " +
-                " [" + ContactsColumns._ID + "] INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                " [" + ContactsColumns.JID + "] TEXT, " +
-                " [" + ContactsColumns.FIRST_NAME + "] TEXT, " +
-                " [" + ContactsColumns.LAST_NAME + "] TEXT, " +
-                " [" + ContactsColumns.MIDDLE_NAME + "] TEXT, " +
-                " [" + ContactsColumns.PREFIX + "] TEXT, " +
-                " [" + ContactsColumns.SUFFIX + "] TEXT, " +
-                " [" + ContactsColumns.EMAIL_HOME + "] TEXT, " +
-                " [" + ContactsColumns.EMAIL_WORK + "] TEXT, " +
-                " [" + ContactsColumns.ORGANIZATION + "] TEXT, " +
-                " [" + ContactsColumns.ORGANIZATION_UNIT + "] TEXT, " +
-                " [" + ContactsColumns.PHOTO_MIME_TYPE + "] TEXT, " +
-                " [" + ContactsColumns.PHOTO_HASH + "] TEXT, " +
-                " [" + ContactsColumns.PHOTO + "] BLOB, " +
-                " CONSTRAINT [] UNIQUE ([" + ContactsColumns.JID + "]) ON CONFLICT FAIL);";
+        String sql = "CREATE TABLE [" + UsersColumns.TABLENAME + "] ( " +
+                " [" + UsersColumns._ID + "] INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                " [" + UsersColumns.JID + "] TEXT, " +
+                " [" + UsersColumns.FIRST_NAME + "] TEXT, " +
+                " [" + UsersColumns.LAST_NAME + "] TEXT, " +
+                " [" + UsersColumns.MIDDLE_NAME + "] TEXT, " +
+                " [" + UsersColumns.PREFIX + "] TEXT, " +
+                " [" + UsersColumns.SUFFIX + "] TEXT, " +
+                " [" + UsersColumns.EMAIL_HOME + "] TEXT, " +
+                " [" + UsersColumns.EMAIL_WORK + "] TEXT, " +
+                " [" + UsersColumns.ORGANIZATION + "] TEXT, " +
+                " [" + UsersColumns.ORGANIZATION_UNIT + "] TEXT, " +
+                " [" + UsersColumns.PHOTO_MIME_TYPE + "] TEXT, " +
+                " [" + UsersColumns.PHOTO_HASH + "] TEXT, " +
+                " [" + UsersColumns.PHOTO + "] BLOB, " +
+                " CONSTRAINT [] UNIQUE ([" + UsersColumns.JID + "]) ON CONFLICT FAIL);";
         db.execSQL(sql);
     }
 }

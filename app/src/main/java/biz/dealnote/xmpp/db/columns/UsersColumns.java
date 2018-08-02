@@ -2,7 +2,7 @@ package biz.dealnote.xmpp.db.columns;
 
 import android.provider.BaseColumns;
 
-public class ContactsColumns implements BaseColumns {
+public class UsersColumns implements BaseColumns {
 
     public static final String TABLENAME = "contacts";
     public static final String JID = "jid";
@@ -35,6 +35,6 @@ public class ContactsColumns implements BaseColumns {
     public static final String FULL_PHOTO_HASH = TABLENAME + "." + PHOTO_HASH;
     public static final String FULL_PHOTO = TABLENAME + "." + PHOTO;
 
-    private ContactsColumns() {
+    private UsersColumns() {
     }
 }

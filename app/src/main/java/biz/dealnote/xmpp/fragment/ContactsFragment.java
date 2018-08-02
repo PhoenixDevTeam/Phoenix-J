@@ -4,9 +4,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,56 +16,51 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.List;
 
+import biz.dealnote.mvp.core.IPresenterFactory;
 import biz.dealnote.xmpp.Constants;
-import biz.dealnote.xmpp.Injection;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.adapter.AccountsListAdapter;
 import biz.dealnote.xmpp.adapter.ContactsAdapter;
 import biz.dealnote.xmpp.callback.OnPlaceOpenCallback;
 import biz.dealnote.xmpp.callback.PicassoPauseOnScrollListener;
 import biz.dealnote.xmpp.db.Accounts;
-import biz.dealnote.xmpp.db.Repositories;
-import biz.dealnote.xmpp.db.columns.AccountsColumns;
-import biz.dealnote.xmpp.loader.RosterEntriesAsyncLoader;
+import biz.dealnote.xmpp.fragment.base.BaseMvpFragment;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AccountContactPair;
 import biz.dealnote.xmpp.model.Contact;
-import biz.dealnote.xmpp.model.User;
+import biz.dealnote.xmpp.mvp.presenter.ContactsPresenter;
+import biz.dealnote.xmpp.mvp.view.IContactsView;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.RequestFactory;
-import biz.dealnote.xmpp.util.Utils;
 import biz.dealnote.xmpp.view.InputTextDialog;
 
-public class ContactsFragment extends AbsRequestSupportFragment implements LoaderManager.LoaderCallbacks<ArrayList<Contact>>, ContactsAdapter.ClickListener {
+public class ContactsFragment extends BaseMvpFragment<ContactsPresenter, IContactsView> implements ContactsAdapter.ClickListener, IContactsView {
 
     private static final String TAG = ContactsFragment.class.getSimpleName();
 
-    private static final int LOADER_CONTACTS = 2;
-    private static final String SAVE_DATA = "save_data";
-    private ArrayList<Contact> data;
-    private View root;
-    private RecyclerView mRecyclerView;
     private ContactsAdapter mAdapter;
     private TextView mEmptyText;
 
     public static ContactsFragment newInstance() {
-        return new ContactsFragment();
+        Bundle args = new Bundle();
+        ContactsFragment fragment = new ContactsFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        if (savedInstanceState != null) {
-            restoreFromSaveInstanceState(savedInstanceState);
-        }
 
-        appendDisposable(Repositories.Companion.getInstance()
+        /*appendDisposable(Repositories.Companion.getInstance()
                 .getAccountsRepository()
                 .observeDeletion()
                 .observeOn(Injection.INSTANCE.provideMainThreadScheduler())
@@ -78,10 +70,10 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
                 .getUsersStorage()
                 .observeUpdates()
                 .observeOn(Injection.INSTANCE.provideMainThreadScheduler())
-                .subscribe(this::handleContactUpdateEvent));
+                .subscribe(this::handleContactUpdateEvent));*/
     }
 
-    private void onAccountDelete(int id) {
+    /*private void onAccountDelete(int id) {
         // если аакаунт был удален - удаляем все его контакты из списка
         Iterator<Contact> iterator = data.iterator();
         boolean changes = false;
@@ -97,68 +89,41 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
         }
 
         resolveEmptyText();
-    }
+    }*/
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        root = inflater.inflate(R.layout.fragment_contacts, container, false);
-        mEmptyText = root.findViewById(R.id.empty);
-        mRecyclerView = root.findViewById(R.id.list);
+        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
+        mEmptyText = view.findViewById(R.id.empty);
+        RecyclerView mRecyclerView = view.findViewById(R.id.list);
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
 
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.addOnScrollListener(new PicassoPauseOnScrollListener(requireActivity(), Constants.PICASSO_TAG));
-        return root;
-    }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        boolean firstRun = false;
-        if (data == null) {
-            firstRun = true;
-            data = new ArrayList<>();
-        }
-
-        mAdapter = new ContactsAdapter(data, getActivity());
+        mAdapter = new ContactsAdapter(Collections.emptyList(), getActivity());
         mAdapter.setClickListener(this);
 
         mRecyclerView.setAdapter(mAdapter);
-
-        if (firstRun) {
-            getLoaderManager().initLoader(LOADER_CONTACTS, RosterEntriesAsyncLoader.createArgs(AccountsColumns.FULL_LOGIN), this);
-        }
-
         resolveEmptyText();
+        return view;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(SAVE_DATA, data);
-    }
-
-    @Override
-    public void onRestoreConnectionToRequest(Request request) {
-
-    }
-
-    @Override
+    /*@Override
     public void onRequestFinished(Request request, Bundle resultData) {
         if (request.getRequestType() == RequestFactory.REQUEST_ADD_CONTACT) {
             safeSnackbar(R.string.request_has_been_sent);
         }
-    }
+    }*/
 
-    private void safeSnackbar(int message) {
+    /*private void safeSnackbar(int message) {
         if (isAdded() && root != null) {
             Snackbar.make(root, message, Snackbar.LENGTH_LONG).show();
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void onCustromError(Request request, String errorText, int code) {
         if (isAdded()) {
             Toast.makeText(getActivity(), errorText, Toast.LENGTH_LONG).show();
@@ -176,9 +141,9 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
         }
 
         return null;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void onLoadFinished(Loader<ArrayList<Contact>> loader, ArrayList<Contact> data) {
         this.data.clear();
         this.data.addAll(data);
@@ -192,7 +157,7 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
     @Override
     public void onLoaderReset(Loader<ArrayList<Contact>> loader) {
 
-    }
+    }*/
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -213,7 +178,7 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
 
     private void addToContactList(Account account, String jid) {
         Request request = RequestFactory.getAddContactRequest(account, jid);
-        getRequestManager().executeRequest(request);
+        //getRequestManager().executeRequest(request);
     }
 
     private void showAddContactInputDialog(final Account account) {
@@ -256,7 +221,7 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
         }
     }
 
-    public void handleContactUpdateEvent(User user) {
+    /*public void handleContactUpdateEvent(User user) {
         if (data == null) return;
 
         boolean changed = false;
@@ -268,12 +233,21 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
         }
 
         if (changed && mAdapter != null) mAdapter.notifyDataSetChanged();
-    }
+    }*/
 
     private void resolveEmptyText() {
         if (!isAdded()) return;
-        boolean visible = Utils.isEmpty(data);
-        mEmptyText.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mEmptyText.setVisibility(mAdapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
     }
 
+    @Override
+    public IPresenterFactory<ContactsPresenter> getPresenterFactory(@Nullable Bundle saveInstanceState) {
+        return () -> new ContactsPresenter(saveInstanceState);
+    }
+
+    @Override
+    public void displayContacts(@NotNull List<Contact> contacts) {
+        mAdapter.setData(contacts);
+        resolveEmptyText();
+    }
 }

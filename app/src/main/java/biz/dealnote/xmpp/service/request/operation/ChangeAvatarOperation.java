@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.db.DBHelper;
-import biz.dealnote.xmpp.db.columns.ContactsColumns;
+import biz.dealnote.xmpp.db.columns.UsersColumns;
 import biz.dealnote.xmpp.exception.CustomAppException;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.request.Request;
@@ -82,14 +82,14 @@ public class ChangeAvatarOperation extends AbsXmppOperation {
             Log.d(TAG, "updated hash: " + updated.getAvatarHash() + ", equals: " + Arrays.equals(array, updated.getAvatar()));
 
             ContentValues cv = new ContentValues();
-            cv.put(ContactsColumns.PHOTO, array);
-            cv.put(ContactsColumns.PHOTO_HASH, updated.getAvatarHash());
-            cv.put(ContactsColumns.PHOTO_MIME_TYPE, updated.getAvatarMimeType());
+            cv.put(UsersColumns.PHOTO, array);
+            cv.put(UsersColumns.PHOTO_HASH, updated.getAvatarHash());
+            cv.put(UsersColumns.PHOTO_MIME_TYPE, updated.getAvatarMimeType());
 
-            String where = ContactsColumns.JID + " LIKE ?";
+            String where = UsersColumns.JID + " LIKE ?";
             String[] args = {myJid.toLowerCase()};
 
-            DBHelper.getInstance(context).getWritableDatabase().update(ContactsColumns.TABLENAME, cv, where, args);
+            DBHelper.getInstance(context).getWritableDatabase().update(UsersColumns.TABLENAME, cv, where, args);
 
             Log.d(TAG, "Saved to DB");
         } catch (IOException e) {

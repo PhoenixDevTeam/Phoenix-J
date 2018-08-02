@@ -63,7 +63,7 @@ public class AppRoster {
 
             cv.put(RosterColumns.ACCOUNT_ID, accountId);
             cv.put(RosterColumns.JID, bareJid);
-            cv.put(RosterColumns.CONTACT_ID, contactId);
+            cv.put(RosterColumns.USER_ID, contactId);
 
             context.getContentResolver().insert(ChatContentProvider.ROSTERS_ENTRIES_CONTENT_URI, cv);
         }
@@ -165,7 +165,7 @@ public class AppRoster {
         String jid = cursor.getString(cursor.getColumnIndex(RosterColumns.JID));
 
         User user = new User()
-                .setId(cursor.getInt(cursor.getColumnIndex(RosterColumns.CONTACT_ID)))
+                .setId(cursor.getInt(cursor.getColumnIndex(RosterColumns.USER_ID)))
                 .setJid(jid)
                 .setFirstName(cursor.getString(cursor.getColumnIndex(RosterColumns.FOREIGN_CONTACT_FIRST_NAME)))
                 .setLastName(cursor.getString(cursor.getColumnIndex(RosterColumns.FOREIGN_CONTACT_LAST_NAME)))

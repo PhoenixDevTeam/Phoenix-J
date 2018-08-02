@@ -9,7 +9,7 @@ public class RosterColumns implements BaseColumns {
     public static final String ACCOUNT_ID = "account_id";
     public static final String JID = "jid";
     public static final String RESOURCE = "resource";
-    public static final String CONTACT_ID = "contact_id";
+    public static final String USER_ID = "contact_id";
     public static final String FLAGS = "flags";
     public static final String AVAILABLE_RECEIVE_MESSAGES = "available_receive_messages";
     public static final String IS_AWAY = "is_away";
@@ -25,7 +25,7 @@ public class RosterColumns implements BaseColumns {
     public static final String FULL_ACCOUNT_ID = TABLENAME + "." + ACCOUNT_ID;
     public static final String FULL_JID = TABLENAME + "." + JID;
     public static final String FULL_RESOURCE = TABLENAME + "." + RESOURCE;
-    public static final String FULL_CONTACT_ID = TABLENAME + "." + CONTACT_ID;
+    public static final String FULL_CONTACT_ID = TABLENAME + "." + USER_ID;
     public static final String FULL_FLAGS = TABLENAME + "." + FLAGS;
     public static final String FULL_AVAILABLE_RECEIVE_MESSAGES = TABLENAME + "." + AVAILABLE_RECEIVE_MESSAGES;
     public static final String FULL_IS_AWAY = TABLENAME + "." + IS_AWAY;

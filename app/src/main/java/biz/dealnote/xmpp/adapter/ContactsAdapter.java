@@ -134,6 +134,11 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.Holder
         this.clickListener = clickListener;
     }
 
+    public void setData(List<Contact> contacts) {
+        this.data = contacts;
+        notifyDataSetChanged();
+    }
+
     public interface ClickListener {
         void onClick(int position, Contact entry);
     }
