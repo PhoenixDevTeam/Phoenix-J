@@ -2,6 +2,7 @@ package biz.dealnote.xmpp.repo
 
 import biz.dealnote.xmpp.model.Contact
 import biz.dealnote.xmpp.model.User
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import org.jivesoftware.smack.roster.RosterEntry
@@ -11,7 +12,9 @@ interface IContactsRepository {
 
     fun getContacts(): Single<List<Contact>>
 
-    fun observeContacts(): Flowable<List<Contact>>
+    fun observeAddings(): Flowable<List<String>>
 
-    fun update(contacts: Collection<RosterEntry>): Single<Contact>
+    fun observeAdding(): Flowable<Contact>
+
+    fun upsert(account: Int, contacts: Collection<RosterEntry>): Completable
 }

@@ -12,10 +12,8 @@ import biz.dealnote.xmpp.db.interfaces.IUsersStorage
 import biz.dealnote.xmpp.model.AccountId
 import biz.dealnote.xmpp.model.Contact
 import biz.dealnote.xmpp.model.User
+import biz.dealnote.xmpp.util.*
 import biz.dealnote.xmpp.util.Optional
-import biz.dealnote.xmpp.util.Utils
-import biz.dealnote.xmpp.util.getInt
-import biz.dealnote.xmpp.util.query
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
@@ -296,6 +294,8 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
 
     override fun getContacts(): Single<List<Contact>> {
         return Single.create { emitter ->
+            val start = System.currentTimeMillis()
+
             val table = RosterColumns.TABLENAME +
                     " LEFT OUTER JOIN " + UsersColumns.TABLENAME +
                     " ON " + RosterColumns.TABLENAME + "." + RosterColumns.USER_ID + " = " + UsersColumns.TABLENAME + "." + UsersColumns._ID +
@@ -340,6 +340,7 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
             }
 
             cursor.close()
+            Logger.d("sqlite.getContacts", "time: " + (System.currentTimeMillis() - start) + " ms, count: " + entries.size)
             emitter.onSuccess(entries)
         }
     }
