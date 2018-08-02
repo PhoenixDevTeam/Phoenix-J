@@ -7,7 +7,7 @@ import biz.dealnote.xmpp.R
 import biz.dealnote.xmpp.db.Accounts
 import biz.dealnote.xmpp.model.Account
 import biz.dealnote.xmpp.model.AccountContactPair
-import biz.dealnote.xmpp.model.Contact
+import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.mvp.presenter.base.RequestSupportPresenter
 import biz.dealnote.xmpp.mvp.view.ILoginView
 import biz.dealnote.xmpp.service.request.Request
@@ -53,19 +53,19 @@ class LoginPresenter(savedInstanceState: Bundle?) : RequestSupportPresenter<ILog
         super.onRequestFinished(request, resultData)
         if (request.requestType == RequestFactory.REQUEST_SIGN_IN) {
             val account : Account? = resultData.getParcelable(Extra.ACCOUNT)
-            val contact = resultData.getParcelable<Contact>(Extra.CONTACT)
+            val contact = resultData.getParcelable<User>(Extra.CONTACT)
             account?.run {
                 onAuthSuccess(this, contact)
             }
         }
     }
 
-    private fun onAuthSuccess(account: Account, contact: Contact?) {
+    private fun onAuthSuccess(account: Account, user: User?) {
         account.disabled = true
         Accounts.enableAccount(App.getInstance(), account.id, true)
 
         val pair = AccountContactPair(account)
-        pair.setContact(contact)
+        pair.setUser(user)
 
         view?.sendSuccess(pair)
     }

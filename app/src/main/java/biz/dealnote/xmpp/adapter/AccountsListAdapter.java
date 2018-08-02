@@ -16,7 +16,7 @@ import java.util.List;
 
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.model.AccountContactPair;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.util.Avatars;
 import biz.dealnote.xmpp.util.RoundTransformation;
 
@@ -60,19 +60,19 @@ public class AccountsListAdapter extends ArrayAdapter<AccountContactPair> {
 
         String jid = item.account.buildBareJid();
 
-        Contact contact = item.contact;
+        User user = item.user;
         String firstLastName = null;
 
-        if (contact != null) {
-            if (!TextUtils.isEmpty(contact.getFirstName())) {
-                firstLastName = contact.getFirstName();
+        if (user != null) {
+            if (!TextUtils.isEmpty(user.getFirstName())) {
+                firstLastName = user.getFirstName();
             }
 
-            if (!TextUtils.isEmpty(contact.getLastName())) {
+            if (!TextUtils.isEmpty(user.getLastName())) {
                 if (firstLastName == null) {
-                    firstLastName = contact.getLastName();
+                    firstLastName = user.getLastName();
                 } else {
-                    firstLastName = firstLastName + " " + contact.getLastName();
+                    firstLastName = firstLastName + " " + user.getLastName();
                 }
             }
         }
@@ -81,7 +81,7 @@ public class AccountsListAdapter extends ArrayAdapter<AccountContactPair> {
         holder.name.setText(firstLastName);
         holder.jid.setText(jid);
 
-        String photoHash = contact == null ? null : contact.getPhotoHash();
+        String photoHash = user == null ? null : user.getPhotoHash();
 
         Avatars.displayAvatar(getContext(), holder, jid, photoHash, transformation);
 

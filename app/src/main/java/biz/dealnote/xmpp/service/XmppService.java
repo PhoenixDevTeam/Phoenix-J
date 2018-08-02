@@ -35,7 +35,7 @@ import biz.dealnote.xmpp.db.exception.AlreadyExistException;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AppFile;
 import biz.dealnote.xmpp.model.AppMessage;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.model.MessageBuilder;
 import biz.dealnote.xmpp.security.IOtrManager;
 import biz.dealnote.xmpp.service.request.Request;
@@ -44,6 +44,7 @@ import biz.dealnote.xmpp.service.request.RequestFactory;
 import biz.dealnote.xmpp.service.request.XmppOperationManager;
 import biz.dealnote.xmpp.service.request.XmppRequestManager;
 import biz.dealnote.xmpp.transfer.IFileTransferer;
+import biz.dealnote.xmpp.util.Logger;
 import biz.dealnote.xmpp.util.NotificationHelper;
 import biz.dealnote.xmpp.util.RxUtils;
 import biz.dealnote.xmpp.util.Unixtime;
@@ -88,15 +89,15 @@ public class XmppService extends Service implements IXmppContext {
     @Override
     public void onCreate() {
         this.fileTransferer = Injection.INSTANCE.provideTransferer();
-        this.mConnectionManager = new ConnectionManager(this);
+        this.mConnectionManager = Injection.INSTANCE.provideConnectionManager();
         this.mOtrManager = Injection.INSTANCE.provideOtrManager();
 
         mRequestAdapter = new RequestAdapter() {
             @Override
             public void onRequestFinished(Request request, Bundle resultData) {
                 if (request.getRequestType() == RequestFactory.REQUEST_GET_VCARD) {
-                    Contact contact = resultData.getParcelable(Extra.CONTACT);
-                    Log.d(TAG, "VCard was loaded: " + contact);
+                    User user = resultData.getParcelable(Extra.CONTACT);
+                    Log.d(TAG, "VCard was loaded: " + user);
                 }
             }
         };
@@ -234,6 +235,8 @@ public class XmppService extends Service implements IXmppContext {
     }
 
     private void onRosterEntryAdded(int accountId, Collection<RosterEntry> entries) {
+        Logger.d("onRosterEntryAdded", "count: " + entries);
+
         ArrayList<String> bareJids = new ArrayList<>(entries.size());
         for (RosterEntry entry : entries) {
             AppRoster.mergeRosterEntry(this, accountId, entry);

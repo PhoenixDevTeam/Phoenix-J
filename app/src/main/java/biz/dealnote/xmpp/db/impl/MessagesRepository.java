@@ -22,7 +22,7 @@ import biz.dealnote.xmpp.db.exception.DataValidateException;
 import biz.dealnote.xmpp.db.exception.DatabaseException;
 import biz.dealnote.xmpp.db.exception.RecordDoesNotExistException;
 import biz.dealnote.xmpp.db.interfaces.IChatsRepository;
-import biz.dealnote.xmpp.db.interfaces.IContactsRepository;
+import biz.dealnote.xmpp.db.interfaces.IUsersStorage;
 import biz.dealnote.xmpp.db.interfaces.IMessagesRepository;
 import biz.dealnote.xmpp.model.AppFile;
 import biz.dealnote.xmpp.model.AppMessage;
@@ -92,7 +92,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
                     }
                 }
 
-                IContactsRepository contactsRepository = getRepositories().getContactsRepository();
+                IUsersStorage contactsRepository = getRepositories().getUsersStorage();
 
                 int targetInterlocutorId;
                 if (builder.getInterlocutorId() != null) {

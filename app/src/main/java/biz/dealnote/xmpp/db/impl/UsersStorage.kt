@@ -4,44 +4,50 @@ import android.content.ContentValues
 import android.database.Cursor
 import biz.dealnote.xmpp.db.DBHelper
 import biz.dealnote.xmpp.db.Repositories
+import biz.dealnote.xmpp.db.columns.AccountsColumns
 import biz.dealnote.xmpp.db.columns.ContactsColumns
 import biz.dealnote.xmpp.db.columns.ContactsColumns.*
-import biz.dealnote.xmpp.db.interfaces.IContactsRepository
+import biz.dealnote.xmpp.db.columns.RosterColumns
+import biz.dealnote.xmpp.db.interfaces.IUsersStorage
+import biz.dealnote.xmpp.model.AccountId
 import biz.dealnote.xmpp.model.Contact
+import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.util.Optional
 import biz.dealnote.xmpp.util.Utils
+import biz.dealnote.xmpp.util.getInt
 import biz.dealnote.xmpp.util.query
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.processors.PublishProcessor
 import org.jivesoftware.smackx.vcardtemp.packet.VCard
+import java.util.*
 
 /**
  * Created by ruslan.kolbasa on 02.11.2016.
  * phoenix_for_xmpp
  */
-class ContactsRepository(repositories: Repositories) : AbsRepository(repositories), IContactsRepository {
+class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IUsersStorage {
 
-    private val addingPublisher: PublishProcessor<Contact> = PublishProcessor.create()
-    private val updatesPublisher: PublishProcessor<Contact> = PublishProcessor.create()
+    private val addingPublisher: PublishProcessor<User> = PublishProcessor.create()
+    private val updatesPublisher: PublishProcessor<User> = PublishProcessor.create()
     private val dbHelper: DBHelper = DBHelper.getInstance(repositories)
 
-    override fun findById(id: Int): Single<Optional<Contact>> {
+    override fun findById(id: Int): Single<Optional<User?>> {
         return Single.create { e ->
-            synchronized(contactLock){
+            synchronized(contactLock) {
                 val cursor = dbHelper.readableDatabase.query(ContactsColumns.TABLENAME, columns, "$_ID = ?", arrayOf(id.toString()))
 
-                var contact: Contact? = null
+                var user: User? = null
                 if (cursor != null) {
                     if (cursor.moveToNext()) {
-                        contact = map(cursor)
+                        user = map(cursor)
                     }
 
                     cursor.close()
                 }
 
-                e.onSuccess(Optional.wrap(contact))
+                e.onSuccess(Optional.wrap(user))
             }
         }
     }
@@ -62,27 +68,27 @@ class ContactsRepository(repositories: Repositories) : AbsRepository(repositorie
             PHOTO
     )
 
-    override fun findByJid(jid: String): Single<Optional<Contact>> {
+    override fun findByJid(jid: String): Single<Optional<User?>> {
         return Single.create { e ->
-            synchronized(contactLock){
+            synchronized(contactLock) {
                 val cursor = dbHelper.readableDatabase.query(TABLENAME, columns, "$JID LIKE ?", arrayOf(jid))
 
-                var contact: Contact? = null
+                var user: User? = null
                 if (cursor != null) {
                     if (cursor.moveToNext()) {
-                        contact = map(cursor)
+                        user = map(cursor)
                     }
 
                     cursor.close()
                 }
 
-                e.onSuccess(Optional.wrap(contact))
+                e.onSuccess(Optional.wrap(user))
             }
         }
     }
 
     private fun findIdByBareJid(jid: String): Int? {
-        synchronized(contactLock){
+        synchronized(contactLock) {
             val cursor = dbHelper.readableDatabase.query(ContactsColumns.TABLENAME, arrayOf(_ID), "$JID LIKE ?", arrayOf(jid))
 
             try {
@@ -101,7 +107,7 @@ class ContactsRepository(repositories: Repositories) : AbsRepository(repositorie
 
     override fun upsert(bareJid: String, vCard: VCard): Completable {
         return Completable.create { e ->
-            synchronized(contactLock){
+            synchronized(contactLock) {
                 val jid = prepareBareJid(bareJid)
 
                 val id = findIdByBareJid(jid)
@@ -120,7 +126,7 @@ class ContactsRepository(repositories: Repositories) : AbsRepository(repositorie
                 cv.put(PHOTO_HASH, vCard.avatarHash)
                 cv.put(PHOTO, vCard.avatar)
 
-                val contact = Contact()
+                val contact = User()
                         .setJid(jid)
                         .setFirstName(vCard.firstName)
                         .setLastName(vCard.lastName)
@@ -150,14 +156,14 @@ class ContactsRepository(repositories: Repositories) : AbsRepository(repositorie
         }
     }
 
-    private fun insert(bareJid: String): Single<Contact> {
+    private fun insert(bareJid: String): Single<User> {
         return Single.fromCallable {
             val cv = ContentValues()
             cv.put(JID, bareJid)
 
-            synchronized(contactLock){
+            synchronized(contactLock) {
                 val id = dbHelper.writableDatabase.insert(TABLENAME, null, cv).toInt()
-                val contact = Contact()
+                val contact = User()
                         .setJid(bareJid)
                         .setId(id)
                 addingPublisher.onNext(contact)
@@ -168,7 +174,7 @@ class ContactsRepository(repositories: Repositories) : AbsRepository(repositorie
 
     override fun getContactIdPutIfNotExist(bareJid: String): Single<Int> {
         return Single.create { e ->
-            synchronized(contactLock){
+            synchronized(contactLock) {
                 val jid = prepareBareJid(bareJid)
                 var id = findIdByBareJid(jid)
 
@@ -180,7 +186,7 @@ class ContactsRepository(repositories: Repositories) : AbsRepository(repositorie
 
                     id = dbHelper.writableDatabase.insert(TABLENAME, null, cv).toInt()
 
-                    val contact = Contact()
+                    val contact = User()
                             .setJid(jid)
                             .setId(id)
 
@@ -191,24 +197,24 @@ class ContactsRepository(repositories: Repositories) : AbsRepository(repositorie
         }
     }
 
-    override fun getByJid(bareJid: String): Single<Contact> {
+    override fun getByJid(bareJid: String): Single<User> {
         val preparedJid = prepareBareJid(bareJid)
 
         return findByJid(preparedJid)
                 .flatMap { found ->
                     if (found.nonEmpty()) {
-                        Single.just<Contact>(found.get())
+                        Single.just<User>(found.get())
                     } else {
                         insert(preparedJid)
                     }
                 }
     }
 
-    override fun observeAdding(): Flowable<Contact> {
+    override fun observeAdding(): Flowable<User> {
         return addingPublisher.onBackpressureBuffer()
     }
 
-    override fun observeUpdates(): Flowable<Contact> {
+    override fun observeUpdates(): Flowable<User> {
         return updatesPublisher.onBackpressureBuffer()
     }
 
@@ -230,8 +236,8 @@ class ContactsRepository(repositories: Repositories) : AbsRepository(repositorie
         }
     }
 
-    private fun map(cursor: Cursor): Contact {
-        return Contact()
+    private fun map(cursor: Cursor): User {
+        return User()
                 .setId(cursor.getInt(cursor.getColumnIndex(_ID)))
                 .setJid(cursor.getString(cursor.getColumnIndex(JID)))
                 .setFirstName(cursor.getString(cursor.getColumnIndex(FIRST_NAME)))
@@ -245,6 +251,98 @@ class ContactsRepository(repositories: Repositories) : AbsRepository(repositorie
                 .setOrganizationUnit(cursor.getString(cursor.getColumnIndex(ORGANIZATION_UNIT)))
                 .setPhotoMimeType(cursor.getString(cursor.getColumnIndex(PHOTO_MIME_TYPE)))
                 .setPhotoHash(cursor.getString(cursor.getColumnIndex(PHOTO_HASH)))
+    }
+
+    override fun getContacts(): Single<List<Contact>> {
+        return Single.create { emitter ->
+            val table = RosterColumns.TABLENAME +
+                    " LEFT OUTER JOIN " + ContactsColumns.TABLENAME +
+                    " ON " + RosterColumns.TABLENAME + "." + RosterColumns.CONTACT_ID + " = " + ContactsColumns.TABLENAME + "." + ContactsColumns._ID +
+                    " LEFT OUTER JOIN " + AccountsColumns.TABLENAME +
+                    " ON " + RosterColumns.TABLENAME + "." + RosterColumns.CONTACT_ID + " = " + AccountsColumns.TABLENAME + "." + AccountsColumns._ID
+
+            val columns: Array<String> = arrayOf(
+                    RosterColumns.ACCOUNT_ID,
+                    RosterColumns.TABLENAME + "." + RosterColumns.JID + " AS user_jid",
+                    RosterColumns.RESOURCE,
+                    RosterColumns.CONTACT_ID,
+                    RosterColumns.FLAGS,
+                    RosterColumns.AVAILABLE_RECEIVE_MESSAGES,
+                    RosterColumns.IS_AWAY,
+                    RosterColumns.PRESENSE_MODE,
+                    RosterColumns.PRESENSE_TYPE,
+                    RosterColumns.PRESENSE_STATUS,
+                    RosterColumns.TYPE,
+                    RosterColumns.NICK,
+                    RosterColumns.PRIORITY,
+                    ContactsColumns.FIRST_NAME,
+                    ContactsColumns.LAST_NAME,
+                    ContactsColumns.MIDDLE_NAME,
+                    ContactsColumns.PREFIX,
+                    ContactsColumns.SUFFIX,
+                    ContactsColumns.EMAIL_HOME,
+                    ContactsColumns.EMAIL_WORK,
+                    ContactsColumns.ORGANIZATION,
+                    ContactsColumns.ORGANIZATION_UNIT,
+                    ContactsColumns.PHOTO_MIME_TYPE,
+                    ContactsColumns.PHOTO_HASH,
+                    AccountsColumns.TABLENAME + "." + AccountsColumns.LOGIN + "AS account_jid"
+            )
+
+            val cursor = dbHelper.readableDatabase.query(table, columns, null, null, null, null, null)
+            val entries = ArrayList<Contact>()
+            while (cursor.moveToNext()) {
+                if(emitter.isDisposed) break
+
+                entries.add(mapContact(cursor))
+            }
+
+            cursor.close()
+            emitter.onSuccess(entries)
+        }
+    }
+
+    private fun mapContact(cursor: Cursor): Contact {
+        val jid = cursor.getString(cursor.getColumnIndex("user_jid"))
+
+        val user = User()
+                .setId(cursor.getInt(cursor.getColumnIndex(RosterColumns.CONTACT_ID)))
+                .setJid(jid)
+                .setFirstName(cursor.getString(cursor.getColumnIndex(ContactsColumns.FIRST_NAME)))
+                .setLastName(cursor.getString(cursor.getColumnIndex(ContactsColumns.LAST_NAME)))
+                .setMiddleName(cursor.getString(cursor.getColumnIndex(ContactsColumns.MIDDLE_NAME)))
+                .setPrefix(cursor.getString(cursor.getColumnIndex(ContactsColumns.PREFIX)))
+                .setSuffix(cursor.getString(cursor.getColumnIndex(ContactsColumns.SUFFIX)))
+                .setEmailHome(cursor.getString(cursor.getColumnIndex(ContactsColumns.EMAIL_HOME)))
+                .setEmailWork(cursor.getString(cursor.getColumnIndex(ContactsColumns.EMAIL_WORK)))
+                .setOrganization(cursor.getString(cursor.getColumnIndex(ContactsColumns.ORGANIZATION)))
+                .setOrganizationUnit(cursor.getString(cursor.getColumnIndex(ContactsColumns.ORGANIZATION_UNIT)))
+                .setPhotoMimeType(cursor.getString(cursor.getColumnIndex(ContactsColumns.PHOTO_MIME_TYPE)))
+                .setPhotoHash(cursor.getString(cursor.getColumnIndex(ContactsColumns.PHOTO_HASH)))
+
+        val entry = Contact()
+
+        entry.id = cursor.getInt(cursor.getColumnIndex(RosterColumns._ID))
+
+        entry.accountId = AccountId(
+                cursor.getInt(cursor.getColumnIndex(RosterColumns.ACCOUNT_ID)),
+                cursor.getString(cursor.getColumnIndex("account_jid"))
+        )
+
+        entry.jid = jid
+        entry.user = user
+        entry.flags = cursor.getInt(cursor.getColumnIndex(RosterColumns.FLAGS))
+        entry.availableToReceiveMessages = cursor.getInt(cursor.getColumnIndex(RosterColumns.AVAILABLE_RECEIVE_MESSAGES)) == 1
+        entry.away = cursor.getInt(cursor.getColumnIndex(RosterColumns.IS_AWAY)) == 1
+
+        entry.presenceMode = cursor.getInt(RosterColumns.PRESENSE_MODE)
+        entry.presenceType = cursor.getInt(RosterColumns.PRESENSE_TYPE)
+        entry.presenceStatus = cursor.getString(cursor.getColumnIndex(RosterColumns.PRESENSE_STATUS))
+
+        entry.type = cursor.getInt(RosterColumns.TYPE)
+        entry.nick = cursor.getString(cursor.getColumnIndex(RosterColumns.NICK))
+        entry.priority = cursor.getInt(cursor.getColumnIndex(RosterColumns.PRIORITY))
+        return entry
     }
 
     private fun prepareBareJid(input: String): String {

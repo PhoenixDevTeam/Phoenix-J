@@ -19,9 +19,11 @@ fun CountDownLatch.safelyWait(): Boolean {
     return try {
         this.await()
         true
-    } catch (e: InterruptedException){
+    } catch (e: InterruptedException) {
         false
     }
 }
 
 fun SQLiteDatabase.query(tablename: String, columns: Array<String>, where: String, args: Array<String>): Cursor? = query(tablename, columns, where, args, null, null, null)
+
+fun Cursor.getInt(columnName: String): Int? = getColumnIndex(columnName).let { if (isNull(it)) null else getInt(it) }

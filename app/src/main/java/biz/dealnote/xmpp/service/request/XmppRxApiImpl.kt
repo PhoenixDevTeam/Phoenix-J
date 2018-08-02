@@ -17,9 +17,14 @@ class XmppRxApiImpl(private val connectionManager: IConnectionManager) : IXmppRx
 
     override fun getVCard(acccount: Int, jid: String): Single<VCard> {
         return singleFromCallable(xmppExecutor, Callable {
-            val connection: AbstractXMPPConnection = connectionManager.findConnectionFor(acccount)!!
-            val entityBareJid = JidCreate.entityBareFrom(jid)
-            return@Callable VCardManager.getInstanceFor(connection).loadVCard(entityBareJid)
+            val connection: AbstractXMPPConnection? = connectionManager.findConnectionFor(acccount)
+
+            connection?.run {
+                val entityBareJid = JidCreate.entityBareFrom(jid)
+                return@Callable VCardManager.getInstanceFor(connection).loadVCard(entityBareJid)
+            } ?: run {
+                throw Exception()
+            }
         })
     }
 

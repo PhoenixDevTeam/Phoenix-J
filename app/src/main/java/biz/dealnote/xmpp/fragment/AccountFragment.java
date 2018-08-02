@@ -39,7 +39,7 @@ import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.dialog.ChangePasswordDialog;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AccountContactPair;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.model.UserAttribute;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.RequestFactory;
@@ -124,7 +124,7 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (mAttributes == null) {
-            mAttributes = createAttributes(accountContactPair.contact);
+            mAttributes = createAttributes(accountContactPair.user);
         }
 
         mAdapter = new UserAttributesRecyclerAdapter(getActivity(), mAttributes);
@@ -136,10 +136,10 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
         resolveFooter();
     }
 
-    private ArrayList<UserAttribute> createAttributes(Contact contact) {
+    private ArrayList<UserAttribute> createAttributes(User user) {
         ArrayList<UserAttribute> attributes = new ArrayList<>();
-        attributes.add(new UserAttribute(UserAttribute.FIRST_NAME, R.string.first_name, contact == null ? null : contact.getFirstName()));
-        attributes.add(new UserAttribute(UserAttribute.LAST_NAME, R.string.last_name, contact == null ? null : contact.getLastName()));
+        attributes.add(new UserAttribute(UserAttribute.FIRST_NAME, R.string.first_name, user == null ? null : user.getFirstName()));
+        attributes.add(new UserAttribute(UserAttribute.LAST_NAME, R.string.last_name, user == null ? null : user.getLastName()));
         return attributes;
     }
 
@@ -191,16 +191,16 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
         if (!isAdded()) return;
 
         Account account = accountContactPair.account;
-        Contact contact = accountContactPair.contact;
+        User user = accountContactPair.user;
 
-        boolean hasAvatar = contact != null && nonEmpty(contact.getPhotoHash());
+        boolean hasAvatar = user != null && nonEmpty(user.getPhotoHash());
 
         avatar.setVisibility(hasAvatar ? View.VISIBLE : View.GONE);
         avaterLetter.setText(account.buildBareJid().substring(0, 1));
 
         if (hasAvatar && needRefreshAvatar) {
             PicassoInstance.get()
-                    .load(PicassoAvatarHandler.generateUri(contact.getPhotoHash()))
+                    .load(PicassoAvatarHandler.generateUri(user.getPhotoHash()))
                     .centerCrop()
                     .resize(500, 500)
                     .into(avatar);
@@ -270,8 +270,8 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
     private void updatedDataFromDb() {
         new UpdateMyDataTask() {
             @Override
-            protected void onPostExecute(Contact contact) {
-                accountContactPair.contact = contact;
+            protected void onPostExecute(User user) {
+                accountContactPair.user = user;
                 resolveViews(true);
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -405,13 +405,13 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
         progressDialog.show();
     }
 
-    private class UpdateMyDataTask extends AsyncTask<Void, Void, Contact> {
+    private class UpdateMyDataTask extends AsyncTask<Void, Void, User> {
 
         @Override
-        protected Contact doInBackground(Void... params) {
+        protected User doInBackground(Void... params) {
             String bareJid = accountContactPair.account.buildBareJid();
             return Repositories.Companion.getInstance()
-                    .getContactsRepository()
+                    .getUsersStorage()
                     .findByJid(bareJid)
                     .blockingGet()
                     .get();

@@ -2,6 +2,7 @@ package biz.dealnote.xmpp.fragment;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
@@ -27,7 +28,7 @@ import biz.dealnote.xmpp.Constants;
 import biz.dealnote.xmpp.Injection;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.adapter.AccountsListAdapter;
-import biz.dealnote.xmpp.adapter.RosterEntriesAdapter;
+import biz.dealnote.xmpp.adapter.ContactsAdapter;
 import biz.dealnote.xmpp.callback.OnPlaceOpenCallback;
 import biz.dealnote.xmpp.callback.PicassoPauseOnScrollListener;
 import biz.dealnote.xmpp.db.Accounts;
@@ -36,23 +37,23 @@ import biz.dealnote.xmpp.db.columns.AccountsColumns;
 import biz.dealnote.xmpp.loader.RosterEntriesAsyncLoader;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AccountContactPair;
-import biz.dealnote.xmpp.model.AppRosterEntry;
 import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.RequestFactory;
 import biz.dealnote.xmpp.util.Utils;
 import biz.dealnote.xmpp.view.InputTextDialog;
 
-public class ContactsFragment extends AbsRequestSupportFragment implements LoaderManager.LoaderCallbacks<ArrayList<AppRosterEntry>>, RosterEntriesAdapter.ClickListener {
+public class ContactsFragment extends AbsRequestSupportFragment implements LoaderManager.LoaderCallbacks<ArrayList<Contact>>, ContactsAdapter.ClickListener {
 
     private static final String TAG = ContactsFragment.class.getSimpleName();
 
     private static final int LOADER_CONTACTS = 2;
     private static final String SAVE_DATA = "save_data";
-    private ArrayList<AppRosterEntry> data;
+    private ArrayList<Contact> data;
     private View root;
     private RecyclerView mRecyclerView;
-    private RosterEntriesAdapter mAdapter;
+    private ContactsAdapter mAdapter;
     private TextView mEmptyText;
 
     public static ContactsFragment newInstance() {
@@ -74,7 +75,7 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
                 .subscribe(this::onAccountDelete));
 
         appendDisposable(Repositories.Companion.getInstance()
-                .getContactsRepository()
+                .getUsersStorage()
                 .observeUpdates()
                 .observeOn(Injection.INSTANCE.provideMainThreadScheduler())
                 .subscribe(this::handleContactUpdateEvent));
@@ -82,10 +83,10 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
 
     private void onAccountDelete(int id) {
         // если аакаунт был удален - удаляем все его контакты из списка
-        Iterator<AppRosterEntry> iterator = data.iterator();
+        Iterator<Contact> iterator = data.iterator();
         boolean changes = false;
         while (iterator.hasNext()) {
-            if (iterator.next().account.id == id) {
+            if (iterator.next().accountId.getId() == id) {
                 iterator.remove();
                 changes = true;
             }
@@ -99,15 +100,15 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_contacts, container, false);
-        mEmptyText = (TextView) root.findViewById(R.id.empty);
-        mRecyclerView = (RecyclerView) root.findViewById(R.id.list);
+        mEmptyText = root.findViewById(R.id.empty);
+        mRecyclerView = root.findViewById(R.id.list);
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
 
         mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.addOnScrollListener(new PicassoPauseOnScrollListener(getActivity(), Constants.PICASSO_TAG));
+        mRecyclerView.addOnScrollListener(new PicassoPauseOnScrollListener(requireActivity(), Constants.PICASSO_TAG));
         return root;
     }
 
@@ -121,7 +122,7 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
             data = new ArrayList<>();
         }
 
-        mAdapter = new RosterEntriesAdapter(data, getActivity());
+        mAdapter = new ContactsAdapter(data, getActivity());
         mAdapter.setClickListener(this);
 
         mRecyclerView.setAdapter(mAdapter);
@@ -169,7 +170,7 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
     }
 
     @Override
-    public Loader<ArrayList<AppRosterEntry>> onCreateLoader(int id, Bundle args) {
+    public Loader<ArrayList<Contact>> onCreateLoader(int id, Bundle args) {
         if (id == LOADER_CONTACTS) {
             return new RosterEntriesAsyncLoader(getActivity(), args);
         }
@@ -178,7 +179,7 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
     }
 
     @Override
-    public void onLoadFinished(Loader<ArrayList<AppRosterEntry>> loader, ArrayList<AppRosterEntry> data) {
+    public void onLoadFinished(Loader<ArrayList<Contact>> loader, ArrayList<Contact> data) {
         this.data.clear();
         this.data.addAll(data);
 
@@ -189,7 +190,7 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
     }
 
     @Override
-    public void onLoaderReset(Loader<ArrayList<AppRosterEntry>> loader) {
+    public void onLoaderReset(Loader<ArrayList<Contact>> loader) {
 
     }
 
@@ -247,7 +248,7 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
     }
 
     @Override
-    public void onClick(int position, AppRosterEntry entry) {
+    public void onClick(int position, Contact entry) {
         Log.d(TAG, "onClick, position: " + position + ", entry: " + entry);
 
         if (getActivity() instanceof OnPlaceOpenCallback) {
@@ -255,13 +256,13 @@ public class ContactsFragment extends AbsRequestSupportFragment implements Loade
         }
     }
 
-    public void handleContactUpdateEvent(Contact contact) {
+    public void handleContactUpdateEvent(User user) {
         if (data == null) return;
 
         boolean changed = false;
-        for (AppRosterEntry entry : data) {
-            if (contact.equals(entry.contact)) {
-                entry.contact = contact;
+        for (Contact entry : data) {
+            if (user.equals(entry.user)) {
+                entry.user = user;
                 changed = true;
             }
         }

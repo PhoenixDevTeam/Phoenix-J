@@ -20,8 +20,8 @@
     <string name="user_not_authorized">User not authorized</string>
     <string name="send_a_request">Send a request</string>
     <string name="delete">Delete</string>
-    <string name="delete_from_contact_list">Delete from contact list</string>
-    <string name="add_contact">Add contact</string>
+    <string name="delete_from_contact_list">Delete from user list</string>
+    <string name="add_contact">Add user</string>
     <string name="open_profile">Open profile</string>
     <string name="select_target_account">Select target account</string>
     <string name="cancel">Cancel</string>
@@ -31,7 +31,7 @@
     <string name="button_cancel">Cancel</string>
     <string name="enter_the_message_text">Enter the message text</string>
     <string name="deleted">Deleted</string>
-    <string name="unable_to_delete_contact">Unable to delete contact</string>
+    <string name="unable_to_delete_contact">Unable to delete user</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="server_host"><b>Server host</b></string>
@@ -126,7 +126,7 @@
     <string name="save_changes_question">Save changes?</string>
     <string name="request_has_been_sent">Request has been sent</string>
     <string name="you_have_no_contacts">You have no contacts</string>
-    <string name="income_message_subscribe_text">Allow user %1$s to add you as a contact list?</string>
+    <string name="income_message_subscribe_text">Allow user %1$s to add you as a user list?</string>
     <string name="out_message_subscribe_text">You have sent a request to the user %1$s</string>
     <string name="income_message_subscribed_text">User %1$s accepted your request</string>
     <string name="out_message_subscribed_text">You have confirmed the authorization request for the user %1$s</string>

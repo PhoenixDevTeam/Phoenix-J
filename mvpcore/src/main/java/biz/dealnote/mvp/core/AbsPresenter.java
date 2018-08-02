@@ -45,7 +45,7 @@ public abstract class AbsPresenter<V extends IMvpView> implements IPresenter<V> 
     }
 
     @CallSuper
-    protected void onGuiCreated(@NonNull V viewHost) {
+    protected void onGuiCreated(@NonNull V view) {
 
     }
 

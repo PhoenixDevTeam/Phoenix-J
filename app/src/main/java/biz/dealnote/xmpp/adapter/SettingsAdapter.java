@@ -14,7 +14,7 @@ import com.squareup.picasso.Transformation;
 import java.util.List;
 
 import biz.dealnote.xmpp.R;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.settings.AbsSettings;
 import biz.dealnote.xmpp.settings.AccountSettings;
 import biz.dealnote.xmpp.settings.NotificationSettings;
@@ -124,19 +124,19 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         String jid = settings.accountContactPair.account.buildBareJid();
 
-        Contact contact = settings.accountContactPair.contact;
+        User user = settings.accountContactPair.user;
         String firstLastName = null;
 
-        if (contact != null) {
-            if (!TextUtils.isEmpty(contact.getFirstName())) {
-                firstLastName = contact.getFirstName();
+        if (user != null) {
+            if (!TextUtils.isEmpty(user.getFirstName())) {
+                firstLastName = user.getFirstName();
             }
 
-            if (!TextUtils.isEmpty(contact.getLastName())) {
+            if (!TextUtils.isEmpty(user.getLastName())) {
                 if (firstLastName == null) {
-                    firstLastName = contact.getLastName();
+                    firstLastName = user.getLastName();
                 } else {
-                    firstLastName = firstLastName + " " + contact.getLastName();
+                    firstLastName = firstLastName + " " + user.getLastName();
                 }
             }
         }
@@ -145,8 +145,8 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.name.setText(firstLastName);
         holder.jid.setText(jid);
 
-        String photoHash = contact == null ? null : contact.getPhotoHash();
-        //byte[] avatar = contact == null ? null : contact.getAvatar();
+        String photoHash = user == null ? null : user.getPhotoHash();
+        //byte[] avatar = user == null ? null : user.getAvatar();
 
         Avatars.displayAvatar(context, holder, jid, photoHash, transformation);
 

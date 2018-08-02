@@ -22,7 +22,7 @@ import biz.dealnote.xmpp.activity.MainActivity;
 import biz.dealnote.xmpp.db.Accounts;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AccountContactPair;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.RequestFactory;
 
@@ -52,14 +52,14 @@ public class SignInFragment extends AbsRequestSupportFragment implements View.On
     @Override
     public void onRequestFinished(Request request, Bundle resultData) {
         Account account = resultData.getParcelable(Extra.ACCOUNT);
-        Contact contact = resultData.getParcelable(Extra.CONTACT);
+        User user = resultData.getParcelable(Extra.CONTACT);
 
         if (account != null) {
-            onAuthSuccess(account, contact);
+            onAuthSuccess(account, user);
         }
     }
 
-    private void onAuthSuccess(Account account, Contact contact) {
+    private void onAuthSuccess(Account account, User user) {
         if (!isAdded()) return;
 
         account.disabled = Boolean.FALSE;
@@ -70,7 +70,7 @@ public class SignInFragment extends AbsRequestSupportFragment implements View.On
         }
 
         AccountContactPair pair = new AccountContactPair(account);
-        pair.setContact(contact);
+        pair.setUser(user);
 
         Intent data = new Intent();
         data.putExtra(LoginActivity.EXTRA_RESULT, pair);

@@ -29,7 +29,7 @@ import biz.dealnote.xmpp.fragment.IncomeFilesFragment;
 import biz.dealnote.xmpp.fragment.MainTabsFragment;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AccountContactPair;
-import biz.dealnote.xmpp.model.AppRosterEntry;
+import biz.dealnote.xmpp.model.Contact;
 import biz.dealnote.xmpp.place.AppPlace;
 import biz.dealnote.xmpp.place.AppPlaceProvider;
 import biz.dealnote.xmpp.service.request.Request;
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements OnPlaceOpenCallba
     }
 
     @Override
-    public void onContactCardOpen(AppRosterEntry entry) {
+    public void onContactCardOpen(Contact entry) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment, ContactCardFragment.newInstance(entry))

@@ -19,7 +19,7 @@ import biz.dealnote.xmpp.db.exception.RecordDoesNotExistException;
 import biz.dealnote.xmpp.db.interfaces.IChatsRepository;
 import biz.dealnote.xmpp.model.Chat;
 import biz.dealnote.xmpp.model.ChatUpdateModel;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.model.HiddenUpdate;
 import biz.dealnote.xmpp.model.LastMessageUpdate;
 import biz.dealnote.xmpp.model.UnreadCountUpdate;
@@ -106,7 +106,7 @@ public class ChatsRepository extends AbsRepository implements IChatsRepository {
                         //.setTitle() // TODO: 23.12.2015
                         .setUnreadCount(targerUnreadCount)
                         .setInterlocutorId(request.getInterlocutorId())
-                        .setInterlocutor(getRepositories().getContactsRepository().findById(request.getInterlocutorId()).blockingGet().get())
+                        .setInterlocutor(getRepositories().getUsersStorage().findById(request.getInterlocutorId()).blockingGet().get())
                         .setHidden(false)
                         .setLastMessageText(request.getLastMessageBody())
                         .setLastMessageTime(request.getLastMessageTime())
@@ -298,8 +298,8 @@ public class ChatsRepository extends AbsRepository implements IChatsRepository {
     }
 
     public static Chat map(Cursor cursor) {
-        Contact contact = new Contact();
-        contact.setId(cursor.getInt(cursor.getColumnIndex(ChatsColumns.INTERLOCUTOR_ID)))
+        User user = new User();
+        user.setId(cursor.getInt(cursor.getColumnIndex(ChatsColumns.INTERLOCUTOR_ID)))
                 .setFirstName(cursor.getString(cursor.getColumnIndex(ChatsColumns.FOREIGN_INTERLOCUTOR_FIRST_NAME)))
                 .setLastName(cursor.getString(cursor.getColumnIndex(ChatsColumns.FOREIGN_INTERLOCUTOR_LAST_NAME)))
                 .setJid(cursor.getString(cursor.getColumnIndex(ChatsColumns.FOREIGN_INTERLOCUTOR_JID)))
@@ -327,8 +327,8 @@ public class ChatsRepository extends AbsRepository implements IChatsRepository {
                 .setHidden(cursor.getInt(cursor.getColumnIndex(ChatsColumns.HIDDEN)) == 1)
                 .setTitle(cursor.getString(cursor.getColumnIndex(ChatsColumns.TITLE)))
                 .setUnreadCount(cursor.getInt(cursor.getColumnIndex(ChatsColumns.UNREAD_COUNT)))
-                .setInterlocutorId(contact.getId())
-                .setInterlocutor(contact)
+                .setInterlocutorId(user.getId())
+                .setInterlocutor(user)
                 .setLastMessageText(cursor.getString(cursor.getColumnIndex(ChatsColumns.LAST_MESSAGE_TEXT)))
                 .setLastMessageTime(cursor.getLong(cursor.getColumnIndex(ChatsColumns.LAST_MESSAGE_TIME)))
                 .setLastMessageOut(cursor.getInt(cursor.getColumnIndex(ChatsColumns.LAST_MESSAGE_OUT)) == 1)

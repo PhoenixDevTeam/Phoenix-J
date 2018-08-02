@@ -20,7 +20,7 @@ public class Extra {
 
     public static final String ACCOUNT = "account";
     public static final String SUCCESS = "success";
-    public static final String CONTACT = "contact";
+    public static final String CONTACT = "user";
 
     public static final String FILE = "file";
     public static final String FILENAME = "filename";

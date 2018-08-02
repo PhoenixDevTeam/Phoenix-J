@@ -9,7 +9,7 @@ import com.squareup.picasso.RequestHandler;
 
 import java.io.ByteArrayInputStream;
 
-import biz.dealnote.xmpp.db.interfaces.IContactsRepository;
+import biz.dealnote.xmpp.db.interfaces.IUsersStorage;
 
 /**
  * Created by admin on 24.04.2017.
@@ -19,9 +19,9 @@ public class PicassoAvatarHandler extends RequestHandler {
 
     //avatars://hash/3h843384r4hh3
 
-    private final IContactsRepository repository;
+    private final IUsersStorage repository;
 
-    public PicassoAvatarHandler(IContactsRepository repository) {
+    public PicassoAvatarHandler(IUsersStorage repository) {
         this.repository = repository;
     }
 

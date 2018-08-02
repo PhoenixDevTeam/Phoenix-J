@@ -25,7 +25,7 @@ public class Chat implements Parcelable, Identificable {
     private int unreadCount;
     private int interlocutorId;
     private boolean hidden;
-    private Contact interlocutor;
+    private User interlocutor;
 
     private String lastMessageText;
     private long lastMessageTime;
@@ -44,7 +44,7 @@ public class Chat implements Parcelable, Identificable {
         unreadCount = in.readInt();
         interlocutorId = in.readInt();
         hidden = in.readByte() != 0;
-        interlocutor = in.readParcelable(Contact.class.getClassLoader());
+        interlocutor = in.readParcelable(User.class.getClassLoader());
         lastMessageText = in.readString();
         lastMessageTime = in.readLong();
         lastMessageOut = in.readByte() != 0;
@@ -105,11 +105,11 @@ public class Chat implements Parcelable, Identificable {
         return this;
     }
 
-    public Contact getInterlocutor() {
+    public User getInterlocutor() {
         return interlocutor;
     }
 
-    public Chat setInterlocutor(Contact interlocutor) {
+    public Chat setInterlocutor(User interlocutor) {
         this.interlocutor = interlocutor;
         return this;
     }

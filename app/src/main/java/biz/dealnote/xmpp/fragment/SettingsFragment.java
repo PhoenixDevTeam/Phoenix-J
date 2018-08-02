@@ -29,7 +29,7 @@ import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.dialog.NotificationSettingsDialog;
 import biz.dealnote.xmpp.fragment.base.BaseFragment;
 import biz.dealnote.xmpp.model.AccountContactPair;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.settings.AbsSettings;
 import biz.dealnote.xmpp.settings.AccountSettings;
 import biz.dealnote.xmpp.settings.NotificationSettings;
@@ -76,7 +76,7 @@ public class SettingsFragment extends BaseFragment implements SettingsAdapter.Ac
                 .subscribe(this::onAccountDelete));
 
         appendDisposable(Repositories.Companion.getInstance()
-                .getContactsRepository()
+                .getUsersStorage()
                 .observeUpdates()
                 .observeOn(Injection.INSTANCE.provideMainThreadScheduler())
                 .subscribe(this::handleContactUpdateEvent));
@@ -258,13 +258,13 @@ public class SettingsFragment extends BaseFragment implements SettingsAdapter.Ac
         }
     }
 
-    public void handleContactUpdateEvent(Contact contact) {
+    public void handleContactUpdateEvent(User user) {
         for (AbsSettings settings : data) {
             if (!(settings instanceof AccountSettings)) continue;
 
             AccountSettings accountSettings = (AccountSettings) settings;
-            if (contact.equals(accountSettings.accountContactPair.contact)) {
-                accountSettings.accountContactPair.contact = contact;
+            if (user.equals(accountSettings.accountContactPair.user)) {
+                accountSettings.accountContactPair.user = user;
                 if (mAdapter != null) mAdapter.notifyDataSetChanged();
             }
         }

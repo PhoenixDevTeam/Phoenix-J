@@ -25,7 +25,7 @@ public class App extends Application {
 
         Picasso picasso = new Picasso.Builder(this)
                 .addRequestHandler(new PicassoLocalPhotosHandler(this))
-                .addRequestHandler(new PicassoAvatarHandler(Repositories.getInstance().getContactsRepository()))
+                .addRequestHandler(new PicassoAvatarHandler(Repositories.getInstance().getUsersStorage()))
                 .build();
 
         PicassoInstance.init(picasso);

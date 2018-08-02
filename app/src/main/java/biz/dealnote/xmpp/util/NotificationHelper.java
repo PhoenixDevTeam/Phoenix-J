@@ -22,7 +22,7 @@ import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.MainActivity;
 import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.model.AppMessage;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.place.AppPlace;
 import biz.dealnote.xmpp.place.PlaceFactory;
 import biz.dealnote.xmpp.settings.NotificationSettings;
@@ -119,7 +119,7 @@ public class NotificationHelper {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_notify_income_message)
                 .setLargeIcon(entry.avatar)
-                .setContentTitle(entry.contact == null ? message.getSenderJid() : entry.contact.getDispayName())
+                .setContentTitle(entry.user == null ? message.getSenderJid() : entry.user.getDispayName())
                 .setContentText(fullBody)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(fullBody))
                 .setAutoCancel(true);
@@ -159,7 +159,7 @@ public class NotificationHelper {
     }
 
     private static class Entry {
-        Contact contact;
+        User user;
         Bitmap avatar;
     }
 
@@ -180,24 +180,24 @@ public class NotificationHelper {
         @Override
         protected Entry doInBackground(String... params) {
             String jid = params[0];
-            Contact contact = Repositories.getInstance()
-                    .getContactsRepository()
+            User user = Repositories.getInstance()
+                    .getUsersStorage()
                     .findByJid(jid)
                     .blockingGet()
                     .get();
 
-            if (contact == null) {
+            if (user == null) {
                 return null;
             }
 
             Entry entry = new Entry();
-            entry.contact = contact;
+            entry.user = user;
 
-            if(nonEmpty(contact.getPhotoHash())){
+            if(nonEmpty(user.getPhotoHash())){
                 int size = (int) dpToPx(LARGE_ICON_SIZE_DP, context);
                 try {
                     entry.avatar = PicassoInstance.get()
-                            .load(PicassoAvatarHandler.generateUri(contact.getPhotoHash()))
+                            .load(PicassoAvatarHandler.generateUri(user.getPhotoHash()))
                             .resize(size, size)
                             .transform(transformation)
                             .get();

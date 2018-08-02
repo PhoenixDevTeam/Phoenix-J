@@ -18,7 +18,7 @@ public class AccountContactPair implements Parcelable {
     };
 
     public Account account;
-    public Contact contact;
+    public User user;
 
     public AccountContactPair(Account account) {
         this.account = account;
@@ -26,11 +26,11 @@ public class AccountContactPair implements Parcelable {
 
     protected AccountContactPair(Parcel in) {
         account = in.readParcelable(Account.class.getClassLoader());
-        contact = in.readParcelable(Contact.class.getClassLoader());
+        user = in.readParcelable(User.class.getClassLoader());
     }
 
-    public AccountContactPair setContact(Contact contact) {
-        this.contact = contact;
+    public AccountContactPair setUser(User user) {
+        this.user = user;
         return this;
     }
 
@@ -42,14 +42,14 @@ public class AccountContactPair implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeParcelable(account, flags);
-        dest.writeParcelable(contact, flags);
+        dest.writeParcelable(user, flags);
     }
 
     @Override
     public String toString() {
         return "AccountContactPair{" +
                 "account=" + account +
-                ", contact=" + contact +
+                ", user=" + user +
                 '}';
     }
 }

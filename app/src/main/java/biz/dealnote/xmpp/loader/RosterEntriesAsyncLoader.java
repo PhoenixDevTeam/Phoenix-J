@@ -12,12 +12,12 @@ import java.util.List;
 
 import biz.dealnote.xmpp.db.AppRoster;
 import biz.dealnote.xmpp.db.ChatContentProvider;
-import biz.dealnote.xmpp.model.AppRosterEntry;
+import biz.dealnote.xmpp.model.Contact;
 
-public class RosterEntriesAsyncLoader extends AsyncTaskLoader<ArrayList<AppRosterEntry>> {
+public class RosterEntriesAsyncLoader extends AsyncTaskLoader<ArrayList<Contact>> {
 
     private static final String EXTRA_ORDER_BY = "order_by";
-    private ArrayList<AppRosterEntry> mData;
+    private ArrayList<Contact> mData;
     private ContentObserver observer;
     private String orderBy;
 
@@ -39,12 +39,12 @@ public class RosterEntriesAsyncLoader extends AsyncTaskLoader<ArrayList<AppRoste
     }
 
     @Override
-    public ArrayList<AppRosterEntry> loadInBackground() {
+    public ArrayList<Contact> loadInBackground() {
         return AppRoster.getAllRosterEntries(getContext(), orderBy);
     }
 
     @Override
-    public void deliverResult(ArrayList<AppRosterEntry> data) {
+    public void deliverResult(ArrayList<Contact> data) {
         if (isReset()) {
             // The Loader has been reset; ignore the result and invalidate the data.
             releaseResources(data);
@@ -53,7 +53,7 @@ public class RosterEntriesAsyncLoader extends AsyncTaskLoader<ArrayList<AppRoste
 
         // Hold a reference to the old data so it doesn't get garbage collected.
         // We must protect it until the new data has been delivered.
-        List<AppRosterEntry> oldData = mData;
+        List<Contact> oldData = mData;
         mData = data;
 
         if (isStarted()) {
@@ -114,7 +114,7 @@ public class RosterEntriesAsyncLoader extends AsyncTaskLoader<ArrayList<AppRoste
     }
 
     @Override
-    public void onCanceled(ArrayList<AppRosterEntry> data) {
+    public void onCanceled(ArrayList<Contact> data) {
         // Attempt to cancel the current asynchronous load.
         super.onCanceled(data);
 
@@ -123,7 +123,7 @@ public class RosterEntriesAsyncLoader extends AsyncTaskLoader<ArrayList<AppRoste
         releaseResources(data);
     }
 
-    private void releaseResources(List<AppRosterEntry> data) {
+    private void releaseResources(List<Contact> data) {
         // For a simple List, there is nothing to do. For something like a Cursor, we
         // would close it in this method. All resources associated with the Loader
         // should be released here.

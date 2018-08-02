@@ -68,7 +68,7 @@ class ChatPresenter(private val mAccountId: Int,
         get() = mAudioRecordWrapper.recorderStatus != Recorder.Status.NO_RECORD
 
     private var mAccount: Account? = null
-    private var mMyContact: Contact? = null
+    private var mMyUser: User? = null
 
     private val firstMessageId: Int?
         get() = if (isEmpty(mData)) null else mData[mData.size - 1].id
@@ -361,7 +361,7 @@ class ChatPresenter(private val mAccountId: Int,
                 .setType(type)
                 .setChatId(mChatId)
                 .setUniqueServiceId(stanzaId)
-                .setSenderId(if (mAccount == null) null else mMyContact!!.id)
+                .setSenderId(if (mAccount == null) null else mMyUser!!.id)
                 .setOut(true)
 
         saveNewOutMessageAndSent(builder)
@@ -389,7 +389,7 @@ class ChatPresenter(private val mAccountId: Int,
         val builder = MessageBuilder(mAccountId)
                 .setAppFile(appFile)
                 .setDestination(mDestination)
-                .setSenderId(if (mMyContact == null) null else mMyContact!!.id)
+                .setSenderId(if (mMyUser == null) null else mMyUser!!.id)
                 .setSenderJid(mAccount!!.buildBareJid())
                 .setDate(Unixtime.now())
                 .setType(AppMessage.TYPE_OUTGOING_FILE)
@@ -511,9 +511,9 @@ class ChatPresenter(private val mAccountId: Int,
         return true
     }
 
-    private fun loadMyInfo(): Single<Pair<Account, Contact>> {
+    private fun loadMyInfo(): Single<Pair<Account, User>> {
         val accounts = Repositories.instance.accountsRepository
-        val contacts = Repositories.instance.contactsRepository
+        val contacts = Repositories.instance.usersStorage
         return accounts
                 .findById(mAccountId)
                 .flatMapSingle { account ->
@@ -528,9 +528,9 @@ class ChatPresenter(private val mAccountId: Int,
                 .subscribe { pair -> onAccountInfoResolved(pair.first, pair.second) })
     }
 
-    private fun onAccountInfoResolved(account: Account, contact: Contact) {
+    private fun onAccountInfoResolved(account: Account, user: User) {
         this.mAccount = account
-        this.mMyContact = contact
+        this.mMyUser = user
     }
 
     override fun saveState(outState: Bundle) {
@@ -599,7 +599,7 @@ class ChatPresenter(private val mAccountId: Int,
         val builder = MessageBuilder(mAccountId)
                 .setAppFile(appFile)
                 .setDestination(mDestination)
-                .setSenderId(if (mMyContact == null) null else mMyContact!!.id)
+                .setSenderId(if (mMyUser == null) null else mMyUser!!.id)
                 .setSenderJid(mAccount!!.buildBareJid())
                 .setDate(Unixtime.now())
                 .setType(AppMessage.TYPE_OUTGOING_FILE)

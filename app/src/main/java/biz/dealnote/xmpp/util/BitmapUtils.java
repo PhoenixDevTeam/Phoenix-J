@@ -52,7 +52,7 @@ public class BitmapUtils {
     /**
      * Creates a blurred version of the given Bitmap.
      *
-     * @param bitmap the input bitmap, presumably a 96x96 pixel contact
+     * @param bitmap the input bitmap, presumably a 96x96 pixel user
      *               thumbnail.
      */
     public static Bitmap createBlurredBitmap(Bitmap bitmap) {

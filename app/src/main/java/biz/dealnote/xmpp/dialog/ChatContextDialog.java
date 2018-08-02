@@ -23,7 +23,7 @@ import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
 import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.Chat;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.util.Avatars;
 import biz.dealnote.xmpp.util.RoundTransformation;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -67,19 +67,19 @@ public class ChatContextDialog extends DialogFragment implements Avatars.AvatarW
         TextView jid = (TextView) root.findViewById(R.id.jid);
         jid.setText(mChat.getDestination());
 
-        Contact contact = mChat.getInterlocutor();
+        User user = mChat.getInterlocutor();
         String firstLastName = null;
 
-        if (contact != null) {
-            if (!TextUtils.isEmpty(contact.getFirstName())) {
-                firstLastName = contact.getFirstName();
+        if (user != null) {
+            if (!TextUtils.isEmpty(user.getFirstName())) {
+                firstLastName = user.getFirstName();
             }
 
-            if (!TextUtils.isEmpty(contact.getLastName())) {
+            if (!TextUtils.isEmpty(user.getLastName())) {
                 if (firstLastName == null) {
-                    firstLastName = contact.getLastName();
+                    firstLastName = user.getLastName();
                 } else {
-                    firstLastName = firstLastName + " " + contact.getLastName();
+                    firstLastName = firstLastName + " " + user.getLastName();
                 }
             }
         }

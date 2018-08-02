@@ -47,7 +47,7 @@ public class EditVcardOperation extends AbsXmppOperation {
         VCard updated = manager.loadVCard();
 
         Repositories.getInstance()
-                .getContactsRepository()
+                .getUsersStorage()
                 .upsert(jid, updated)
                 .blockingAwait();
         return null;

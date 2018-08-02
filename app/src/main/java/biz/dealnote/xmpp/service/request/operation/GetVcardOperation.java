@@ -38,7 +38,7 @@ public class GetVcardOperation extends AbsXmppOperation {
 
                 if (vCard != null) {
                     Repositories.getInstance()
-                            .getContactsRepository()
+                            .getUsersStorage()
                             .upsert(jid, vCard)
                             .blockingAwait();
                 }
@@ -50,9 +50,9 @@ public class GetVcardOperation extends AbsXmppOperation {
             e.printStackTrace();
         }
 
-        //Contact contact = Contacts.findByJid(context, jid);
+        //User user = Contacts.findByJid(context, jid);
         //Bundle bundle = new Bundle();
-        //bundle.putParcelable(Extra.CONTACT, contact);
+        //bundle.putParcelable(Extra.CONTACT, user);
         return null;
     }
 }

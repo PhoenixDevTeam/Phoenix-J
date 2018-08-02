@@ -10,15 +10,15 @@ import android.widget.TextView;
 import com.squareup.picasso.Transformation;
 
 import biz.dealnote.xmpp.Constants;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 
 import static biz.dealnote.xmpp.util.Utils.isEmpty;
 import static biz.dealnote.xmpp.util.Utils.nonEmpty;
 
 public class Avatars {
 
-    public static void displayAvatar(Context context, AvatarWithLetter avatarWithLetter, @NonNull Contact contact, Transformation transformation) {
-        displayAvatar(context, avatarWithLetter, contact.getJid(), contact.getPhotoHash(), transformation);
+    public static void displayAvatar(Context context, AvatarWithLetter avatarWithLetter, @NonNull User user, Transformation transformation) {
+        displayAvatar(context, avatarWithLetter, user.getJid(), user.getPhotoHash(), transformation);
     }
 
     public static void displayAvatar(Context context, AvatarWithLetter avatarWithLetter, String jid, @Nullable String photoHash, Transformation transformation) {

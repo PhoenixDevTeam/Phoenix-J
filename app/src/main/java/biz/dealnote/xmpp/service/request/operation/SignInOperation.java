@@ -25,7 +25,7 @@ import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.exception.AccountAlreadyExistException;
 import biz.dealnote.xmpp.exception.CustomAppException;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.service.IConnectionManager;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.exception.ConnectionAlreadyRegisteredException;
@@ -77,19 +77,19 @@ public class SignInOperation extends AbsXmppOperation {
             }
 
             Repositories.getInstance()
-                    .getContactsRepository()
+                    .getUsersStorage()
                     .upsert(account.buildBareJid(), myVCard)
                     .blockingAwait();
 
-            Contact contact = Repositories.getInstance()
-                    .getContactsRepository()
+            User user = Repositories.getInstance()
+                    .getUsersStorage()
                     .findByJid(account.buildBareJid())
                     .blockingGet()
                     .get();
 
             Bundle bundle = new Bundle();
             bundle.putParcelable(Extra.ACCOUNT, account);
-            bundle.putParcelable(Extra.CONTACT, contact);
+            bundle.putParcelable(Extra.CONTACT, user);
             return bundle;
         } catch (XMPPException | IOException | SmackException e) {
             e.printStackTrace();

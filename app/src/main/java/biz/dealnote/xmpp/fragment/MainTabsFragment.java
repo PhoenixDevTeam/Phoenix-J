@@ -28,7 +28,7 @@ import biz.dealnote.xmpp.activity.ActivityUtils;
 import biz.dealnote.xmpp.callback.AppStyleable;
 import biz.dealnote.xmpp.db.Accounts;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.AppRosterEntry;
+import biz.dealnote.xmpp.model.Contact;
 import biz.dealnote.xmpp.mvp.presenter.ChatsPresenter;
 import biz.dealnote.xmpp.service.request.RequestAdapter;
 import biz.dealnote.xmpp.service.request.RequestFactory;
@@ -193,7 +193,7 @@ public class MainTabsFragment extends Fragment {
             if (!isEmpty(accounts)) {
                 for (Account account : accounts) {
                     XmppRequestManager.from(getActivity())
-                            .execute(RequestFactory.getSendPresenceRequest(account.id, account.buildBareJid(), null, AppRosterEntry.PRESENCE_TYPE_AVAILABLE), DUMMMY);
+                            .execute(RequestFactory.getSendPresenceRequest(account.id, account.buildBareJid(), null, Contact.PRESENCE_TYPE_AVAILABLE), DUMMMY);
                 }
             }
         }

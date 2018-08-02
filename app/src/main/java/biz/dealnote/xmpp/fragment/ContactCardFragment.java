@@ -3,7 +3,6 @@ package biz.dealnote.xmpp.fragment;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,29 +14,28 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import biz.dealnote.xmpp.Extra;
+import org.jetbrains.annotations.NotNull;
+
+import biz.dealnote.mvp.core.IPresenterFactory;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.ActivityUtils;
 import biz.dealnote.xmpp.callback.AppStyleable;
-import biz.dealnote.xmpp.model.AppRosterEntry;
+import biz.dealnote.xmpp.fragment.base.BaseMvpFragment;
 import biz.dealnote.xmpp.model.Contact;
-import biz.dealnote.xmpp.place.PlaceFactory;
-import biz.dealnote.xmpp.service.StringArray;
-import biz.dealnote.xmpp.service.request.Request;
-import biz.dealnote.xmpp.service.request.RequestFactory;
+import biz.dealnote.xmpp.model.User;
+import biz.dealnote.xmpp.mvp.presenter.ContactCardPresenter;
+import biz.dealnote.xmpp.mvp.view.IContactCardView;
 import biz.dealnote.xmpp.util.PicassoAvatarHandler;
 import biz.dealnote.xmpp.util.PicassoInstance;
-import biz.dealnote.xmpp.util.Utils;
 
 import static biz.dealnote.xmpp.util.Utils.nonEmpty;
 
-public class ContactCardFragment extends AbsRequestSupportFragment implements View.OnClickListener {
+public class ContactCardFragment extends BaseMvpFragment<ContactCardPresenter, IContactCardView>
+        implements View.OnClickListener, IContactCardView {
 
     private static final String TAG = ContactCardFragment.class.getSimpleName();
-    private static final String EXTRA_ENTRY = "entry";
 
-    private AppRosterEntry entry;
-    private View root;
+    //private Contact entry;
     private View mainInfoRoot;
     private View unauthorizeRoot;
     private ImageView avatar;
@@ -45,9 +43,9 @@ public class ContactCardFragment extends AbsRequestSupportFragment implements Vi
     private TextView tvName;
     private TextView tvEmail;
 
-    public static ContactCardFragment newInstance(AppRosterEntry entry) {
+    public static ContactCardFragment newInstance(Contact entry) {
         Bundle args = new Bundle();
-        args.putParcelable(EXTRA_ENTRY, entry);
+        args.putParcelable("contact", entry);
         ContactCardFragment fragment = new ContactCardFragment();
         fragment.setArguments(args);
         return fragment;
@@ -57,25 +55,25 @@ public class ContactCardFragment extends AbsRequestSupportFragment implements Vi
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        entry = getArguments().getParcelable(EXTRA_ENTRY);
+        //entry = getArguments().getParcelable("contact");
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        root = inflater.inflate(R.layout.fragment_card, container, false);
-        mainInfoRoot = root.findViewById(R.id.main_info_root);
-        unauthorizeRoot = root.findViewById(R.id.unauthorize_root);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_card, container, false);
 
-        tvName = (TextView) root.findViewById(R.id.name);
-        tvEmail = (TextView) root.findViewById(R.id.email);
+        mainInfoRoot = view.findViewById(R.id.main_info_root);
+        unauthorizeRoot = view.findViewById(R.id.unauthorize_root);
 
-        avatar = (ImageView) root.findViewById(R.id.avatar);
-        avaterLetter = (TextView) root.findViewById(R.id.avatar_letter);
+        tvName = view.findViewById(R.id.name);
+        tvEmail = view.findViewById(R.id.email);
 
-        root.findViewById(R.id.to_chat_button).setOnClickListener(this);
-        root.findViewById(R.id.send_add_request).setOnClickListener(this);
+        avatar = view.findViewById(R.id.avatar);
+        avaterLetter = view.findViewById(R.id.avatar_letter);
 
-        return root;
+        view.findViewById(R.id.to_chat_button).setOnClickListener(this);
+        view.findViewById(R.id.send_add_request).setOnClickListener(this);
+        return view;
     }
 
     @Override
@@ -86,19 +84,14 @@ public class ContactCardFragment extends AbsRequestSupportFragment implements Vi
         requestVcard();
     }
 
-    @Override
-    public void onRestoreConnectionToRequest(Request request) {
-
-    }
-
-    @Override
+    /*@Override
     public void onRequestFinished(Request request, Bundle resultData) {
         Log.d(TAG, "onRequestFinished, resultData: " + resultData);
         // TODO: 07.11.2016 Do it with Database
         if (request.getRequestType() == RequestFactory.REQUEST_GET_VCARD) {
-            Contact contact = resultData.getParcelable("contact");
-            if (contact != null) {
-                onVcardUpdated(contact);
+            User user = resultData.getParcelable("user");
+            if (user != null) {
+                onVcardUpdated(user);
             }
         }
 
@@ -108,48 +101,40 @@ public class ContactCardFragment extends AbsRequestSupportFragment implements Vi
                 Snackbar.make(root, deleted ? R.string.deleted : R.string.unable_to_delete_contact, Snackbar.LENGTH_LONG).show();
             }
         }
-    }
+    }*/
 
-    @Override
-    public void onCustromError(Request request, String errorText, int code) {
-        if (isAdded() && root != null) {
-            Snackbar.make(root, errorText, Snackbar.LENGTH_LONG).show();
-        }
-    }
+    private void onVcardUpdated(@NonNull User user) {
+        Log.d(TAG, "onVcardUpdated, user: " + user);
 
-    private void onVcardUpdated(@NonNull Contact contact) {
-        Log.d(TAG, "onVcardUpdated, contact: " + contact);
+        //boolean photoWasChanged = !Utils.safeEquals(user.getPhotoHash(), entry.user.getPhotoHash());
 
-        boolean photoWasChanged = !Utils.safeEquals(contact.getPhotoHash(), entry.contact.getPhotoHash());
+        //entry.user = user;
 
-        entry.contact = contact;
-        getArguments().putParcelable(EXTRA_ENTRY, entry);
-
-        resolveViews(photoWasChanged);
+        //resolveViews(photoWasChanged);
     }
 
     private void requestVcard() {
-        Request request = RequestFactory.getVcardRequest(entry.account.id, new StringArray(entry.jid));
-        getRequestManager().executeRequest(request);
+        //Request request = RequestFactory.getVcardRequest(entry.account.id, new StringArray(entry.jid));
+
     }
 
     private void resolveViews(boolean needRefreshAvatar) {
         if (!isAdded()) return;
 
-        boolean hasAvatar = entry.contact != null && nonEmpty(entry.contact.getPhotoHash());
+        /*boolean hasAvatar = entry.user != null && nonEmpty(entry.user.getPhotoHash());
 
         avatar.setVisibility(hasAvatar ? View.VISIBLE : View.GONE);
         avaterLetter.setText(entry.jid.substring(0, 1));
 
         if (hasAvatar && needRefreshAvatar) {
             PicassoInstance.get()
-                    .load(PicassoAvatarHandler.generateUri(entry.contact.getPhotoHash()))
+                    .load(PicassoAvatarHandler.generateUri(entry.user.getPhotoHash()))
                     .centerCrop()
                     .resize(500, 500)
                     .into(avatar);
         }
 
-        boolean needAuthorize = entry.type == AppRosterEntry.TYPE_NONE || entry.type == AppRosterEntry.TYPE_FROM;
+        boolean needAuthorize = entry.type == Contact.TYPE_NONE || entry.type == Contact.TYPE_FROM;
         unauthorizeRoot.setVisibility(needAuthorize ? View.VISIBLE : View.GONE);
         mainInfoRoot.setVisibility(needAuthorize ? View.GONE : View.VISIBLE);
 
@@ -157,21 +142,16 @@ public class ContactCardFragment extends AbsRequestSupportFragment implements Vi
             return;
         }
 
-        Contact contact = entry.contact;
-        String availableEmail = TextUtils.isEmpty(contact.getEmailHome()) ? contact.getEmailWork() : contact.getEmailHome();
+        User user = entry.user;
+        String availableEmail = TextUtils.isEmpty(user.getEmailHome()) ? user.getEmailWork() : user.getEmailHome();
 
-        tvName.setText(contact.getDispayName());
+        tvName.setText(user.getDispayName());
         tvEmail.setText(availableEmail);
-        tvEmail.setVisibility(TextUtils.isEmpty(availableEmail) ? View.GONE : View.VISIBLE);
+        tvEmail.setVisibility(TextUtils.isEmpty(availableEmail) ? View.GONE : View.VISIBLE);*/
     }
 
     private void toChat() {
-        //if (getActivity() instanceof OnPlaceOpenCallback) {
-        //    ((OnPlaceOpenCallback) getActivity()).onChatOpen(entry.account, entry.jid, null);
-        //}
-
-        PlaceFactory.getChatPlace(entry.getAccount().getId(), entry.getJid(), null)
-                .tryOpenWith(getActivity());
+        //PlaceFactory.getChatPlace(entry.getAccount().getId(), entry.getJid(), null).tryOpenWith(getActivity());
     }
 
     @Override
@@ -185,7 +165,7 @@ public class ContactCardFragment extends AbsRequestSupportFragment implements Vi
         ActionBar actionBar = ActivityUtils.supportToolbarFor(this);
         if (actionBar != null) {
             actionBar.setTitle(R.string.contact_card);
-            actionBar.setSubtitle(entry.jid);
+            //actionBar.setSubtitle(entry.jid);
         }
     }
 
@@ -193,8 +173,8 @@ public class ContactCardFragment extends AbsRequestSupportFragment implements Vi
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.send_add_request:
-                Request request = RequestFactory.getSendPresenceRequest(entry.account.id, entry.account.buildBareJid(), entry.jid, AppRosterEntry.PRESENCE_TYPE_SUBSCRIBE);
-                getRequestManager().executeRequest(request);
+                //Request request = RequestFactory.getSendPresenceRequest(entry.account.id, entry.account.buildBareJid(), entry.jid, Contact.PRESENCE_TYPE_SUBSCRIBE);
+                //getRequestManager().executeRequest(request);
                 break;
             case R.id.to_chat_button:
                 toChat();
@@ -203,8 +183,8 @@ public class ContactCardFragment extends AbsRequestSupportFragment implements Vi
     }
 
     private void deleteFromContactsList() {
-        Request request = RequestFactory.getDeleteRosterEntryRequest(entry.account, entry.jid);
-        getRequestManager().executeRequest(request);
+        //Request request = RequestFactory.getDeleteRosterEntryRequest(entry.account, entry.jid);
+        //getRequestManager().executeRequest(request);
     }
 
     @Override
@@ -214,5 +194,39 @@ public class ContactCardFragment extends AbsRequestSupportFragment implements Vi
             deleteFromContactsList();
             return true;
         });
+    }
+
+    @Override
+    public IPresenterFactory<ContactCardPresenter> getPresenterFactory(@Nullable Bundle saveInstanceState) {
+        return () -> new ContactCardPresenter(requireArguments().getParcelable("contact"), saveInstanceState);
+    }
+
+    @Override
+    public void displayUser(@NotNull User user) {
+        boolean hasAvatar = nonEmpty(user.getPhotoHash());
+
+        avatar.setVisibility(hasAvatar ? View.VISIBLE : View.GONE);
+        avaterLetter.setText(user.getJid().substring(0, 1));
+
+        if (hasAvatar) {
+            PicassoInstance.get()
+                    .load(PicassoAvatarHandler.generateUri(user.getPhotoHash()))
+                    .centerCrop()
+                    .resize(500, 500)
+                    .into(avatar);
+        } else {
+            PicassoInstance.get().cancelRequest(avatar);
+        }
+
+        String availableEmail = TextUtils.isEmpty(user.getEmailHome()) ? user.getEmailWork() : user.getEmailHome();
+
+        tvName.setText(user.getDispayName());
+        tvEmail.setText(availableEmail);
+        tvEmail.setVisibility(TextUtils.isEmpty(availableEmail) ? View.GONE : View.VISIBLE);
+
+        ActionBar actionBar = ActivityUtils.supportToolbarFor(this);
+        if(actionBar != null){
+            actionBar.setSubtitle(user.getJid());
+        }
     }
 }

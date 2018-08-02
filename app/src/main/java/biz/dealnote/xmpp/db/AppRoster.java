@@ -14,17 +14,18 @@ import java.util.ArrayList;
 
 import biz.dealnote.xmpp.db.columns.RosterColumns;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.AppRosterEntry;
+import biz.dealnote.xmpp.model.AccountId;
 import biz.dealnote.xmpp.model.Contact;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.util.Utils;
 
 public class AppRoster {
 
     private static final String TAG = AppRoster.class.getSimpleName();
 
-    public static ArrayList<AppRosterEntry> getAllRosterEntries(Context context, String orderBy) {
+    public static ArrayList<Contact> getAllRosterEntries(Context context, String orderBy) {
         Cursor cursor = context.getContentResolver().query(ChatContentProvider.ROSTERS_ENTRIES_CONTENT_URI, null, null, null, orderBy);
-        ArrayList<AppRosterEntry> entries = new ArrayList<>();
+        ArrayList<Contact> entries = new ArrayList<>();
         if (cursor != null) {
             while (cursor.moveToNext()) {
                 entries.add(map(cursor));
@@ -43,10 +44,10 @@ public class AppRoster {
      * @param entry     данные контакта
      */
     public static void mergeRosterEntry(Context context, int accountId, RosterEntry entry) {
-        String bareJid = Utils.getBareJid(entry.getUser());
+        String bareJid = entry.getJid().asBareJid().toString();
 
         ContentValues cv = new ContentValues();
-        cv.put(RosterColumns.TYPE, AppRosterEntry.apiTypeToAppType(entry.getType()));
+        cv.put(RosterColumns.TYPE, Contact.apiTypeToAppType(entry.getType()));
         cv.put(RosterColumns.NICK, entry.getName());
 
         // пытаемся обновить информацию
@@ -56,7 +57,7 @@ public class AppRoster {
         // если нет записей для обновления, то делаем вставку
         if (rows <= 0) {
             int contactId = Repositories.getInstance()
-                    .getContactsRepository()
+                    .getUsersStorage()
                     .getContactIdPutIfNotExist(bareJid)
                     .blockingGet();
 
@@ -78,76 +79,76 @@ public class AppRoster {
 
     private static int getPresenceModeFrom(Presence.Mode mode) {
         if (mode == null) {
-            return AppRosterEntry.UNKNOWN;
+            return Contact.UNKNOWN;
         }
 
         switch (mode) {
             case chat:
-                return AppRosterEntry.PRESENSE_MODE_CHAT;
+                return Contact.PRESENSE_MODE_CHAT;
             case available:
-                return AppRosterEntry.PRESENSE_MODE_AVAILABLE;
+                return Contact.PRESENSE_MODE_AVAILABLE;
             case away:
-                return AppRosterEntry.PRESENSE_MODE_AWAY;
+                return Contact.PRESENSE_MODE_AWAY;
             case xa:
-                return AppRosterEntry.PRESENSE_MODE_XA;
+                return Contact.PRESENSE_MODE_XA;
             case dnd:
-                return AppRosterEntry.PRESENSE_MODE_DND;
+                return Contact.PRESENSE_MODE_DND;
             default:
-                return AppRosterEntry.UNKNOWN;
+                return Contact.UNKNOWN;
         }
     }
 
     private static int getPresenceTypeFrom(Presence.Type type) {
         if (type == null) {
-            return AppRosterEntry.UNKNOWN;
+            return Contact.UNKNOWN;
         }
 
         switch (type) {
             case available:
-                return AppRosterEntry.PRESENCE_TYPE_AVAILABLE;
+                return Contact.PRESENCE_TYPE_AVAILABLE;
             case unavailable:
-                return AppRosterEntry.PRESENCE_TYPE_UNAVAILABLE;
+                return Contact.PRESENCE_TYPE_UNAVAILABLE;
             case subscribe:
-                return AppRosterEntry.PRESENCE_TYPE_SUBSCRIBE;
+                return Contact.PRESENCE_TYPE_SUBSCRIBE;
             case subscribed:
-                return AppRosterEntry.PRESENCE_TYPE_SUBSCRIBED;
+                return Contact.PRESENCE_TYPE_SUBSCRIBED;
             case unsubscribe:
-                return AppRosterEntry.PRESENCE_TYPE_UNSUBSCRIBE;
+                return Contact.PRESENCE_TYPE_UNSUBSCRIBE;
             case unsubscribed:
-                return AppRosterEntry.PRESENCE_TYPE_UNSUBSCRIBED;
+                return Contact.PRESENCE_TYPE_UNSUBSCRIBED;
             case error:
-                return AppRosterEntry.PRESENCE_TYPE_ERROR;
+                return Contact.PRESENCE_TYPE_ERROR;
             case probe:
-                return AppRosterEntry.PRESENCE_TYPE_PROBE;
+                return Contact.PRESENCE_TYPE_PROBE;
             default:
-                return AppRosterEntry.UNKNOWN;
+                return Contact.UNKNOWN;
         }
     }
 
     public static Presence.Type getApiPresenseTypeFrom(int type) {
         switch (type) {
-            case AppRosterEntry.PRESENCE_TYPE_AVAILABLE:
+            case Contact.PRESENCE_TYPE_AVAILABLE:
                 return Presence.Type.available;
-            case AppRosterEntry.PRESENCE_TYPE_UNAVAILABLE:
+            case Contact.PRESENCE_TYPE_UNAVAILABLE:
                 return Presence.Type.unavailable;
-            case AppRosterEntry.PRESENCE_TYPE_SUBSCRIBE:
+            case Contact.PRESENCE_TYPE_SUBSCRIBE:
                 return Presence.Type.subscribe;
-            case AppRosterEntry.PRESENCE_TYPE_SUBSCRIBED:
+            case Contact.PRESENCE_TYPE_SUBSCRIBED:
                 return Presence.Type.subscribed;
-            case AppRosterEntry.PRESENCE_TYPE_UNSUBSCRIBE:
+            case Contact.PRESENCE_TYPE_UNSUBSCRIBE:
                 return Presence.Type.unsubscribe;
-            case AppRosterEntry.PRESENCE_TYPE_UNSUBSCRIBED:
+            case Contact.PRESENCE_TYPE_UNSUBSCRIBED:
                 return Presence.Type.unsubscribed;
-            case AppRosterEntry.PRESENCE_TYPE_ERROR:
+            case Contact.PRESENCE_TYPE_ERROR:
                 return Presence.Type.error;
-            case AppRosterEntry.PRESENCE_TYPE_PROBE:
+            case Contact.PRESENCE_TYPE_PROBE:
                 return Presence.Type.probe;
             default:
                 return null;
         }
     }
 
-    public static AppRosterEntry map(Cursor cursor) {
+    public static Contact map(Cursor cursor) {
         byte[] pubKeyBytes = cursor.getBlob(cursor.getColumnIndex(RosterColumns.FOREIGN_ACCOUNT_PUBLIC_KEY));
         byte[] privKeyBytes = cursor.getBlob(cursor.getColumnIndex(RosterColumns.FOREIGN_ACCOUNT_PRIVATE_KEY));
         KeyPair keyPair = Accounts.restoreDSAKeyPairFrom(pubKeyBytes, privKeyBytes);
@@ -163,7 +164,7 @@ public class AppRoster {
 
         String jid = cursor.getString(cursor.getColumnIndex(RosterColumns.JID));
 
-        Contact contact = new Contact()
+        User user = new User()
                 .setId(cursor.getInt(cursor.getColumnIndex(RosterColumns.CONTACT_ID)))
                 .setJid(jid)
                 .setFirstName(cursor.getString(cursor.getColumnIndex(RosterColumns.FOREIGN_CONTACT_FIRST_NAME)))
@@ -179,12 +180,12 @@ public class AppRoster {
                 .setPhotoHash(cursor.getString(cursor.getColumnIndex(RosterColumns.FOREIGN_CONTACT_PHOTO_HASH)));
                 //.setAvatar(cursor.getBlob(cursor.getColumnIndex(RosterColumns.FOREIGN_CONTACT_PHOTO)));
 
-        AppRosterEntry entry = new AppRosterEntry();
+        Contact entry = new Contact();
 
         entry.id = cursor.getInt(cursor.getColumnIndex(RosterColumns._ID));
-        entry.account = account;
+        entry.accountId = new AccountId(account.id, account.login);
         entry.jid = jid;
-        entry.contact = contact;
+        entry.user = user;
         entry.flags = cursor.getInt(cursor.getColumnIndex(RosterColumns.FLAGS));
         entry.availableToReceiveMessages = cursor.getInt(cursor.getColumnIndex(RosterColumns.AVAILABLE_RECEIVE_MESSAGES)) == 1;
         entry.away = cursor.getInt(cursor.getColumnIndex(RosterColumns.IS_AWAY)) == 1;
@@ -261,7 +262,7 @@ public class AppRoster {
         context.getContentResolver().update(ChatContentProvider.ROSTERS_ENTRIES_CONTENT_URI, cv, where, args);
     }
 
-    public static AppRosterEntry findByJid(Context context, int accountId, String jid) {
+    public static Contact findByJid(Context context, int accountId, String jid) {
         String bareJid = Utils.getBareJid(jid);
 
         String where = RosterColumns.ACCOUNT_ID + " = ? AND " + RosterColumns.FULL_JID + " LIKE ?";
@@ -269,16 +270,16 @@ public class AppRoster {
 
         Cursor cursor = context.getContentResolver().query(ChatContentProvider.ROSTERS_ENTRIES_CONTENT_URI, null, where, args, null);
 
-        AppRosterEntry appRosterEntry = null;
+        Contact contact = null;
         if (cursor != null) {
             if (cursor.moveToNext()) {
-                appRosterEntry = map(cursor);
+                contact = map(cursor);
             }
 
             cursor.close();
         }
 
-        return appRosterEntry;
+        return contact;
     }
 
     public static String findRosterResource(Context context, String jid) {

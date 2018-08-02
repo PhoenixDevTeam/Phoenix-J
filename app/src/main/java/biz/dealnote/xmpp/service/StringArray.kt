@@ -12,8 +12,8 @@ class StringArray : Parcelable {
 
     val array: Array<String>
 
-    constructor(vararg array : String) {
-        this.array = Array(array.size) { index -> array[index]}
+    constructor(vararg array: String) {
+        this.array = Array(array.size) { index -> array[index] }
     }
 
     private constructor(parcel: Parcel) {
@@ -42,17 +42,13 @@ class StringArray : Parcelable {
         return Arrays.hashCode(array)
     }
 
-    companion object {
+    companion object CREATOR : Parcelable.Creator<StringArray> {
+        override fun createFromParcel(parcel: Parcel): StringArray {
+            return StringArray(parcel)
+        }
 
-        @JvmField
-        val CREATOR: Parcelable.Creator<StringArray> = object : Parcelable.Creator<StringArray> {
-            override fun createFromParcel(parcel: Parcel): StringArray {
-                return StringArray(parcel)
-            }
-
-            override fun newArray(size: Int): Array<StringArray?> {
-                return arrayOfNulls(size)
-            }
+        override fun newArray(size: Int): Array<StringArray?> {
+            return arrayOfNulls(size)
         }
     }
 }

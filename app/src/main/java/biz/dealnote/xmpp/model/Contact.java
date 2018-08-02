@@ -2,9 +2,54 @@ package biz.dealnote.xmpp.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
+
+import org.jivesoftware.smack.roster.packet.RosterPacket;
+
+import biz.dealnote.xmpp.util.ParcelUtils;
 
 public class Contact implements Parcelable, Identificable {
+
+    public static final int UNKNOWN = 0;
+
+    /**
+     * У пользователя нет подписки к контакту, нет подписки и к информации присутствия пользователя
+     */
+    public static final int TYPE_NONE = 1;
+
+    /**
+     * у пользователя есть подписка к информации присутствия контакта, но у контакта нет подписки к информации присутствия пользователя
+     */
+    public static final int TYPE_TO = 2;
+
+    /**
+     * у контакта есть подписка к информации присутствия пользователя, но у пользователя нет подписки к информации присутствия контакта
+     */
+    public static final int TYPE_FROM = 3;
+
+    /**
+     * у пользователя есть подписка к присутствию контакта, да и у контакта есть подписка к пользователю
+     */
+    public static final int TYPE_BOTH = 4;
+
+    /**
+     * пользователь желает, чтобы остановить получать обновления от абонента
+     */
+    public static final int TYPE_REMOVE = 5;
+
+    public static final int PRESENCE_TYPE_AVAILABLE = 1;
+    public static final int PRESENCE_TYPE_UNAVAILABLE = 2;
+    public static final int PRESENCE_TYPE_SUBSCRIBE = 3;
+    public static final int PRESENCE_TYPE_SUBSCRIBED = 4;
+    public static final int PRESENCE_TYPE_UNSUBSCRIBE = 5;
+    public static final int PRESENCE_TYPE_UNSUBSCRIBED = 6;
+    public static final int PRESENCE_TYPE_ERROR = 7;
+    public static final int PRESENCE_TYPE_PROBE = 8;
+
+    public static final int PRESENSE_MODE_CHAT = 1;
+    public static final int PRESENSE_MODE_AVAILABLE = 2;
+    public static final int PRESENSE_MODE_AWAY = 3;
+    public static final int PRESENSE_MODE_XA = 4;
+    public static final int PRESENSE_MODE_DND = 5;
 
     public static final Creator<Contact> CREATOR = new Creator<Contact>() {
         @Override
@@ -17,182 +62,77 @@ public class Contact implements Parcelable, Identificable {
             return new Contact[size];
         }
     };
-    private int id;
-    private String jid;
-    private String firstName;
-    private String lastName;
-    private String middleName;
-    private String prefix;
-    private String suffix;
-    private String emailHome;
-    private String emailWork;
-    private String organization;
-    private String organizationUnit;
-    private String photoMimeType;
-    private String photoHash;
-    //private byte[] avatar;
+
+    public int id;
+    public AccountId accountId;
+
+    public String jid;
+    public User user;
+    public int flags;
+    public boolean availableToReceiveMessages;
+    public boolean away;
+    public Integer presenceMode;
+    public Integer presenceType;
+    public String presenceStatus;
+    public Integer type;
+    //public Integer status;
+    public String nick;
+    public int priority;
 
     public Contact() {
     }
 
     protected Contact(Parcel in) {
         id = in.readInt();
+        accountId = in.readParcelable(AccountId.class.getClassLoader());
         jid = in.readString();
-        firstName = in.readString();
-        lastName = in.readString();
-        middleName = in.readString();
-        prefix = in.readString();
-        suffix = in.readString();
-        emailHome = in.readString();
-        emailWork = in.readString();
-        organization = in.readString();
-        organizationUnit = in.readString();
-        photoMimeType = in.readString();
-        photoHash = in.readString();
-        //avatar = in.createByteArray();
+        user = in.readParcelable(User.class.getClassLoader());
+        flags = in.readInt();
+        availableToReceiveMessages = in.readByte() != 0;
+        away = in.readByte() != 0;
+        presenceMode = ParcelUtils.readObjectInteger(in);
+        presenceType = ParcelUtils.readObjectInteger(in);
+        presenceStatus = in.readString();
+        type = ParcelUtils.readObjectInteger(in);
+        //status = ParcelUtils.readObjectInteger(in);
+        nick = in.readString();
+        priority = in.readInt();
     }
 
-    public String getJid() {
-        return jid;
-    }
-
-    public Contact setJid(String jid) {
-        this.jid = jid;
-        return this;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public Contact setFirstName(String firstName) {
-        this.firstName = firstName;
-        return this;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public Contact setLastName(String lastName) {
-        this.lastName = lastName;
-        return this;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public Contact setMiddleName(String middleName) {
-        this.middleName = middleName;
-        return this;
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public Contact setPrefix(String prefix) {
-        this.prefix = prefix;
-        return this;
-    }
-
-    public String getSuffix() {
-        return suffix;
-    }
-
-    public Contact setSuffix(String suffix) {
-        this.suffix = suffix;
-        return this;
-    }
-
-    public String getEmailHome() {
-        return emailHome;
-    }
-
-    public Contact setEmailHome(String emailHome) {
-        this.emailHome = emailHome;
-        return this;
-    }
-
-    public String getEmailWork() {
-        return emailWork;
-    }
-
-    public Contact setEmailWork(String emailWork) {
-        this.emailWork = emailWork;
-        return this;
-    }
-
-    public String getOrganization() {
-        return organization;
-    }
-
-    public Contact setOrganization(String organization) {
-        this.organization = organization;
-        return this;
-    }
-
-    public String getOrganizationUnit() {
-        return organizationUnit;
-    }
-
-    public Contact setOrganizationUnit(String organizationUnit) {
-        this.organizationUnit = organizationUnit;
-        return this;
-    }
-
-    public String getPhotoMimeType() {
-        return photoMimeType;
-    }
-
-    public Contact setPhotoMimeType(String photoMimeType) {
-        this.photoMimeType = photoMimeType;
-        return this;
-    }
-
-    public String getPhotoHash() {
-        return photoHash;
-    }
-
-    public Contact setPhotoHash(String photoHash) {
-        this.photoHash = photoHash;
-        return this;
-    }
-
-    @Override
-    public String toString() {
-        return "Contact{" +
-                "id=" + id +
-                ", jid='" + jid + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", middleName='" + middleName + '\'' +
-                ", prefix='" + prefix + '\'' +
-                ", suffix='" + suffix + '\'' +
-                ", emailHome='" + emailHome + '\'' +
-                ", emailWork='" + emailWork + '\'' +
-                ", organization='" + organization + '\'' +
-                ", organizationUnit='" + organizationUnit + '\'' +
-                ", photoMimeType='" + photoMimeType + '\'' +
-                ", photoHash='" + photoHash +
-                '}';
-    }
-
-    public String getDispayName() {
-        if (TextUtils.isEmpty(firstName) && TextUtils.isEmpty(lastName)) {
-            return jid;
+   /* public static Integer apiStatusToAppStatus(RosterPacket.ItemStatus status) {
+        if (status == null) {
+            return null;
         }
 
-        if (TextUtils.isEmpty(firstName)) {
-            return lastName;
+        switch (status) {
+            case subscribe:
+                return STATUS_SUBSCRIBE;
+            case unsubscribe:
+                return STATUS_UNSUBSCRIBE;
         }
 
-        if (TextUtils.isEmpty(lastName)) {
-            return firstName;
+        return UNKNOWN;
+    }*/
+
+    public static Integer apiTypeToAppType(RosterPacket.ItemType type) {
+        if (type == null) {
+            return null;
         }
 
-        return firstName + " " + lastName;
+        switch (type) {
+            case none:
+                return TYPE_NONE;
+            case to:
+                return TYPE_TO;
+            case from:
+                return TYPE_FROM;
+            case both:
+                return TYPE_BOTH;
+            case remove:
+                return TYPE_REMOVE;
+        }
+
+        return UNKNOWN;
     }
 
     @Override
@@ -203,19 +143,23 @@ public class Contact implements Parcelable, Identificable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
+        dest.writeParcelable(accountId, flags);
         dest.writeString(jid);
-        dest.writeString(firstName);
-        dest.writeString(lastName);
-        dest.writeString(middleName);
-        dest.writeString(prefix);
-        dest.writeString(suffix);
-        dest.writeString(emailHome);
-        dest.writeString(emailWork);
-        dest.writeString(organization);
-        dest.writeString(organizationUnit);
-        dest.writeString(photoMimeType);
-        dest.writeString(photoHash);
-        //dest.writeByteArray(avatar);
+        dest.writeParcelable(user, flags);
+        dest.writeInt(flags);
+        dest.writeByte((byte) (availableToReceiveMessages ? 1 : 0));
+        dest.writeByte((byte) (away ? 1 : 0));
+        ParcelUtils.writeObjectInteger(dest, presenceMode);
+        ParcelUtils.writeObjectInteger(dest, presenceType);
+        dest.writeString(presenceStatus);
+        ParcelUtils.writeObjectInteger(dest, type);
+        //ParcelUtils.writeObjectInteger(dest, status);
+        dest.writeString(nick);
+        dest.writeInt(priority);
+    }
+
+    public boolean needSendSubscribePresence() {
+        return presenceType == null;
     }
 
     @Override
@@ -223,22 +167,7 @@ public class Contact implements Parcelable, Identificable {
         return id;
     }
 
-    public Contact setId(int id) {
-        this.id = id;
-        return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Contact contact = (Contact) o;
-        return id == contact.id;
-
-    }
-
-    @Override
-    public int hashCode() {
-        return id;
+    public String getJid() {
+        return jid;
     }
 }
