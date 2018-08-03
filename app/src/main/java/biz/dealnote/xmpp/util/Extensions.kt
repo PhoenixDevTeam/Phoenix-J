@@ -6,6 +6,8 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.CountDownLatch
 
@@ -29,3 +31,7 @@ fun SQLiteDatabase.query(tablename: String, columns: Array<String>, where: Strin
 fun SQLiteDatabase.query(tablename: String, columns: Array<String>): Cursor = query(tablename, columns, null, null)
 
 fun Cursor.getInt(columnName: String): Int? = getColumnIndex(columnName).let { if (isNull(it)) null else getInt(it) }
+
+fun <T : Any> Flowable<T>.subscribeIgnoreErrors(consumer: Consumer<in T>): Disposable = subscribe(consumer, RxUtils.ignore())
+
+fun <T : Any> Single<T>.subscribeIgnoreErrors(consumer: Consumer<in T>): Disposable = subscribe(consumer, RxUtils.ignore())

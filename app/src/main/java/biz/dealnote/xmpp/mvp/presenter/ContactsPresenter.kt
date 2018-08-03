@@ -6,8 +6,9 @@ import biz.dealnote.xmpp.model.Contact
 import biz.dealnote.xmpp.mvp.presenter.base.RxSupportPresenter
 import biz.dealnote.xmpp.mvp.view.IContactsView
 import biz.dealnote.xmpp.repo.IContactsRepository
-import biz.dealnote.xmpp.util.RxUtils
 import biz.dealnote.xmpp.util.fromIOToMain
+import biz.dealnote.xmpp.util.subscribeIgnoreErrors
+import biz.dealnote.xmpp.util.toMainThread
 import io.reactivex.functions.Consumer
 
 class ContactsPresenter(savedState: Bundle?) : RxSupportPresenter<IContactsView>(savedState) {
@@ -22,12 +23,16 @@ class ContactsPresenter(savedState: Bundle?) : RxSupportPresenter<IContactsView>
 
     init {
         loadCachedUsers()
+
+        appendDisposable(repository.observeAddings()
+                .toMainThread()
+                .subscribeIgnoreErrors(Consumer { loadCachedUsers() }))
     }
 
     private fun loadCachedUsers() {
         appendDisposable(repository.getContacts()
                 .fromIOToMain()
-                .subscribe(Consumer { it -> onContactsReceived(it) }, RxUtils.ignore<Throwable>()))
+                .subscribeIgnoreErrors(Consumer { it -> onContactsReceived(it) }))
     }
 
     private fun onContactsReceived(contacts: List<Contact>) {

@@ -14,7 +14,5 @@ interface IContactsRepository {
 
     fun observeAddings(): Flowable<List<String>>
 
-    fun observeAdding(): Flowable<Contact>
-
     fun upsert(account: Int, contacts: Collection<RosterEntry>): Completable
 }
