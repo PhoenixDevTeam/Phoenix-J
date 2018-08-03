@@ -40,7 +40,7 @@ public class GetVcardOperation extends AbsXmppOperation {
                     Repositories.getInstance()
                             .getUsersStorage()
                             .upsert(jid, vCard)
-                            .blockingAwait();
+                            .blockingGet();
                 }
 
                 Log.d(TAG, "success, vCard: " + vCard);

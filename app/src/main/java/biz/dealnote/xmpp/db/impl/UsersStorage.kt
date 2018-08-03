@@ -5,11 +5,12 @@ import android.database.Cursor
 import biz.dealnote.xmpp.db.DBHelper
 import biz.dealnote.xmpp.db.Repositories
 import biz.dealnote.xmpp.db.columns.AccountsColumns
+import biz.dealnote.xmpp.db.columns.RosterColumns
 import biz.dealnote.xmpp.db.columns.UsersColumns
 import biz.dealnote.xmpp.db.columns.UsersColumns.*
-import biz.dealnote.xmpp.db.columns.RosterColumns
+import biz.dealnote.xmpp.db.entity.ContactEntity
+import biz.dealnote.xmpp.db.entity.UserEntity
 import biz.dealnote.xmpp.db.interfaces.IUsersStorage
-import biz.dealnote.xmpp.model.AccountId
 import biz.dealnote.xmpp.model.Contact
 import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.util.*
@@ -66,7 +67,7 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
             synchronized(contactLock) {
                 val cursor = dbHelper.readableDatabase.query(TABLENAME, columns, "$JID LIKE ?", arrayOf(jid))
 
-                val user: User? = if(cursor.moveToNext()) map(cursor) else null
+                val user: User? = if (cursor.moveToNext()) map(cursor) else null
                 cursor.close()
 
                 e.onSuccess(Optional.wrap(user))
@@ -75,18 +76,19 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     }
 
     override fun putContacts(accountId: Int, contacts: Collection<RosterEntry>): Completable {
-        if(contacts.isEmpty()){
+        if (contacts.isEmpty()) {
             return Completable.complete()
         }
 
-        return Completable.create {emitter ->
-            synchronized(contactLock){
+        return Completable.create { emitter ->
+            synchronized(contactLock) {
+                val start = System.currentTimeMillis()
                 val db = dbHelper.writableDatabase
 
                 db.beginTransaction()
 
                 try {
-                    for(contact in contacts){
+                    for (contact in contacts) {
                         val jid = contact.jid.asBareJid().toString()
 
                         val cv = ContentValues()
@@ -96,7 +98,7 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
                         val rows = db.update(RosterColumns.TABLENAME, cv,
                                 RosterColumns.ACCOUNT_ID + " = ? AND " + RosterColumns.JID + " LIKE ?", arrayOf(accountId.toString(), jid))
 
-                        if(rows == 0){
+                        if (rows == 0) {
                             val userId = obtainUserId(jid)
 
                             cv.put(RosterColumns.ACCOUNT_ID, accountId)
@@ -109,8 +111,9 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
 
                     db.setTransactionSuccessful()
                     db.endTransaction()
+                    Logger.d("sqlite.putContacts", "time: ${System.currentTimeMillis() - start} ms, count: ${contacts.size}")
                     emitter.onComplete()
-                } catch (e: Exception){
+                } catch (e: Exception) {
                     db.endTransaction()
                     emitter.onError(e)
                 }
@@ -122,7 +125,7 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
         val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(UsersColumns._ID), "$JID LIKE ?", arrayOf(jid))
 
         return cursor.use {
-            if(it.moveToNext()){
+            if (it.moveToNext()) {
                 it.getInt(it.getColumnIndex(UsersColumns._ID))
             } else {
                 val cv = ContentValues()
@@ -146,53 +149,56 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
 
     private val contactLock: Any = Any()
 
-    override fun upsert(bareJid: String, vCard: VCard): Completable {
-        return Completable.create { e ->
+    override fun upsert(bareJid: String, vCard: VCard): Single<UserEntity> {
+        return Single.create { e ->
             synchronized(contactLock) {
+                val start = System.currentTimeMillis()
                 val jid = prepareBareJid(bareJid)
-
                 val id = findIdByBareJid(jid)
 
                 val cv = ContentValues()
-                cv.put(FIRST_NAME, vCard.firstName)
-                cv.put(LAST_NAME, vCard.lastName)
-                cv.put(MIDDLE_NAME, vCard.middleName)
-                cv.put(PREFIX, vCard.prefix)
-                cv.put(SUFFIX, vCard.suffix)
-                cv.put(EMAIL_HOME, vCard.emailHome)
-                cv.put(EMAIL_WORK, vCard.emailWork)
-                cv.put(ORGANIZATION, vCard.organization)
-                cv.put(ORGANIZATION_UNIT, vCard.organizationUnit)
-                cv.put(PHOTO_MIME_TYPE, vCard.avatarMimeType)
-                cv.put(PHOTO_HASH, vCard.avatarHash)
-                cv.put(PHOTO, vCard.avatar)
-
-                val contact = User()
-                        .setJid(jid)
-                        .setFirstName(vCard.firstName)
-                        .setLastName(vCard.lastName)
-                        .setMiddleName(vCard.middleName)
-                        .setPrefix(vCard.prefix)
-                        .setSuffix(vCard.suffix)
-                        .setEmailHome(vCard.emailHome)
-                        .setEmailWork(vCard.emailWork)
-                        .setOrganization(vCard.organization)
-                        .setOrganizationUnit(vCard.organizationUnit)
-                        .setPhotoMimeType(vCard.avatarMimeType)
-                        .setPhotoHash(vCard.avatarHash)
+                cv.put(UsersColumns.FIRST_NAME, vCard.firstName)
+                cv.put(UsersColumns.LAST_NAME, vCard.lastName)
+                cv.put(UsersColumns.MIDDLE_NAME, vCard.middleName)
+                cv.put(UsersColumns.PREFIX, vCard.prefix)
+                cv.put(UsersColumns.SUFFIX, vCard.suffix)
+                cv.put(UsersColumns.EMAIL_HOME, vCard.emailHome)
+                cv.put(UsersColumns.EMAIL_WORK, vCard.emailWork)
+                cv.put(UsersColumns.ORGANIZATION, vCard.organization)
+                cv.put(UsersColumns.ORGANIZATION_UNIT, vCard.organizationUnit)
+                cv.put(UsersColumns.PHOTO_MIME_TYPE, vCard.avatarMimeType)
+                cv.put(UsersColumns.PHOTO_HASH, vCard.avatarHash)
+                cv.put(UsersColumns.PHOTO, vCard.avatar)
+                cv.put(UsersColumns.LAST_VCARD_UPDATE_TIME, System.currentTimeMillis())
 
                 val db = dbHelper.writableDatabase
 
+                val entity: UserEntity
+
                 if (id != null) {
-                    contact.id = id
+                    entity = UserEntity(id, jid)
                     db.update(TABLENAME, cv, "$_ID = ?", arrayOf(id.toString()))
-                    updatesPublisher.onNext(contact)
                 } else {
-                    contact.id = db.insert(TABLENAME, null, cv).toInt()
-                    addingPublisher.onNext(contact)
+                    entity = UserEntity(db.insert(TABLENAME, null, cv).toInt(), jid)
                 }
 
-                e.onComplete()
+                entity.apply {
+                    firstName = vCard.firstName
+                    lastName = vCard.lastName
+                    middleName = vCard.middleName
+                    prefix = vCard.prefix
+                    suffix = vCard.suffix
+                    emailHome = vCard.emailHome
+                    emailWork = vCard.emailWork
+                    organization = vCard.organization
+                    organizationUnit = vCard.organizationUnit
+                    photoMimeType = vCard.avatarMimeType
+                    photoHash = vCard.avatarHash
+                    lastVcardUpdateTime = System.currentTimeMillis()
+                }
+
+                Logger.d("sqlite.upsert", "time: " + (System.currentTimeMillis() - start) + " ms, id: " + entity.jid)
+                e.onSuccess(entity)
             }
         }
     }
@@ -260,39 +266,58 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     }
 
     override fun findPhotoByHash(hash: String): ByteArray? {
-        val projection = arrayOf(PHOTO)
-
-        val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, projection, "$PHOTO_HASH LIKE ?", arrayOf(hash))
-
-        cursor.run {
-            var photo: ByteArray? = null
-            if (moveToNext()) {
-                photo = getBlob(getColumnIndex(PHOTO))
+        val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(PHOTO), "$PHOTO_HASH LIKE ?", arrayOf(hash))
+        cursor.use {
+            return if (it.moveToNext()) {
+                it.getBlob(it.getColumnIndex(PHOTO))
+            } else {
+                null
             }
-
-            close()
-            return photo
         }
     }
 
     private fun map(cursor: Cursor): User {
-        return User()
-                .setId(cursor.getInt(cursor.getColumnIndex(_ID)))
-                .setJid(cursor.getString(cursor.getColumnIndex(JID)))
-                .setFirstName(cursor.getString(cursor.getColumnIndex(FIRST_NAME)))
-                .setLastName(cursor.getString(cursor.getColumnIndex(LAST_NAME)))
-                .setMiddleName(cursor.getString(cursor.getColumnIndex(MIDDLE_NAME)))
-                .setPrefix(cursor.getString(cursor.getColumnIndex(PREFIX)))
-                .setSuffix(cursor.getString(cursor.getColumnIndex(SUFFIX)))
-                .setEmailHome(cursor.getString(cursor.getColumnIndex(EMAIL_HOME)))
-                .setEmailWork(cursor.getString(cursor.getColumnIndex(EMAIL_WORK)))
-                .setOrganization(cursor.getString(cursor.getColumnIndex(ORGANIZATION)))
-                .setOrganizationUnit(cursor.getString(cursor.getColumnIndex(ORGANIZATION_UNIT)))
-                .setPhotoMimeType(cursor.getString(cursor.getColumnIndex(PHOTO_MIME_TYPE)))
-                .setPhotoHash(cursor.getString(cursor.getColumnIndex(PHOTO_HASH)))
+        return User().apply {
+            id = cursor.getInt(UsersColumns._ID)
+            jid = cursor.getString(UsersColumns.JID)
+            firstName = cursor.getString(UsersColumns.FIRST_NAME)
+            lastName = cursor.getString(UsersColumns.LAST_NAME)
+            middleName = cursor.getString(UsersColumns.MIDDLE_NAME)
+            prefix = cursor.getString(UsersColumns.PREFIX)
+            suffix = cursor.getString(UsersColumns.SUFFIX)
+            emailHome = cursor.getString(UsersColumns.EMAIL_HOME)
+            emailWork = cursor.getString(UsersColumns.EMAIL_WORK)
+            organization = cursor.getString(UsersColumns.ORGANIZATION)
+            organizationUnit = cursor.getString(UsersColumns.ORGANIZATION_UNIT)
+            photoMimeType = cursor.getString(UsersColumns.PHOTO_MIME_TYPE)
+            photoHash = cursor.getString(UsersColumns.PHOTO_HASH)
+        }
     }
 
-    override fun getContacts(): Single<List<Contact>> {
+    override fun delete(account: Int, jids: List<String>): Completable {
+        return Completable.create { emitter ->
+            synchronized(contactLock) {
+                val db = dbHelper.writableDatabase
+                db.beginTransaction()
+
+                try {
+                    for (jid in jids) {
+                        val where = RosterColumns.ACCOUNT_ID + " = ? AND " + RosterColumns.JID + " LIKE ?"
+                        val args = arrayOf(account.toString(), jid)
+                        dbHelper.writableDatabase.delete(RosterColumns.TABLENAME, where, args)
+                    }
+                    db.setTransactionSuccessful()
+                    db.endTransaction()
+                    emitter.onComplete()
+                } catch (e: Exception) {
+                    db.endTransaction()
+                    emitter.onError(e)
+                }
+            }
+        }
+    }
+
+    override fun getContacts(): Single<List<ContactEntity>> {
         return Single.create { emitter ->
             val start = System.currentTimeMillis()
 
@@ -328,11 +353,12 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
                     UsersColumns.ORGANIZATION_UNIT,
                     UsersColumns.PHOTO_MIME_TYPE,
                     UsersColumns.PHOTO_HASH,
+                    UsersColumns.LAST_VCARD_UPDATE_TIME,
                     AccountsColumns.TABLENAME + "." + AccountsColumns.LOGIN + " AS account_jid"
             )
 
             val cursor = dbHelper.readableDatabase.query(table, columns)
-            val entries = ArrayList<Contact>()
+            val entries = ArrayList<ContactEntity>()
             while (cursor.moveToNext()) {
                 if (emitter.isDisposed) break
 
@@ -345,46 +371,49 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
         }
     }
 
-    private fun mapContact(cursor: Cursor): Contact {
-        val user = User().apply {
-            id = cursor.getInt(cursor.getColumnIndex(RosterColumns.USER_ID))
-            jid = cursor.getString(cursor.getColumnIndex("user_jid"))
-            firstName = cursor.getString(cursor.getColumnIndex(UsersColumns.FIRST_NAME))
-            lastName = cursor.getString(cursor.getColumnIndex(UsersColumns.LAST_NAME))
-            middleName = cursor.getString(cursor.getColumnIndex(UsersColumns.MIDDLE_NAME))
-            prefix = cursor.getString(cursor.getColumnIndex(UsersColumns.PREFIX))
-            suffix = cursor.getString(cursor.getColumnIndex(UsersColumns.SUFFIX))
-            emailHome = cursor.getString(cursor.getColumnIndex(UsersColumns.EMAIL_HOME))
-            emailWork = cursor.getString(cursor.getColumnIndex(UsersColumns.EMAIL_WORK))
-            organization = cursor.getString(cursor.getColumnIndex(UsersColumns.ORGANIZATION))
-            organizationUnit = cursor.getString(cursor.getColumnIndex(UsersColumns.ORGANIZATION_UNIT))
-            photoMimeType = cursor.getString(cursor.getColumnIndex(UsersColumns.PHOTO_MIME_TYPE))
-            photoHash = cursor.getString(cursor.getColumnIndex(UsersColumns.PHOTO_HASH))
-        }
-
-        val entry = Contact()
-
-        entry.id = cursor.getInt(cursor.getColumnIndex("contact_id"))
-
-        entry.accountId = AccountId(
-                cursor.getInt(cursor.getColumnIndex(RosterColumns.ACCOUNT_ID)),
-                cursor.getString(cursor.getColumnIndex("account_jid"))
+    private fun mapContact(cursor: Cursor): ContactEntity {
+        val user = UserEntity(
+                cursor.getInt(RosterColumns.USER_ID),
+                cursor.getString("user_jid")!!
         )
 
-        entry.jid = user.jid
-        entry.user = user
-        entry.flags = cursor.getInt(cursor.getColumnIndex(RosterColumns.FLAGS))
-        entry.availableToReceiveMessages = cursor.getInt(cursor.getColumnIndex(RosterColumns.AVAILABLE_RECEIVE_MESSAGES)) == 1
-        entry.away = cursor.getInt(cursor.getColumnIndex(RosterColumns.IS_AWAY)) == 1
+        user.apply {
+            firstName = cursor.getString(UsersColumns.FIRST_NAME)
+            lastName = cursor.getString(UsersColumns.LAST_NAME)
+            middleName = cursor.getString(UsersColumns.MIDDLE_NAME)
+            prefix = cursor.getString(UsersColumns.PREFIX)
+            suffix = cursor.getString(UsersColumns.SUFFIX)
+            emailHome = cursor.getString(UsersColumns.EMAIL_HOME)
+            emailWork = cursor.getString(UsersColumns.EMAIL_WORK)
+            organization = cursor.getString(UsersColumns.ORGANIZATION)
+            organizationUnit = cursor.getString(UsersColumns.ORGANIZATION_UNIT)
+            photoMimeType = cursor.getString(UsersColumns.PHOTO_MIME_TYPE)
+            photoHash = cursor.getString(UsersColumns.PHOTO_HASH)
+            lastVcardUpdateTime = cursor.getLong(UsersColumns.LAST_VCARD_UPDATE_TIME)
+        }
 
-        entry.presenceMode = cursor.getInt(RosterColumns.PRESENSE_MODE)
-        entry.presenceType = cursor.getInt(RosterColumns.PRESENSE_TYPE)
-        entry.presenceStatus = cursor.getString(cursor.getColumnIndex(RosterColumns.PRESENSE_STATUS))
+        val entity = ContactEntity(
+                cursor.getInt("contact_id"),
+                user.jid,
+                cursor.getInt(RosterColumns.ACCOUNT_ID),
+                cursor.getString("account_jid")!!, user
+        )
 
-        entry.type = cursor.getInt(RosterColumns.TYPE)
-        entry.nick = cursor.getString(cursor.getColumnIndex(RosterColumns.NICK))
-        entry.priority = cursor.getInt(cursor.getColumnIndex(RosterColumns.PRIORITY))
-        return entry
+        entity.apply {
+            flags = cursor.getInt(RosterColumns.FLAGS)
+            availableToReceiveMessages = cursor.getBoolean(RosterColumns.AVAILABLE_RECEIVE_MESSAGES)
+            away = cursor.getBoolean(RosterColumns.IS_AWAY)
+
+            presenceMode = cursor.getNullableInt(RosterColumns.PRESENSE_MODE)
+            presenceType = cursor.getNullableInt(RosterColumns.PRESENSE_TYPE)
+            presenceStatus = cursor.getString(RosterColumns.PRESENSE_STATUS)
+
+            type = cursor.getNullableInt(RosterColumns.TYPE)
+            nick = cursor.getString(RosterColumns.NICK)
+            priority = cursor.getInt(RosterColumns.PRIORITY)
+        }
+
+        return entity
     }
 
     private fun prepareBareJid(input: String): String {

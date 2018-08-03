@@ -20,6 +20,7 @@ public class UsersColumns implements BaseColumns {
     public static final String PHOTO_MIME_TYPE = "photo_mime_type";
     public static final String PHOTO_HASH = "photo_hash";
     public static final String PHOTO = "photo";
+    public static final String LAST_VCARD_UPDATE_TIME = "last_vcard_update_time";
     public static final String FULL_ID = TABLENAME + "." + _ID;
     public static final String FULL_JID = TABLENAME + "." + JID;
     public static final String FULL_FIRST_NAME = TABLENAME + "." + FIRST_NAME;

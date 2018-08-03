@@ -151,6 +151,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 " [" + UsersColumns.PHOTO_MIME_TYPE + "] TEXT, " +
                 " [" + UsersColumns.PHOTO_HASH + "] TEXT, " +
                 " [" + UsersColumns.PHOTO + "] BLOB, " +
+                " [" + UsersColumns.LAST_VCARD_UPDATE_TIME + "] INTEGER, " +
                 " CONSTRAINT [] UNIQUE ([" + UsersColumns.JID + "]) ON CONFLICT FAIL);";
         db.execSQL(sql);
     }

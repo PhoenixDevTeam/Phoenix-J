@@ -1,5 +1,7 @@
 package biz.dealnote.xmpp.db.interfaces
 
+import biz.dealnote.xmpp.db.entity.ContactEntity
+import biz.dealnote.xmpp.db.entity.UserEntity
 import biz.dealnote.xmpp.model.Contact
 import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.util.Optional
@@ -18,7 +20,7 @@ interface IUsersStorage {
 
     fun findByJid(jid: String): Single<Optional<User?>>
 
-    fun upsert(bareJid: String, vCard: VCard): Completable
+    fun upsert(bareJid: String, vCard: VCard): Single<UserEntity>
 
     fun putContacts(accountId: Int, contacts: Collection<RosterEntry>): Completable
 
@@ -32,5 +34,7 @@ interface IUsersStorage {
 
     fun findPhotoByHash(hash: String): ByteArray?
 
-    fun getContacts(): Single<List<Contact>>
+    fun getContacts(): Single<List<ContactEntity>>
+
+    fun delete(account: Int, jids: List<String>): Completable
 }

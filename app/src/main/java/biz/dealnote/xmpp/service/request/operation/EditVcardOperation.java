@@ -49,7 +49,7 @@ public class EditVcardOperation extends AbsXmppOperation {
         Repositories.getInstance()
                 .getUsersStorage()
                 .upsert(jid, updated)
-                .blockingAwait();
+                .blockingGet();
         return null;
     }
 }

@@ -79,7 +79,7 @@ public class SignInOperation extends AbsXmppOperation {
             Repositories.getInstance()
                     .getUsersStorage()
                     .upsert(account.buildBareJid(), myVCard)
-                    .blockingAwait();
+                    .blockingGet();
 
             User user = Repositories.getInstance()
                     .getUsersStorage()

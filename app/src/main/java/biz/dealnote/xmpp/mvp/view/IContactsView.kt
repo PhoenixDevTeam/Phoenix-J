@@ -5,4 +5,5 @@ import biz.dealnote.xmpp.model.Contact
 
 interface IContactsView: IMvpView, IErrorView {
     fun displayContacts(contacts: List<Contact>)
+    fun notifyDataSetChanged()
 }

@@ -15,7 +15,7 @@ class ContactsPresenter(savedState: Bundle?) : RxSupportPresenter<IContactsView>
 
     private val repository: IContactsRepository = Injection.proviceContactsRepository()
 
-    private var contacts: List<Contact> = ArrayList()
+    private var contacts: MutableList<Contact> = ArrayList()
         set(value) {
             field = value
             view?.displayContacts(value)
@@ -27,6 +27,14 @@ class ContactsPresenter(savedState: Bundle?) : RxSupportPresenter<IContactsView>
         appendDisposable(repository.observeAddings()
                 .toMainThread()
                 .subscribeIgnoreErrors(Consumer { loadCachedUsers() }))
+
+        appendDisposable(repository.observeDeleting()
+                .toMainThread()
+                .subscribeIgnoreErrors(Consumer { it -> onContactRemoved(it) }))
+    }
+
+    private fun onContactRemoved(jids: List<String>) {
+        if (contacts.removeAll { jids.contains(it.jid) }) view?.notifyDataSetChanged()
     }
 
     private fun loadCachedUsers() {
@@ -36,7 +44,7 @@ class ContactsPresenter(savedState: Bundle?) : RxSupportPresenter<IContactsView>
     }
 
     private fun onContactsReceived(contacts: List<Contact>) {
-        this.contacts = contacts
+        this.contacts = contacts.toMutableList()
     }
 
     override fun onGuiCreated(view: IContactsView) {

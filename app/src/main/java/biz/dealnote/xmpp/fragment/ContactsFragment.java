@@ -250,4 +250,10 @@ public class ContactsFragment extends BaseMvpFragment<ContactsPresenter, IContac
         mAdapter.setData(contacts);
         resolveEmptyText();
     }
+
+    @Override
+    public void notifyDataSetChanged() {
+        mAdapter.notifyDataSetChanged();
+        resolveEmptyText();
+    }
 }

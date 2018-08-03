@@ -18,7 +18,7 @@ class ContactCardPresenter(val contact: Contact, savedState: Bundle?) : RxSuppor
     }
 
     private fun actualizeData() {
-        appendDisposable(repository.actualizeUser(contact.accountId.id, contact.jid)
+        appendDisposable(repository.actualizeUserAndGet(contact.accountId.id, contact.jid)
                 .fromIOToMain()
                 .subscribe({ onActualDataReceived(it) }, { onActualDataFail(it) }))
     }

@@ -44,12 +44,15 @@ import biz.dealnote.xmpp.service.request.RequestFactory;
 import biz.dealnote.xmpp.service.request.XmppOperationManager;
 import biz.dealnote.xmpp.service.request.XmppRequestManager;
 import biz.dealnote.xmpp.transfer.IFileTransferer;
+import biz.dealnote.xmpp.util.ExtensionsKt;
 import biz.dealnote.xmpp.util.Logger;
 import biz.dealnote.xmpp.util.NotificationHelper;
 import biz.dealnote.xmpp.util.RxUtils;
 import biz.dealnote.xmpp.util.Unixtime;
+import io.reactivex.Scheduler;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class XmppService extends Service implements IXmppContext {
 
@@ -237,16 +240,21 @@ public class XmppService extends Service implements IXmppContext {
     private void onRosterEntryAdded(int accountId, Collection<RosterEntry> entries) {
         Logger.d("onRosterEntryAdded", "count: " + entries);
 
-        ArrayList<String> bareJids = new ArrayList<>(entries.size());
-        for (RosterEntry entry : entries) {
-            AppRoster.mergeRosterEntry(this, accountId, entry);
-            bareJids.add(entry.getJid().asBareJid().toString());
-        }
+        Injection.INSTANCE.proviceContactsRepository()
+                .handleContactsAdded(accountId, entries)
+                .subscribeOn(Schedulers.io())
+                .subscribe(RxUtils.dummy(), RxUtils.ignore());
 
-        StringArray array = new StringArray(bareJids.toArray(new String[bareJids.size()]));
+        //ArrayList<String> bareJids = new ArrayList<>(entries.size());
+        //for (RosterEntry entry : entries) {
+        //    AppRoster.mergeRosterEntry(this, accountId, entry);
+        //    bareJids.add(entry.getJid().asBareJid().toString());
+        //}
 
-        Request request = RequestFactory.getVcardRequest(accountId, array);
-        XmppRequestManager.from(this).execute(request, mRequestAdapter);
+        //StringArray array = new StringArray(bareJids.toArray(new String[bareJids.size()]));
+
+        //Request request = RequestFactory.getVcardRequest(accountId, array);
+        //XmppRequestManager.from(this).execute(request, mRequestAdapter);
     }
 
     private void onRosterEntryUpdated(int accountId, Collection<RosterEntry> entries) {
@@ -256,9 +264,11 @@ public class XmppService extends Service implements IXmppContext {
     }
 
     private void onRosterEntryDeleted(int accountId, Collection<Jid> jids) {
-        for (Jid jid : jids) {
-            AppRoster.deleteRosterEntry(this, accountId, jid.asBareJid().toString());
-        }
+        ExtensionsKt.subscribeIOAndIgnoreResults(Injection.INSTANCE.proviceContactsRepository().handleContactsDeleted(accountId, jids));
+
+        //for (Jid jid : jids) {
+        //    AppRoster.deleteRosterEntry(this, accountId, jid.asBareJid().toString());
+        //}
     }
 
     @Override
