@@ -7,21 +7,18 @@ import biz.dealnote.xmpp.db.Repositories
 import biz.dealnote.xmpp.db.columns.AccountsColumns
 import biz.dealnote.xmpp.db.columns.RosterColumns
 import biz.dealnote.xmpp.db.columns.UsersColumns
-import biz.dealnote.xmpp.db.columns.UsersColumns.*
 import biz.dealnote.xmpp.db.entity.ContactEntity
 import biz.dealnote.xmpp.db.entity.UserEntity
 import biz.dealnote.xmpp.db.interfaces.IUsersStorage
 import biz.dealnote.xmpp.model.Contact
 import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.util.*
-import biz.dealnote.xmpp.util.Optional
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.processors.PublishProcessor
 import org.jivesoftware.smack.roster.RosterEntry
 import org.jivesoftware.smackx.vcardtemp.packet.VCard
-import java.util.*
 
 /**
  * Created by ruslan.kolbasa on 02.11.2016.
@@ -36,7 +33,7 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     override fun findById(id: Int): Single<Optional<User?>> {
         return Single.create { e ->
             synchronized(contactLock) {
-                val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, columns, "$_ID = ?", arrayOf(id.toString()))
+                val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, columns, "${UsersColumns._ID} = ?", arrayOf(id.toString()))
 
                 val user: User? = if (cursor.moveToNext()) map(cursor) else null
                 cursor.close()
@@ -46,26 +43,27 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
         }
     }
 
-    private val columns = arrayOf(_ID,
-            JID,
-            FIRST_NAME,
-            LAST_NAME,
-            MIDDLE_NAME,
-            PREFIX,
-            SUFFIX,
-            EMAIL_HOME,
-            EMAIL_WORK,
-            ORGANIZATION,
-            ORGANIZATION_UNIT,
-            PHOTO_MIME_TYPE,
-            PHOTO_HASH,
-            PHOTO
+    private val columns = arrayOf(UsersColumns._ID,
+            UsersColumns.JID,
+            UsersColumns.FIRST_NAME,
+            UsersColumns.LAST_NAME,
+            UsersColumns.MIDDLE_NAME,
+            UsersColumns.PREFIX,
+            UsersColumns.SUFFIX,
+            UsersColumns.EMAIL_HOME,
+            UsersColumns.EMAIL_WORK,
+            UsersColumns.ORGANIZATION,
+            UsersColumns.ORGANIZATION_UNIT,
+            UsersColumns.PHOTO_MIME_TYPE,
+            UsersColumns.PHOTO_HASH,
+            UsersColumns.PHOTO,
+            UsersColumns.LAST_VCARD_UPDATE_TIME
     )
 
     override fun findByJid(jid: String): Single<Optional<User?>> {
         return Single.create { e ->
             synchronized(contactLock) {
-                val cursor = dbHelper.readableDatabase.query(TABLENAME, columns, "$JID LIKE ?", arrayOf(jid))
+                val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, columns, "${UsersColumns.JID} LIKE ?", arrayOf(jid))
 
                 val user: User? = if (cursor.moveToNext()) map(cursor) else null
                 cursor.close()
@@ -122,25 +120,25 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     }
 
     private fun obtainUserId(jid: String): Int {
-        val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(UsersColumns._ID), "$JID LIKE ?", arrayOf(jid))
+        val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(UsersColumns._ID), "${UsersColumns.JID} LIKE ?", arrayOf(jid))
 
         return cursor.use {
             if (it.moveToNext()) {
                 it.getInt(it.getColumnIndex(UsersColumns._ID))
             } else {
                 val cv = ContentValues()
-                cv.put(JID, jid)
-                dbHelper.writableDatabase.insert(TABLENAME, null, cv).toInt()
+                cv.put(UsersColumns.JID, jid)
+                dbHelper.writableDatabase.insert(UsersColumns.TABLENAME, null, cv).toInt()
             }
         }
     }
 
     private fun findIdByBareJid(jid: String): Int? {
         synchronized(contactLock) {
-            val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(_ID), "$JID LIKE ?", arrayOf(jid))
+            val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(UsersColumns._ID), "${UsersColumns.JID} LIKE ?", arrayOf(jid))
 
             try {
-                return if (cursor.moveToNext()) cursor.getInt(cursor.getColumnIndex(_ID)) else null
+                return if (cursor.moveToNext()) cursor.getInt(cursor.getColumnIndex(UsersColumns._ID)) else null
             } finally {
                 Utils.safelyCloseCursor(cursor)
             }
@@ -177,9 +175,9 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
 
                 if (id != null) {
                     entity = UserEntity(id, jid)
-                    db.update(TABLENAME, cv, "$_ID = ?", arrayOf(id.toString()))
+                    db.update(UsersColumns.TABLENAME, cv, "${UsersColumns._ID} = ?", arrayOf(id.toString()))
                 } else {
-                    entity = UserEntity(db.insert(TABLENAME, null, cv).toInt(), jid)
+                    entity = UserEntity(db.insert(UsersColumns.TABLENAME, null, cv).toInt(), jid)
                 }
 
                 entity.apply {
@@ -206,10 +204,10 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     private fun insert(bareJid: String): Single<User> {
         return Single.fromCallable {
             val cv = ContentValues()
-            cv.put(JID, bareJid)
+            cv.put(UsersColumns.JID, bareJid)
 
             synchronized(contactLock) {
-                val id = dbHelper.writableDatabase.insert(TABLENAME, null, cv).toInt()
+                val id = dbHelper.writableDatabase.insert(UsersColumns.TABLENAME, null, cv).toInt()
                 val contact = User()
                         .setJid(bareJid)
                         .setId(id)
@@ -229,9 +227,9 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
                     e.onSuccess(id)
                 } else {
                     val cv = ContentValues()
-                    cv.put(JID, jid)
+                    cv.put(UsersColumns.JID, jid)
 
-                    id = dbHelper.writableDatabase.insert(TABLENAME, null, cv).toInt()
+                    id = dbHelper.writableDatabase.insert(UsersColumns.TABLENAME, null, cv).toInt()
 
                     val contact = User()
                             .setJid(jid)
@@ -266,10 +264,10 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
     }
 
     override fun findPhotoByHash(hash: String): ByteArray? {
-        val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(PHOTO), "$PHOTO_HASH LIKE ?", arrayOf(hash))
+        val cursor = dbHelper.readableDatabase.query(UsersColumns.TABLENAME, arrayOf(UsersColumns.PHOTO), "${UsersColumns.PHOTO_HASH} LIKE ?", arrayOf(hash))
         cursor.use {
             return if (it.moveToNext()) {
-                it.getBlob(it.getColumnIndex(PHOTO))
+                it.getBlob(it.getColumnIndex(UsersColumns.PHOTO))
             } else {
                 null
             }
