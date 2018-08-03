@@ -28,6 +28,14 @@ public class RxUtils {
         };
     }
 
+    public static Consumer<Throwable> print(){
+        return t -> {
+            if(BuildConfig.DEBUG){
+                t.printStackTrace();
+            }
+        };
+    }
+
     public static <T> MaybeTransformer<T, T> applyMaybeIOToMainSchedulers() {
         return upstream -> upstream
                 .subscribeOn(Schedulers.io())

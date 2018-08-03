@@ -47,7 +47,10 @@ class ContactsRepository(private val api: IXmppRxApi, private val storage: IUser
                     Observable.fromIterable(it)
                 }
                 .flatMapCompletable {
-                    actualizeUser(it.accountId, it.jid).ignoreElement().onErrorComplete()
+                    actualizeUser(it.accountId, it.jid)
+                            .ignoreElement()
+                            .doOnError(RxUtils.print())
+                            .onErrorComplete()
                 }
                 .subscribeOn(monoScheduler)
                 .subscribe(RxUtils.dummy(), RxUtils.ignore()))
