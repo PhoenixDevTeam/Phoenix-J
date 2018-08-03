@@ -21,7 +21,6 @@ import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
 import org.jxmpp.jid.Jid;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import biz.dealnote.xmpp.Extra;
@@ -35,24 +34,21 @@ import biz.dealnote.xmpp.db.exception.AlreadyExistException;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AppFile;
 import biz.dealnote.xmpp.model.AppMessage;
-import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.model.MessageBuilder;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.security.IOtrManager;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.RequestAdapter;
 import biz.dealnote.xmpp.service.request.RequestFactory;
 import biz.dealnote.xmpp.service.request.XmppOperationManager;
-import biz.dealnote.xmpp.service.request.XmppRequestManager;
 import biz.dealnote.xmpp.transfer.IFileTransferer;
 import biz.dealnote.xmpp.util.ExtensionsKt;
 import biz.dealnote.xmpp.util.Logger;
 import biz.dealnote.xmpp.util.NotificationHelper;
 import biz.dealnote.xmpp.util.RxUtils;
 import biz.dealnote.xmpp.util.Unixtime;
-import io.reactivex.Scheduler;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class XmppService extends Service implements IXmppContext {
 
@@ -240,10 +236,7 @@ public class XmppService extends Service implements IXmppContext {
     private void onRosterEntryAdded(int accountId, Collection<RosterEntry> entries) {
         Logger.d("onRosterEntryAdded", "count: " + entries);
 
-        Injection.INSTANCE.proviceContactsRepository()
-                .handleContactsAdded(accountId, entries)
-                .subscribeOn(Schedulers.io())
-                .subscribe(RxUtils.dummy(), RxUtils.ignore());
+        ExtensionsKt.subscribeIOAndIgnoreResults(Injection.INSTANCE.proviceContactsRepository().handleContactsAdded(accountId, entries));
 
         //ArrayList<String> bareJids = new ArrayList<>(entries.size());
         //for (RosterEntry entry : entries) {
