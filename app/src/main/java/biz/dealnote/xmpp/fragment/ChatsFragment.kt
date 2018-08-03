@@ -13,7 +13,6 @@ import biz.dealnote.xmpp.R
 import biz.dealnote.xmpp.activity.ActivityUtils
 import biz.dealnote.xmpp.adapter.ChatsAdapter
 import biz.dealnote.xmpp.callback.PicassoPauseOnScrollListener
-import biz.dealnote.xmpp.dialog.ChatContextDialog
 import biz.dealnote.xmpp.fragment.base.BaseMvpFragment
 import biz.dealnote.xmpp.model.Chat
 import biz.dealnote.xmpp.mvp.presenter.ChatsPresenter
@@ -56,8 +55,8 @@ class ChatsFragment : BaseMvpFragment<ChatsPresenter, IChatsView>(), ChatsAdapte
     }
 
     override fun onLongClick(chat: Chat): Boolean {
-        presenter.fireChatLongClick(chat)
-        return true
+        //TODO Impl
+        return false
     }
 
     override fun getPresenterFactory(saveInstanceState: Bundle?): IPresenterFactory<ChatsPresenter> {
@@ -76,19 +75,11 @@ class ChatsFragment : BaseMvpFragment<ChatsPresenter, IChatsView>(), ChatsAdapte
         mEmptyText?.visibility = if (visible) View.VISIBLE else View.INVISIBLE
     }
 
-    override fun displayChatOptionsDialog(chat: Chat) {
-        val dialog = ChatContextDialog.newInstance(chat)
-        dialog.setTargetFragment(this, REQUEST_CODE_EDIT_CHAT)
-        dialog.show(requireFragmentManager(), "edit_chat")
-    }
-
     override fun goToChat(accountId: Int, destination: String, chatId: Int?) {
         PlaceFactory.getChatPlace(accountId, destination, chatId).tryOpenWith(requireActivity())
     }
 
     companion object {
-        private const val REQUEST_CODE_EDIT_CHAT = 13
-
         @JvmStatic
         fun newInstance(): ChatsFragment {
             return ChatsFragment()

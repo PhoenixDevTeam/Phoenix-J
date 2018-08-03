@@ -12,5 +12,4 @@ interface IChatsView : IMvpView {
     fun notifyDataChanged()
     fun setEmptyTextVisible(visible: Boolean)
     fun goToChat(accountId: Int, destination: String, chatId: Int?)
-    fun displayChatOptionsDialog(chat: Chat)
 }

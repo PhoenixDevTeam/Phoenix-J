@@ -161,10 +161,6 @@ class ChatsPresenter(savedInstanceState: Bundle?) : RequestSupportPresenter<ICha
         view?.goToChat(chat.accountId, chat.destination, chat.id)
     }
 
-    fun fireChatLongClick(chat: Chat) {
-        view?.displayChatOptionsDialog(chat)
-    }
-
     private fun notifyAboutUnreadChatsCount() {
         var count = 0
         for (chat in mChats) {
