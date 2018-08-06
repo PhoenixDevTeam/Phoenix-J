@@ -2,7 +2,6 @@ package biz.dealnote.xmpp.db.interfaces
 
 import biz.dealnote.xmpp.db.entity.ContactEntity
 import biz.dealnote.xmpp.db.entity.UserEntity
-import biz.dealnote.xmpp.model.Contact
 import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.util.Optional
 import io.reactivex.Completable
@@ -20,7 +19,7 @@ interface IUsersStorage {
 
     fun findByJid(jid: String): Single<Optional<User?>>
 
-    fun upsert(bareJid: String, vCard: VCard): Single<UserEntity>
+    fun upsert(bareJid: String, vCard: VCard?): Single<UserEntity>
 
     fun putContacts(accountId: Int, contacts: Collection<RosterEntry>): Completable
 

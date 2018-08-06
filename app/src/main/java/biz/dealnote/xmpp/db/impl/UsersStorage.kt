@@ -147,7 +147,7 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
 
     private val contactLock: Any = Any()
 
-    override fun upsert(bareJid: String, vCard: VCard): Single<UserEntity> {
+    override fun upsert(bareJid: String, vCard: VCard?): Single<UserEntity> {
         return Single.create { e ->
             synchronized(contactLock) {
                 val start = System.currentTimeMillis()
@@ -155,18 +155,34 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
                 val id = findIdByBareJid(jid)
 
                 val cv = ContentValues()
-                cv.put(UsersColumns.FIRST_NAME, vCard.firstName)
-                cv.put(UsersColumns.LAST_NAME, vCard.lastName)
-                cv.put(UsersColumns.MIDDLE_NAME, vCard.middleName)
-                cv.put(UsersColumns.PREFIX, vCard.prefix)
-                cv.put(UsersColumns.SUFFIX, vCard.suffix)
-                cv.put(UsersColumns.EMAIL_HOME, vCard.emailHome)
-                cv.put(UsersColumns.EMAIL_WORK, vCard.emailWork)
-                cv.put(UsersColumns.ORGANIZATION, vCard.organization)
-                cv.put(UsersColumns.ORGANIZATION_UNIT, vCard.organizationUnit)
-                cv.put(UsersColumns.PHOTO_MIME_TYPE, vCard.avatarMimeType)
-                cv.put(UsersColumns.PHOTO_HASH, vCard.avatarHash)
-                cv.put(UsersColumns.PHOTO, vCard.avatar)
+                vCard?.run {
+                    cv.put(UsersColumns.FIRST_NAME, firstName)
+                    cv.put(UsersColumns.LAST_NAME, lastName)
+                    cv.put(UsersColumns.MIDDLE_NAME, middleName)
+                    cv.put(UsersColumns.PREFIX, prefix)
+                    cv.put(UsersColumns.SUFFIX, suffix)
+                    cv.put(UsersColumns.EMAIL_HOME, emailHome)
+                    cv.put(UsersColumns.EMAIL_WORK, emailWork)
+                    cv.put(UsersColumns.ORGANIZATION, organization)
+                    cv.put(UsersColumns.ORGANIZATION_UNIT, organizationUnit)
+                    cv.put(UsersColumns.PHOTO_MIME_TYPE, avatarMimeType)
+                    cv.put(UsersColumns.PHOTO_HASH, avatarHash)
+                    cv.put(UsersColumns.PHOTO, avatar)
+                } ?: run {
+                    cv.putNull(UsersColumns.FIRST_NAME)
+                    cv.putNull(UsersColumns.LAST_NAME)
+                    cv.putNull(UsersColumns.MIDDLE_NAME)
+                    cv.putNull(UsersColumns.PREFIX)
+                    cv.putNull(UsersColumns.SUFFIX)
+                    cv.putNull(UsersColumns.EMAIL_HOME)
+                    cv.putNull(UsersColumns.EMAIL_WORK)
+                    cv.putNull(UsersColumns.ORGANIZATION)
+                    cv.putNull(UsersColumns.ORGANIZATION_UNIT)
+                    cv.putNull(UsersColumns.PHOTO_MIME_TYPE)
+                    cv.putNull(UsersColumns.PHOTO_HASH)
+                    cv.putNull(UsersColumns.PHOTO)
+                }
+
                 cv.put(UsersColumns.LAST_VCARD_UPDATE_TIME, System.currentTimeMillis())
 
                 val db = dbHelper.writableDatabase
@@ -181,17 +197,17 @@ class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IU
                 }
 
                 entity.apply {
-                    firstName = vCard.firstName
-                    lastName = vCard.lastName
-                    middleName = vCard.middleName
-                    prefix = vCard.prefix
-                    suffix = vCard.suffix
-                    emailHome = vCard.emailHome
-                    emailWork = vCard.emailWork
-                    organization = vCard.organization
-                    organizationUnit = vCard.organizationUnit
-                    photoMimeType = vCard.avatarMimeType
-                    photoHash = vCard.avatarHash
+                    firstName = vCard?.firstName
+                    lastName = vCard?.lastName
+                    middleName = vCard?.middleName
+                    prefix = vCard?.prefix
+                    suffix = vCard?.suffix
+                    emailHome = vCard?.emailHome
+                    emailWork = vCard?.emailWork
+                    organization = vCard?.organization
+                    organizationUnit = vCard?.organizationUnit
+                    photoMimeType = vCard?.avatarMimeType
+                    photoHash = vCard?.avatarHash
                     lastVcardUpdateTime = System.currentTimeMillis()
                 }
 

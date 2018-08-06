@@ -15,6 +15,8 @@ interface IContactsRepository {
 
     fun observeAddings(): Flowable<List<String>>
 
+    fun observeVcards(): Flowable<Collection<User>>
+
     fun observeDeleting(): Flowable<List<String>>
 
     fun handleContactsAdded(account: Int, contacts: Collection<RosterEntry>): Completable

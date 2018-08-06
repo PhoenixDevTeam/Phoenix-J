@@ -3,9 +3,11 @@ package biz.dealnote.xmpp.mvp.presenter
 import android.os.Bundle
 import biz.dealnote.xmpp.Injection
 import biz.dealnote.xmpp.model.Contact
+import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.mvp.presenter.base.RxSupportPresenter
 import biz.dealnote.xmpp.mvp.view.IContactsView
 import biz.dealnote.xmpp.repo.IContactsRepository
+import biz.dealnote.xmpp.util.Logger
 import biz.dealnote.xmpp.util.fromIOToMain
 import biz.dealnote.xmpp.util.subscribeIgnoreErrors
 import biz.dealnote.xmpp.util.toMainThread
@@ -31,6 +33,15 @@ class ContactsPresenter(savedState: Bundle?) : RxSupportPresenter<IContactsView>
         appendDisposable(repository.observeDeleting()
                 .toMainThread()
                 .subscribeIgnoreErrors(Consumer { it -> onContactRemoved(it) }))
+
+        appendDisposable(repository.observeVcards()
+                .toMainThread()
+                .subscribeIgnoreErrors(Consumer { it -> onVcardsUpdated(it) }))
+    }
+
+    private fun onVcardsUpdated(users: Collection<User>) {
+        Logger.d("onVcardsUpdated", "jids:${users.map { it.jid }}")
+        loadCachedUsers()
     }
 
     private fun onContactRemoved(jids: List<String>) {
