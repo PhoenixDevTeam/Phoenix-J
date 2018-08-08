@@ -44,9 +44,9 @@ class ContactsRepository(private val api: IXmppRxApi, private val storage: IUser
         val minUpdateTime = System.currentTimeMillis() - (12 * 60 * 60 * 1000) // 12 hours
 
         compositeDisposable.add(storage.getContacts()
-                .map {
-                    it.filter {
-                        it.user.lastVcardUpdateTime.let { it == null || it < minUpdateTime }
+                .map { entities ->
+                    entities.filter { entity ->
+                        entity.user.lastVcardUpdateTime.let { it == null || it < minUpdateTime }
                     }
                 }
                 .flatMapObservable {
@@ -156,8 +156,8 @@ class ContactsRepository(private val api: IXmppRxApi, private val storage: IUser
 
     override fun getContacts(): Single<List<Contact>> {
         return storage.getContacts()
-                .map {
-                    it.map {
+                .map { list ->
+                    list.map {
                         entity2Model(it)
                     }
                 }

@@ -29,7 +29,6 @@ object Injection {
     private val otrManager: IOtrManager by lazy { OTRManager(App.getInstance()) }
     private val connectionManager: IOldConnectionManager by lazy { OldConnectionManager(App.getInstance(), Repositories.instance.accountsRepository) }
     private val contactsStorage: Repositories by lazy { Repositories(App.getInstance()) }
-    private val contactsRepository: IContactsRepository by lazy { ContactsRepository(XmppRxApiImpl(connectionManager, xmppExecutor), contactsStorage.usersStorage) }
 
     fun proviceContactsRepository() = contactsRepository
 
@@ -52,4 +51,6 @@ object Injection {
     }
 
     val xmppConnectionManager: IXmppConnectionManager by lazy { XmppConnectionManager(App.getInstance(), Repositories.instance.accountsRepository) }
+
+    private val contactsRepository: IContactsRepository by lazy { ContactsRepository(XmppRxApiImpl(xmppConnectionManager, xmppExecutor), contactsStorage.usersStorage) }
 }

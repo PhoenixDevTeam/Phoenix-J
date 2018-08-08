@@ -1,10 +1,9 @@
 package biz.dealnote.xmpp.service.request
 
-import biz.dealnote.xmpp.service.IOldConnectionManager
+import biz.dealnote.xmpp.service.IXmppConnectionManager
 import biz.dealnote.xmpp.util.safelyWait
 import io.reactivex.Completable
 import io.reactivex.Single
-import org.jivesoftware.smack.AbstractXMPPConnection
 import org.jivesoftware.smackx.vcardtemp.VCardManager
 import org.jivesoftware.smackx.vcardtemp.packet.VCard
 import org.jxmpp.jid.impl.JidCreate
@@ -12,19 +11,16 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 
-class XmppRxApiImpl(private val connectionManager: IOldConnectionManager, private val executor: ExecutorService) : IXmppRxApi {
+class XmppRxApiImpl(private val connectionManager: IXmppConnectionManager, private val executor: ExecutorService) : IXmppRxApi {
 
     override fun getVCard(acccount: Int, jid: String): Single<VCard> {
-        return singleFromCallable(executor, Callable {
-            val connection: AbstractXMPPConnection? = connectionManager.findConnectionFor(acccount)
-
-            connection?.run {
-                val entityBareJid = JidCreate.entityBareFrom(jid)
-                return@Callable VCardManager.getInstanceFor(connection).loadVCard(entityBareJid)
-            } ?: run {
-                throw Exception()
-            }
-        })
+        return connectionManager.obtainConnected(acccount)
+                .flatMap { connection ->
+                    singleFromCallable(executor, Callable {
+                        val entityBareJid = JidCreate.entityBareFrom(jid)
+                        return@Callable VCardManager.getInstanceFor(connection).loadVCard(entityBareJid)
+                    })
+                }
     }
 
     companion object {
