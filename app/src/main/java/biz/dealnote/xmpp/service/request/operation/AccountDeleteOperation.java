@@ -13,7 +13,7 @@ import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.db.interfaces.IAccountsRepository;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.service.IConnectionManager;
+import biz.dealnote.xmpp.service.IOldConnectionManager;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.exception.CustomRequestException;
@@ -25,7 +25,7 @@ public class AccountDeleteOperation extends AbsXmppOperation {
     public Bundle executeRequest(@NonNull Context context, @NonNull IXmppContext xmppContext, @NonNull Request request) throws DataException, CustomRequestException, SmackException.NotConnectedException, SmackException.NoResponseException, XMPPException.XMPPErrorException, SmackException.NotLoggedInException {
         int accountId = request.getInt(Extra.ACCOUNT_ID);
 
-        IConnectionManager connectionManager = xmppContext.getConnectionManager();
+        IOldConnectionManager connectionManager = xmppContext.getConnectionManager();
         AbstractXMPPConnection connection = connectionManager.findConnectionFor(accountId);
 
         if (connection != null) {

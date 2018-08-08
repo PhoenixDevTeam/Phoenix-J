@@ -71,6 +71,29 @@ public class AccountsRepository extends AbsRepository implements IAccountsReposi
     }
 
     @Override
+    public Single<Account> getById(int id) {
+        return Single.create(e -> {
+            Cursor cursor = getContentResolver().query(ChatContentProvider.ACCOUNTS_CONTENT_URI,
+                    null, AccountsColumns._ID + " = ?", new String[]{String.valueOf(id)}, null);
+
+            Account account = null;
+            if (cursor != null) {
+                if (cursor.moveToNext()) {
+                    account = map(cursor);
+                }
+
+                cursor.close();
+            }
+
+            if (account != null) {
+                e.onSuccess(account);
+            } else {
+                e.onError(new RecordDoesNotExistException());
+            }
+        });
+    }
+
+    @Override
     public Maybe<Account> findById(int id) {
         return Maybe.create(e -> {
             Cursor cursor = getContentResolver().query(ChatContentProvider.ACCOUNTS_CONTENT_URI,

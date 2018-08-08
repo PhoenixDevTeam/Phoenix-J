@@ -23,6 +23,8 @@ public interface IAccountsRepository {
     @CheckResult
     Maybe<Account> findById(int id);
 
+    Single<Account> getById(int id);
+
     @CheckResult
     Completable deleteById(int id);
 

@@ -11,7 +11,7 @@ import biz.dealnote.xmpp.security.IOtrManager;
 public interface IXmppContext {
 
     @NonNull
-    IConnectionManager getConnectionManager();
+    IOldConnectionManager getConnectionManager();
 
     @NonNull
     IOtrManager getOtrManager();

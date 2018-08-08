@@ -1,6 +1,6 @@
 package biz.dealnote.xmpp.service.request
 
-import biz.dealnote.xmpp.service.IConnectionManager
+import biz.dealnote.xmpp.service.IOldConnectionManager
 import biz.dealnote.xmpp.util.safelyWait
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -11,12 +11,11 @@ import org.jxmpp.jid.impl.JidCreate
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
-class XmppRxApiImpl(private val connectionManager: IConnectionManager) : IXmppRxApi {
+class XmppRxApiImpl(private val connectionManager: IOldConnectionManager, private val executor: ExecutorService) : IXmppRxApi {
 
     override fun getVCard(acccount: Int, jid: String): Single<VCard> {
-        return singleFromCallable(xmppExecutor, Callable {
+        return singleFromCallable(executor, Callable {
             val connection: AbstractXMPPConnection? = connectionManager.findConnectionFor(acccount)
 
             connection?.run {
@@ -93,7 +92,5 @@ class XmppRxApiImpl(private val connectionManager: IConnectionManager) : IXmppRx
                 }
             }
         }
-
-        private val xmppExecutor: ExecutorService = Executors.newSingleThreadExecutor()
     }
 }

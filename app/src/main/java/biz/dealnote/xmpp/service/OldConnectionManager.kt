@@ -2,6 +2,7 @@ package biz.dealnote.xmpp.service
 
 import android.content.Context
 import biz.dealnote.xmpp.Constants
+import biz.dealnote.xmpp.db.interfaces.IAccountsRepository
 import biz.dealnote.xmpp.model.Account
 import biz.dealnote.xmpp.service.exception.ConnectionAlreadyRegisteredException
 import de.duenndns.ssl.MemorizingTrustManager
@@ -33,10 +34,11 @@ import javax.net.ssl.X509TrustManager
  * Created by admin on 05.11.2016.
  * phoenix-for-xmpp
  */
-internal class ConnectionManager(context: Context) : IConnectionManager {
+internal class OldConnectionManager(context: Context,
+                                    private val accountsRepository: IAccountsRepository) : IOldConnectionManager {
 
-    private val connectionsMap: MutableMap<Account, XMPPTCPConnection>
-    private var sslContext: SSLContext? = null
+    private val connectionsMap: MutableMap<Account, XMPPTCPConnection> = ConcurrentHashMap()
+    private var sslContext: SSLContext
 
     private val rosterAddingPublisher: PublishProcessor<AccountAction<Collection<RosterEntry>>> = PublishProcessor.create()
     private val rosterUpdatesPublisher: PublishProcessor<AccountAction<Collection<RosterEntry>>> = PublishProcessor.create()
@@ -48,12 +50,11 @@ internal class ConnectionManager(context: Context) : IConnectionManager {
     private val fileTransferPublisher: PublishProcessor<AccountAction<FileTransferRequest>> = PublishProcessor.create()
 
     init {
-        this.connectionsMap = ConcurrentHashMap()
-
         try {
-            val trustManager = MemorizingTrustManager(context)
-            this.sslContext = SSLContext.getInstance("TLS")
-            this.sslContext!!.init(null, arrayOf<X509TrustManager>(trustManager), SecureRandom())
+            sslContext = SSLContext.getInstance("TLS")
+                    .apply {
+                        init(null, arrayOf<X509TrustManager>(MemorizingTrustManager(context)), SecureRandom())
+                    }
         } catch (e: NoSuchAlgorithmException) {
             throw IllegalStateException("Unable to create SSL Context")
         } catch (e: KeyManagementException) {
@@ -88,7 +89,7 @@ internal class ConnectionManager(context: Context) : IConnectionManager {
                 .setResource(Constants.APP_RESOURCE)
                 .setConnectTimeout(timeout)
                 .setSecurityMode(ConnectionConfiguration.SecurityMode.required)
-                .setCustomSSLContext(sslContext!!)
+                .setCustomSSLContext(sslContext)
                 .build()
 
         val connection = XMPPTCPConnection(conf)
@@ -127,6 +128,7 @@ internal class ConnectionManager(context: Context) : IConnectionManager {
 
         return connection
     }
+
 
     override fun findConnectionFor(accountId: Int): AbstractXMPPConnection? {
         for ((key, value) in connectionsMap) {

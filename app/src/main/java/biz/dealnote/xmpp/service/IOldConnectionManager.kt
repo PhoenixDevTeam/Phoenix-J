@@ -13,7 +13,7 @@ import org.jxmpp.jid.Jid
  * Created by admin on 05.11.2016.
  * phoenix-for-xmpp
  */
-interface IConnectionManager {
+interface IOldConnectionManager {
     fun registerConnectionFor(account: Account): AbstractXMPPConnection
 
     fun findConnectionFor(accountId: Int): AbstractXMPPConnection?

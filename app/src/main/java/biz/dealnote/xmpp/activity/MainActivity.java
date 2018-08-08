@@ -12,15 +12,19 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.jivesoftware.smack.AbstractXMPPConnection;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import biz.dealnote.xmpp.Extra;
+import biz.dealnote.xmpp.Injection;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.callback.AppStyleable;
 import biz.dealnote.xmpp.callback.OnBackButtonCallback;
 import biz.dealnote.xmpp.callback.OnPlaceOpenCallback;
 import biz.dealnote.xmpp.db.Accounts;
+import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.fragment.AccountFragment;
 import biz.dealnote.xmpp.fragment.ChatFragment;
 import biz.dealnote.xmpp.fragment.ContactCardFragment;
@@ -35,10 +39,12 @@ import biz.dealnote.xmpp.place.AppPlaceProvider;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.RequestAdapter;
 import biz.dealnote.xmpp.service.request.RequestFactory;
-import biz.dealnote.xmpp.service.request.XmppRequestManager;
 import biz.dealnote.xmpp.util.AppPerms;
+import biz.dealnote.xmpp.util.Logger;
 import biz.dealnote.xmpp.util.Objects;
 import biz.dealnote.xmpp.util.Utils;
+import io.reactivex.Observable;
+import io.reactivex.functions.Consumer;
 
 public class MainActivity extends AppCompatActivity implements OnPlaceOpenCallback, AppStyleable, AppPlaceProvider {
 
@@ -89,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements OnPlaceOpenCallba
         connectToActiveAccounts();
 
         if (savedInstanceState == null) {
-            if(!handleIntent(getIntent())){
+            if (!handleIntent(getIntent())) {
                 attachMainTabsFragment();
             }
         }
@@ -97,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements OnPlaceOpenCallba
         resolveNavigationIcon();
     }
 
-    private void attachMainTabsFragment(){
+    private void attachMainTabsFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment, MainTabsFragment.newInstance())
@@ -113,9 +119,9 @@ public class MainActivity extends AppCompatActivity implements OnPlaceOpenCallba
         }
     }
 
-    public boolean handleIntent(@NonNull Intent intent){
+    public boolean handleIntent(@NonNull Intent intent) {
         String action = intent.getAction();
-        if(ACTION_OPEN_PLACE.equals(action)){
+        if (ACTION_OPEN_PLACE.equals(action)) {
             AppPlace place = intent.getParcelableExtra(Extra.PLACE);
             place.tryOpenWith(this);
             return true;
@@ -135,8 +141,21 @@ public class MainActivity extends AppCompatActivity implements OnPlaceOpenCallba
     }
 
     private void connectToActiveAccounts() {
-        Request request = RequestFactory.getConnectToAccountsRequest();
-        XmppRequestManager.from(this).execute(request, mRequestAdapter);
+        //Request request = RequestFactory.getConnectToAccountsRequest();
+        //XmppRequestManager.from(this).execute(request, mRequestAdapter);
+
+        Repositories.getInstance()
+                .getAccountsRepository()
+                .getAllActive()
+                .flatMapObservable(accounts -> Observable.fromIterable(accounts)
+                        .flatMapSingle(account -> Injection.INSTANCE.getXmppConnectionManager().obtainConnected(account.id)))
+                .toList()
+                .subscribe(new Consumer<List<AbstractXMPPConnection>>() {
+                    @Override
+                    public void accept(List<AbstractXMPPConnection> connections) throws Exception {
+                        Logger.d("connectToActiveAccounts", "count: " + connections.size());
+                    }
+                });
     }
 
     @Override
@@ -216,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements OnPlaceOpenCallba
 
     @Override
     public void openPlace(AppPlace place) {
-        if(place.getType() == AppPlace.Type.CHAT){
+        if (place.getType() == AppPlace.Type.CHAT) {
             int accountId = place.getArgs().getInt(Extra.ACCOUNT_ID);
             String destination = place.getArgs().getString(Extra.DESTINATION);
             Integer chatId = place.getArgs().containsKey(Extra.CHAT_ID) ? place.getArgs().getInt(Extra.CHAT_ID) : null;

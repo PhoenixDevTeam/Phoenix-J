@@ -16,7 +16,7 @@ import java.util.List;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.service.IConnectionManager;
+import biz.dealnote.xmpp.service.IOldConnectionManager;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.util.Logger;
@@ -26,7 +26,7 @@ public class ConnectToAccountsOperation extends AbsXmppOperation {
     @Override
     public Bundle executeRequest(@NonNull Context context, @NonNull IXmppContext xmppContext, @NonNull Request request) {
 
-        IConnectionManager connectionManager = xmppContext.getConnectionManager();
+        IOldConnectionManager connectionManager = xmppContext.getConnectionManager();
         List<Account> accounts = Repositories.getInstance()
                 .getAccountsRepository()
                 .getAllActive()

@@ -69,7 +69,7 @@ public class XmppService extends Service implements IXmppContext {
     private XmppOperationManager mXmppOperationManager;
     private RequestAdapter mRequestAdapter;
 
-    private IConnectionManager mConnectionManager;
+    private IOldConnectionManager mConnectionManager;
     private IOtrManager mOtrManager;
     private IFileTransferer fileTransferer;
 
@@ -301,7 +301,7 @@ public class XmppService extends Service implements IXmppContext {
 
     @NonNull
     @Override
-    public IConnectionManager getConnectionManager() {
+    public IOldConnectionManager getConnectionManager() {
         return mConnectionManager;
     }
 

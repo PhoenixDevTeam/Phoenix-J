@@ -26,7 +26,7 @@ import biz.dealnote.xmpp.exception.AccountAlreadyExistException;
 import biz.dealnote.xmpp.exception.CustomAppException;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.User;
-import biz.dealnote.xmpp.service.IConnectionManager;
+import biz.dealnote.xmpp.service.IOldConnectionManager;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.exception.ConnectionAlreadyRegisteredException;
 import biz.dealnote.xmpp.service.request.Request;
@@ -60,7 +60,7 @@ public class SignInOperation extends AbsXmppOperation {
             }
         }
 
-        IConnectionManager connectionManager = xmppContext.getConnectionManager();
+        IOldConnectionManager connectionManager = xmppContext.getConnectionManager();
         AbstractXMPPConnection connection = connectionManager.registerConnectionFor(account);
 
         try {
