@@ -95,7 +95,7 @@ class XmppConnectionManager(private val context: Context,
     override fun obtainConnected(accountId: Int): Single<AbstractXMPPConnection> {
         return Single.create { emitter ->
             synchronized(entryMap) {
-                val entry = entryMap.getOrPut(accountId) { Entry(accountId, sslContext, accountsRepository, WeakReference(this@XmppConnectionManager)) }
+                val entry = entryMap.getOrPut(accountId) { Entry(accountId, sslContext, accountsRepository, this@XmppConnectionManager) }
 
                 if (entry.isConnected()) {
                     emitter.onSuccess(entry.connection!!)
@@ -112,10 +112,11 @@ class XmppConnectionManager(private val context: Context,
     private class Entry(val accountId: Int,
                         val sslContext: SSLContext,
                         val accounts: IAccountsRepository,
-                        val managerOld: WeakReference<XmppConnectionManager>) {
+                        connectionManager: XmppConnectionManager) {
 
         val compositeDisposable = CompositeDisposable()
         var connection: XMPPTCPConnection? = null
+        val manager = WeakReference(connectionManager)
 
         fun connect() {
             synchronized(this) {
@@ -180,23 +181,23 @@ class XmppConnectionManager(private val context: Context,
                 val roster = Roster.getInstanceFor(connection)
                 roster.addRosterListener(object : RosterListener {
                     override fun entriesDeleted(addresses: Collection<Jid>) {
-                        managerOld.get()?.notifyRosterDeleted(account, addresses)
+                        manager.get()?.notifyRosterDeleted(account, addresses)
                     }
 
                     override fun presenceChanged(presence: Presence) {
-                        managerOld.get()?.notifyPresenceChanged(account, presence)
+                        manager.get()?.notifyPresenceChanged(account, presence)
                     }
 
                     override fun entriesUpdated(addresses: Collection<Jid>) {
-                        managerOld.get()?.notifyRosterUpdate(account, addresses.map { roster.getEntry(it.asBareJid()) })
+                        manager.get()?.notifyRosterUpdate(account, addresses.map { roster.getEntry(it.asBareJid()) })
                     }
 
                     override fun entriesAdded(addresses: Collection<Jid>) {
-                        managerOld.get()?.notifyRosterAdded(account, addresses.map { roster.getEntry(it.asBareJid()) })
+                        manager.get()?.notifyRosterAdded(account, addresses.map { roster.getEntry(it.asBareJid()) })
                     }
                 })
 
-                connection.addAsyncStanzaListener({ packet -> managerOld.get()?.notifyStanza(account, packet) }, { it -> it is Message || it is Presence })
+                connection.addAsyncStanzaListener({ packet -> manager.get()?.notifyStanza(account, packet) }, { it -> it is Message || it is Presence })
 
                 connection.addConnectionListener(object : AbstractConnectionListener() {
                     override fun connected(connection: XMPPConnection) {
@@ -204,7 +205,7 @@ class XmppConnectionManager(private val context: Context,
                     }
 
                     override fun authenticated(connection: XMPPConnection, resumed: Boolean) {
-                        managerOld.get()?.onConnected(this@Entry)
+                        manager.get()?.onConnected(this@Entry)
                     }
                 })
 
