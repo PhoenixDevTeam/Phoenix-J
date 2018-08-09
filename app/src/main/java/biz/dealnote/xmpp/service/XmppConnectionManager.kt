@@ -100,7 +100,7 @@ class XmppConnectionManager(private val context: Context,
 
         synchronized(entryMap) {
             for ((_, entry) in entryMap) {
-                entry.connectIfWasDisconnected()
+                entry.connectAsync()
             }
         }
     }
@@ -178,22 +178,16 @@ class XmppConnectionManager(private val context: Context,
         val compositeDisposable = CompositeDisposable()
         var connection: XMPPTCPConnection? = null
         val manager = WeakReference(connectionManager)
-        var wasDisconnected = false
-
-        fun connectIfWasDisconnected() {
-            synchronized(this) {
-                if (wasDisconnected) {
-                    wasDisconnected = false
-                    connectAsync()
-                }
-            }
-        }
+        var released = true
 
         fun connectAsync() {
             synchronized(this) {
-                compositeDisposable.add(accounts.getById(accountId)
-                        .subscribeOn(Schedulers.io())
-                        .subscribe({ account -> onAccountFound(account) }, { _ -> onAccountNotFound() }))
+                if (released) {
+                    released = false
+                    compositeDisposable.add(accounts.getById(accountId)
+                            .subscribeOn(Schedulers.io())
+                            .subscribe({ account -> onAccountFound(account) }, { _ -> onAccountNotFound() }))
+                }
             }
         }
 
@@ -215,8 +209,6 @@ class XmppConnectionManager(private val context: Context,
 
         fun onAccountFound(account: Account) {
             synchronized(this) {
-                if (connection != null) return
-
                 connection = createXMPPTCPConnection(account)
 
                 connection?.run {
@@ -297,7 +289,7 @@ class XmppConnectionManager(private val context: Context,
                 }
 
                 connection = null
-                wasDisconnected = true
+                released = true
                 compositeDisposable.clear()
             }
         }
