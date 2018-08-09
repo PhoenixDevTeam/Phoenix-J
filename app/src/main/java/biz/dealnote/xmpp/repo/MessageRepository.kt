@@ -2,6 +2,7 @@ package biz.dealnote.xmpp.repo
 
 import biz.dealnote.xmpp.db.Repositories
 import biz.dealnote.xmpp.db.exception.RecordDoesNotExistException
+import biz.dealnote.xmpp.db.interfaces.IMessagesStorage
 import biz.dealnote.xmpp.model.MessageBuilder
 import biz.dealnote.xmpp.model.MessageUpdate
 import biz.dealnote.xmpp.model.Msg
@@ -23,6 +24,8 @@ class MessageRepository(private val api: IXmppRxApi,
                         private val storages: Repositories,
                         private val idGenerator: IStanzaIdGenerator) : IMessageRepository {
 
+    private val messagesStorage: IMessagesStorage get() = storages.messages
+
     private val chatIds: MutableMap<String, Int> = Collections.synchronizedMap(HashMap())
 
     override fun saveMessage(accountId: Int, destination: String, text: String, type: Int): Single<Msg> {
@@ -42,7 +45,7 @@ class MessageRepository(private val api: IXmppRxApi,
                                 it.status = Msg.STATUS_IN_QUEUE
                             }
 
-                    return@flatMap storages.messages.saveMessage(builder)
+                    return@flatMap messagesStorage.saveMessage(builder)
                             .doOnSuccess {
                                 chatIds[destination] = it.chatId
                             }
@@ -55,7 +58,7 @@ class MessageRepository(private val api: IXmppRxApi,
     override fun startSendingQueue() {
         if (sending) return
 
-        val disposable = storages.messages.firstWithStatus(Msg.STATUS_IN_QUEUE)
+        val disposable = messagesStorage.firstWithStatus(Msg.STATUS_IN_QUEUE)
                 .flatMap {
                     val message = it.get()
                             ?: return@flatMap Single.error<Msg>(RecordDoesNotExistException())
@@ -90,12 +93,12 @@ class MessageRepository(private val api: IXmppRxApi,
                 .andThen(api.sendMessage(message.accountId, dto))
                 .andThen(changeStatus(message.id, Msg.STATUS_SENT))
                 .onErrorResumeNext {
-                    storages.messages.updateStatus(message.chatId, Msg.STATUS_IN_QUEUE, Msg.STATUS_ERROR)
+                    messagesStorage.updateStatus(message.chatId, Msg.STATUS_IN_QUEUE, Msg.STATUS_ERROR)
                             .andThen(Completable.error(it))
                 }
     }
 
-    private fun changeStatus(id: Int, status: Int): Completable = storages.messages.updateMessage(id, MessageUpdate.simpleStatusChange(status))
+    private fun changeStatus(id: Int, status: Int): Completable = messagesStorage.updateMessage(id, MessageUpdate.simpleStatusChange(status))
 
     private fun obtainSenderId(accountId: Int): Single<User> {
         return storages.accountsRepository.getById(accountId)
