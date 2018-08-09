@@ -3,7 +3,7 @@ package biz.dealnote.xmpp.mvp.view
 import android.net.Uri
 
 import biz.dealnote.mvp.core.IMvpView
-import biz.dealnote.xmpp.model.AppMessage
+import biz.dealnote.xmpp.model.Msg
 import biz.dealnote.xmpp.util.AvatarResorce
 
 /**
@@ -22,11 +22,11 @@ interface IChatView : IMvpView, IErrorView, IToastView {
     fun showUploadStreamConfirmationDialog(uri: Uri, type: String?)
     fun removeInputStreamExtra()
 
-    fun showReSentMessageDialog(message: AppMessage)
+    fun showReSentMessageDialog(message: Msg)
 
     fun showOTRActionsMenu(canStart: Boolean, canRefresh: Boolean, canEnd: Boolean)
 
-    fun displayMessages(messages: List<AppMessage>, avatarResorce: AvatarResorce)
+    fun displayMessages(messages: List<Msg>, avatarResorce: AvatarResorce)
 
     fun notifyItemRangeInserted(positionStart: Int, itemCount: Int)
 

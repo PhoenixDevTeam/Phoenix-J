@@ -21,10 +21,12 @@ import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.ActivityUtils;
 import biz.dealnote.xmpp.callback.AppStyleable;
 import biz.dealnote.xmpp.fragment.base.BaseMvpFragment;
+import biz.dealnote.xmpp.model.AccountId;
 import biz.dealnote.xmpp.model.Contact;
 import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.mvp.presenter.ContactCardPresenter;
 import biz.dealnote.xmpp.mvp.view.IContactCardView;
+import biz.dealnote.xmpp.place.PlaceFactory;
 import biz.dealnote.xmpp.util.PicassoAvatarHandler;
 import biz.dealnote.xmpp.util.PicassoInstance;
 
@@ -71,7 +73,7 @@ public class ContactCardFragment extends BaseMvpFragment<ContactCardPresenter, I
         avatar = view.findViewById(R.id.avatar);
         avaterLetter = view.findViewById(R.id.avatar_letter);
 
-        view.findViewById(R.id.to_chat_button).setOnClickListener(this);
+        view.findViewById(R.id.to_chat_button).setOnClickListener(v -> getPresenter().fireChatClick());
         view.findViewById(R.id.send_add_request).setOnClickListener(this);
         return view;
     }
@@ -150,8 +152,13 @@ public class ContactCardFragment extends BaseMvpFragment<ContactCardPresenter, I
         tvEmail.setVisibility(TextUtils.isEmpty(availableEmail) ? View.GONE : View.VISIBLE);*/
     }
 
+    @Override
+    public void openChat(@NotNull AccountId accountId, @NotNull String jid) {
+        PlaceFactory.getChatPlace(accountId.getId(), jid, null).tryOpenWith(requireActivity());
+    }
+
     private void toChat() {
-        //PlaceFactory.getChatPlace(entry.getAccount().getId(), entry.getJid(), null).tryOpenWith(getActivity());
+
     }
 
     @Override

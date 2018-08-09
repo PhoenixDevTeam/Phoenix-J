@@ -11,7 +11,7 @@ import org.jivesoftware.smack.packet.Presence;
 
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
 import biz.dealnote.xmpp.model.AppFile;
-import biz.dealnote.xmpp.model.AppMessage;
+import biz.dealnote.xmpp.model.Msg;
 
 public class Messages {
 
@@ -19,13 +19,13 @@ public class Messages {
 
     public static Integer appPresenseTypeFromApi(Presence.Type type) {
         if (Presence.Type.subscribe.equals(type)) {
-            return AppMessage.TYPE_SUBSCRIBE;
+            return Msg.TYPE_SUBSCRIBE;
         } else if (Presence.Type.subscribed.equals(type)) {
-            return AppMessage.TYPE_SUBSCRIBED;
+            return Msg.TYPE_SUBSCRIBED;
         } else if (Presence.Type.unsubscribe.equals(type)) {
-            return AppMessage.TYPE_UNSUBSCRIBE;
+            return Msg.TYPE_UNSUBSCRIBE;
         } else if (Presence.Type.unsubscribed.equals(type)) {
-            return AppMessage.TYPE_UNSUBSCRIBED;
+            return Msg.TYPE_UNSUBSCRIBED;
         } else {
             return null;
         }
@@ -34,42 +34,42 @@ public class Messages {
     public static int getAppTypeFrom(Message.Type type) {
         switch (type) {
             case chat:
-                return AppMessage.TYPE_CHAT;
+                return Msg.TYPE_CHAT;
             case normal:
-                return AppMessage.TYPE_NORMAL;
+                return Msg.TYPE_NORMAL;
             case groupchat:
-                return AppMessage.TYPE_GROUP_CHAT;
+                return Msg.TYPE_GROUP_CHAT;
             case headline:
-                return AppMessage.TYPE_HEADLINE;
+                return Msg.TYPE_HEADLINE;
             case error:
-                return AppMessage.TYPE_ERROR;
+                return Msg.TYPE_ERROR;
             default:
-                return AppMessage.UNKNOWN;
+                return Msg.UNKNOWN;
         }
     }
 
     public static Message.Type getTypeFrom(int type) {
         switch (type) {
-            case AppMessage.TYPE_CHAT:
+            case Msg.TYPE_CHAT:
                 return Message.Type.chat;
-            case AppMessage.TYPE_NORMAL:
+            case Msg.TYPE_NORMAL:
                 return Message.Type.normal;
-            case AppMessage.TYPE_GROUP_CHAT:
+            case Msg.TYPE_GROUP_CHAT:
                 return Message.Type.groupchat;
-            case AppMessage.TYPE_HEADLINE:
+            case Msg.TYPE_HEADLINE:
                 return Message.Type.headline;
-            case AppMessage.TYPE_ERROR:
+            case Msg.TYPE_ERROR:
                 return Message.Type.error;
             default:
                 return null;
         }
     }
 
-    public static AppMessage map(Cursor cursor) {
+    public static Msg map(Cursor cursor) {
         int type = cursor.getInt(cursor.getColumnIndex(MessagesColumns.TYPE));
 
         AppFile file = null;
-        if (type == AppMessage.TYPE_INCOME_FILE || type == AppMessage.TYPE_OUTGOING_FILE) {
+        if (type == Msg.TYPE_INCOME_FILE || type == Msg.TYPE_OUTGOING_FILE) {
             String path = cursor.getString(cursor.getColumnIndex(MessagesColumns.ATTACHED_FILE_PATH));
 
             file = new AppFile(TextUtils.isEmpty(path) ? null : Uri.parse(path),
@@ -79,7 +79,7 @@ public class Messages {
             file.description = cursor.getString(cursor.getColumnIndex(MessagesColumns.ATTACHED_FILE_DESCRIPTION));
         }
 
-        return new AppMessage()
+        return new Msg()
                 .setId(cursor.getInt(cursor.getColumnIndex(MessagesColumns._ID)))
                 .setAccountId(cursor.getInt(cursor.getColumnIndex(MessagesColumns.ACCOUNT_ID)))
                 .setChatId(cursor.getInt(cursor.getColumnIndex(MessagesColumns.CHAT_ID)))
@@ -99,7 +99,7 @@ public class Messages {
     public static void appendAttachedFilePath(Context context, int mid, String path) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessagesColumns.ATTACHED_FILE_PATH, path);
-        contentValues.put(MessagesColumns.STATUS, AppMessage.STATUS_DONE);
+        contentValues.put(MessagesColumns.STATUS, Msg.STATUS_DONE);
 
         context.getContentResolver().update(ChatContentProvider.MESSAGES_CONTENT_URI, contentValues,
                 MessagesColumns._ID + " = ?", new String[]{String.valueOf(mid)});

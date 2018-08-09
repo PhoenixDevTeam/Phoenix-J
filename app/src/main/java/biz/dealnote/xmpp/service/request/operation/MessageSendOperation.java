@@ -17,8 +17,8 @@ import biz.dealnote.xmpp.db.Messages;
 import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.exception.CustomAppException;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.MessageUpdate;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.security.IOtrManager;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.request.Request;
@@ -29,9 +29,9 @@ public class MessageSendOperation extends AbsXmppOperation {
 
     @Override
     public Bundle executeRequest(@NonNull Context context, @NonNull IXmppContext xmppContext, @NonNull Request request) throws Exception {
-        AppMessage message = (AppMessage) request.getParcelable(Extra.MESSAGE);
+        Msg message = (Msg) request.getParcelable(Extra.MESSAGE);
 
-        changeMessgeStatusImpl(context, message, AppMessage.STATUS_SENDING);
+        changeMessgeStatusImpl(context, message, Msg.STATUS_SENDING);
 
         try {
             AbstractXMPPConnection connection = assertConnectionFor(xmppContext, message.getAccountId());
@@ -49,16 +49,16 @@ public class MessageSendOperation extends AbsXmppOperation {
             forSend.setStanzaId(message.getStanzaId());
             connection.sendStanza(forSend);
 
-            changeMessgeStatusImpl(context, message, AppMessage.STATUS_SENT);
+            changeMessgeStatusImpl(context, message, Msg.STATUS_SENT);
         } catch (Exception e) {
-            changeMessgeStatusImpl(context, message, AppMessage.STATUS_ERROR);
+            changeMessgeStatusImpl(context, message, Msg.STATUS_ERROR);
             throw new CustomAppException(e.getMessage());
         }
 
         return null;
     }
 
-    private void changeMessgeStatusImpl(Context context, AppMessage message, int newStatus) {
+    private void changeMessgeStatusImpl(Context context, Msg message, int newStatus) {
         Repositories.getInstance()
                 .getMessages()
                 .updateMessage(message.getId(), MessageUpdate.simpleStatusChange(newStatus))

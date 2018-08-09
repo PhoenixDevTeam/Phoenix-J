@@ -18,9 +18,9 @@ import org.jxmpp.stringprep.XmppStringprepException;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.MessageBuilder;
 import biz.dealnote.xmpp.model.MessageUpdate;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.exception.CustomRequestException;
@@ -46,7 +46,7 @@ public class AcceptSubscribeOperation extends AbsXmppOperation {
 
         Repositories.getInstance()
                 .getMessages()
-                .updateMessage(mid, MessageUpdate.simpleStatusChange(AppMessage.STATUS_ACCEPTED))
+                .updateMessage(mid, MessageUpdate.simpleStatusChange(Msg.STATUS_ACCEPTED))
                 .blockingAwait();
 
         Roster roster = Roster.getInstanceFor(connection);
@@ -60,12 +60,12 @@ public class AcceptSubscribeOperation extends AbsXmppOperation {
             connection.sendStanza(subscribe);
 
             MessageBuilder builder = new MessageBuilder(account.id)
-                    .setType(AppMessage.TYPE_SUBSCRIBE)
+                    .setType(Msg.TYPE_SUBSCRIBE)
                     .setSenderJid(account.buildBareJid())
                     .setDestination(jid)
                     .setDate(Unixtime.now())
                     .setOut(true)
-                    .setStatus(AppMessage.STATUS_WAITING_FOR_REASON);
+                    .setStatus(Msg.STATUS_WAITING_FOR_REASON);
 
             Repositories.getInstance()
                     .getMessages()

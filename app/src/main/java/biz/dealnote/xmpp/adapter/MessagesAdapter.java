@@ -25,7 +25,7 @@ import java.util.Set;
 
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.model.AppFile;
-import biz.dealnote.xmpp.model.AppMessage;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.util.AvatarResorce;
 import biz.dealnote.xmpp.util.Avatars;
 import biz.dealnote.xmpp.util.Objects;
@@ -44,7 +44,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private final int secondaryTextColor;
 
-    private List<AppMessage> data;
+    private List<Msg> data;
     private Context context;
     private AvatarResorce avatarResorce;
     private Transformation transformation;
@@ -53,7 +53,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private SharedHolders<AudioMessageHolder> mAudioMessageHolders;
 
-    public MessagesAdapter(@NonNull List<AppMessage> data, @NonNull AvatarResorce avatarResorce, @NonNull Context context) {
+    public MessagesAdapter(@NonNull List<Msg> data, @NonNull AvatarResorce avatarResorce, @NonNull Context context) {
         this.data = data;
         this.context = context;
         this.avatarResorce = avatarResorce;
@@ -101,21 +101,21 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    private void bindSubscriptionHolder(SubscriptionHolder holder, final AppMessage message) {
+    private void bindSubscriptionHolder(SubscriptionHolder holder, final Msg message) {
         diplayAvatarFor(holder, message);
 
         String destination = message.getDestination();
 
-        boolean hasReason = message.getStatus() == AppMessage.STATUS_ACCEPTED || message.getStatus() == AppMessage.STATUS_DECLINED;
+        boolean hasReason = message.getStatus() == Msg.STATUS_ACCEPTED || message.getStatus() == Msg.STATUS_DECLINED;
 
         holder.reason.setVisibility(hasReason ? View.VISIBLE : View.GONE);
-        holder.buttonsRoot.setVisibility(!message.isOut() && message.getType() == AppMessage.TYPE_SUBSCRIBE && !hasReason ? View.VISIBLE : View.GONE);
+        holder.buttonsRoot.setVisibility(!message.isOut() && message.getType() == Msg.TYPE_SUBSCRIBE && !hasReason ? View.VISIBLE : View.GONE);
 
         switch (message.getStatus()) {
-            case AppMessage.STATUS_ACCEPTED:
+            case Msg.STATUS_ACCEPTED:
                 holder.reason.setText(R.string.accepted);
                 break;
-            case AppMessage.STATUS_DECLINED:
+            case Msg.STATUS_DECLINED:
                 holder.reason.setText(R.string.declined);
                 break;
         }
@@ -144,7 +144,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         });
     }
 
-    private void diplayAvatarFor(Avatars.AvatarWithLetter avatarWithLetter, AppMessage message) {
+    private void diplayAvatarFor(Avatars.AvatarWithLetter avatarWithLetter, Msg message) {
         AvatarResorce.Entry entry = avatarResorce.findById(message.getSenderId());
         String avatarHash = entry == null ? null : entry.hash;
         //byte[] avatar = entry == null ? null : entry.avatar;
@@ -153,11 +153,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public interface AudioBindCallback {
-        void onHolderCreate(int holderId, @NonNull AppMessage message);
+        void onHolderCreate(int holderId, @NonNull Msg message);
 
-        void onPlayButtonClick(int holderId, @NonNull AppMessage message);
+        void onPlayButtonClick(int holderId, @NonNull Msg message);
 
-        void onSeekbarMovedByUser(int position, @NonNull AppMessage message);
+        void onSeekbarMovedByUser(int position, @NonNull Msg message);
     }
 
     private AudioBindCallback mAudioBindCallback;
@@ -166,7 +166,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.mAudioBindCallback = audioBindCallback;
     }
 
-    private void bindAudioMessageHolder(AudioMessageHolder holder, final AppMessage message) {
+    private void bindAudioMessageHolder(AudioMessageHolder holder, final Msg message) {
         Objects.requireNonNull(mAudioBindCallback);
         mAudioMessageHolders.put(message.getId(), holder);
 
@@ -245,20 +245,20 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
     }
 
-    private void bindFileTransferHolder(FileTransferHolder holder, final AppMessage message) {
+    private void bindFileTransferHolder(FileTransferHolder holder, final Msg message) {
         diplayAvatarFor(holder, message);
 
         final AppFile appFile = message.getAttachedFile();
 
         String title = context.getString(R.string.file_transfer) + ": " + appFile.name;
-        if (message.getType() == AppMessage.TYPE_INCOME_FILE) {
+        if (message.getType() == Msg.TYPE_INCOME_FILE) {
             String fileSizeMb = Utils.getSizeString(appFile.size);
             title = title + ", " + fileSizeMb;
         }
 
         holder.title.setText(title);
         holder.time.setText(Utils.getDateFromUnixTime(message.getDate()));
-        holder.time.setTextColor(message.getStatus() == AppMessage.STATUS_CANCELLED ? Color.RED : secondaryTextColor);
+        holder.time.setTextColor(message.getStatus() == Msg.STATUS_CANCELLED ? Color.RED : secondaryTextColor);
 
         holder.acceptButton.setOnClickListener(v -> {
             if (actionListener != null) {
@@ -280,29 +280,29 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         holder.progress.setProgress(message.getProgress());
 
-        boolean canOpenFile = message.getStatus() == AppMessage.STATUS_DONE && !message.isOut();
+        boolean canOpenFile = message.getStatus() == Msg.STATUS_DONE && !message.isOut();
 
         //holder.openFileButton.setVisibility(canOpenFile ? View.VISIBLE : View.GONE);
 
-        holder.progress.setVisibility(message.getStatus() == AppMessage.STATUS_IN_PROGRESS ? View.VISIBLE : View.GONE);
-        holder.buttonsRoot.setVisibility(message.getStatus() == AppMessage.STATUS_CANCELLED ? View.GONE : View.VISIBLE);
+        holder.progress.setVisibility(message.getStatus() == Msg.STATUS_IN_PROGRESS ? View.VISIBLE : View.GONE);
+        holder.buttonsRoot.setVisibility(message.getStatus() == Msg.STATUS_CANCELLED ? View.GONE : View.VISIBLE);
 
         switch (message.getStatus()) {
-            case AppMessage.STATUS_WAITING_FOR_REASON:
+            case Msg.STATUS_WAITING_FOR_REASON:
                 holder.acceptButton.setVisibility(message.isOut() ? View.GONE : View.VISIBLE);
                 holder.declineButton.setVisibility(View.VISIBLE);
                 break;
-            case AppMessage.STATUS_CANCELLED:
+            case Msg.STATUS_CANCELLED:
                 holder.time.setText(R.string.cancelled);
                 break;
-            case AppMessage.STATUS_IN_PROGRESS:
+            case Msg.STATUS_IN_PROGRESS:
                 holder.acceptButton.setVisibility(View.GONE);
                 holder.declineButton.setVisibility(View.VISIBLE);
 
                 String percent = message.getProgress() + "%";
                 holder.time.setText(percent);
                 break;
-            case AppMessage.STATUS_DONE:
+            case Msg.STATUS_DONE:
                 holder.acceptButton.setVisibility(View.GONE);
                 holder.declineButton.setVisibility(View.GONE);
                 break;
@@ -310,7 +310,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     private void bindMessageHolder(MessageHolder holder, int position) {
-        final AppMessage message = data.get(position);
+        final Msg message = data.get(position);
 
         if (message.isSelected()) {
             PicassoInstance.get()
@@ -322,19 +322,19 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         holder.body.setText(message.getMessageBody(context), TextView.BufferType.SPANNABLE);
-        holder.time.setTextColor(message.getStatus() == AppMessage.STATUS_ERROR ? Color.RED : secondaryTextColor);
+        holder.time.setTextColor(message.getStatus() == Msg.STATUS_ERROR ? Color.RED : secondaryTextColor);
 
         switch (message.getStatus()) {
-            case AppMessage.STATUS_SENT:
+            case Msg.STATUS_SENT:
                 holder.time.setText(Utils.getDateFromUnixTime(message.getDate()));
                 break;
-            case AppMessage.STATUS_ERROR:
+            case Msg.STATUS_ERROR:
                 holder.time.setText(R.string.error);
                 break;
-            case AppMessage.STATUS_IN_QUEUE:
+            case Msg.STATUS_IN_QUEUE:
                 holder.time.setText(R.string.in_queue);
                 break;
-            case AppMessage.STATUS_SENDING:
+            case Msg.STATUS_SENDING:
                 holder.time.setText(R.string.sending);
                 break;
         }
@@ -356,20 +356,20 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public int getItemViewType(int position) {
-        AppMessage message = data.get(position);
+        Msg message = data.get(position);
 
-        if (message.isVoiceMessage() && message.hasSavedFile() && message.getStatus() == AppMessage.STATUS_DONE) {
+        if (message.isVoiceMessage() && message.hasSavedFile() && message.getStatus() == Msg.STATUS_DONE) {
             return TYPE_AUDIO_MESSAGE;
         }
 
-        if (message.getType() == AppMessage.TYPE_INCOME_FILE || message.getType() == AppMessage.TYPE_OUTGOING_FILE) {
+        if (message.getType() == Msg.TYPE_INCOME_FILE || message.getType() == Msg.TYPE_OUTGOING_FILE) {
             return TYPE_FILE_TRANSFER;
         }
 
-        if (message.getType() == AppMessage.TYPE_SUBSCRIBE ||
-                message.getType() == AppMessage.TYPE_SUBSCRIBED ||
-                message.getType() == AppMessage.TYPE_UNSUBSCRIBE ||
-                message.getType() == AppMessage.TYPE_UNSUBSCRIBED) {
+        if (message.getType() == Msg.TYPE_SUBSCRIBE ||
+                message.getType() == Msg.TYPE_SUBSCRIBED ||
+                message.getType() == Msg.TYPE_UNSUBSCRIBE ||
+                message.getType() == Msg.TYPE_UNSUBSCRIBED) {
             return TYPE_SUBSCRIPTION;
         }
 
@@ -384,28 +384,28 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.subscriptionActionListener = subscriptionActionListener;
     }
 
-    public void setData(List<AppMessage> data, AvatarResorce avatarResorce) {
+    public void setData(List<Msg> data, AvatarResorce avatarResorce) {
         this.data = data;
         this.avatarResorce = avatarResorce;
         notifyDataSetChanged();
     }
 
     public interface ActionListener {
-        void onFileTransferAcceptClick(AppMessage message);
+        void onFileTransferAcceptClick(Msg message);
 
-        void onFileTransferDeclineClick(AppMessage message);
+        void onFileTransferDeclineClick(Msg message);
 
         void onFileOpen(int mid, AppFile request);
 
-        void onMessageClicked(int position, AppMessage message);
+        void onMessageClicked(int position, Msg message);
 
-        boolean onMessageLongClick(int position, AppMessage message);
+        boolean onMessageLongClick(int position, Msg message);
     }
 
     public interface SubscriptionActionListener {
-        void onSubscriptionAcceptClick(AppMessage message);
+        void onSubscriptionAcceptClick(Msg message);
 
-        void onSubscriptionDeclineClick(AppMessage message);
+        void onSubscriptionDeclineClick(Msg message);
     }
 
     private class MessageHolder extends RecyclerView.ViewHolder implements Avatars.AvatarWithLetter {

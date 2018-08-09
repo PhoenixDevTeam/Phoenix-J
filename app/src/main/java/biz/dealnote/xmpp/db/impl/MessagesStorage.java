@@ -15,21 +15,22 @@ import java.util.Set;
 import biz.dealnote.xmpp.db.ChatContentProvider;
 import biz.dealnote.xmpp.db.DBHelper;
 import biz.dealnote.xmpp.db.Repositories;
-import biz.dealnote.xmpp.db.columns.UsersColumns;
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
+import biz.dealnote.xmpp.db.columns.UsersColumns;
 import biz.dealnote.xmpp.db.exception.AlreadyExistException;
 import biz.dealnote.xmpp.db.exception.DataValidateException;
 import biz.dealnote.xmpp.db.exception.DatabaseException;
 import biz.dealnote.xmpp.db.exception.RecordDoesNotExistException;
 import biz.dealnote.xmpp.db.interfaces.IChatsRepository;
+import biz.dealnote.xmpp.db.interfaces.IMessagesStorage;
 import biz.dealnote.xmpp.db.interfaces.IUsersStorage;
-import biz.dealnote.xmpp.db.interfaces.IMessagesRepository;
 import biz.dealnote.xmpp.model.AppFile;
-import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.MessageBuilder;
 import biz.dealnote.xmpp.model.MessageCriteria;
 import biz.dealnote.xmpp.model.MessageUpdate;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.util.AvatarResorce;
+import biz.dealnote.xmpp.util.Optional;
 import biz.dealnote.xmpp.util.Pair;
 import biz.dealnote.xmpp.util.Unixtime;
 import biz.dealnote.xmpp.util.Utils;
@@ -49,14 +50,14 @@ import static biz.dealnote.xmpp.util.Utils.safelyCloseCursor;
  * Created by ruslan.kolbasa on 02.11.2016.
  * phoenix_for_xmpp
  */
-public class MessagesRepository extends AbsRepository implements IMessagesRepository {
+public class MessagesStorage extends AbsRepository implements IMessagesStorage {
 
-    private final PublishSubject<AppMessage> addingPublisher;
+    private final PublishSubject<Msg> addingPublisher;
     private final PublishSubject<Pair<Integer, MessageUpdate>> statusChangePubisher;
     private final PublishSubject<Pair<Integer, Set<Integer>>> deletionPublisher;
     private final DBHelper dbHelper;
 
-    public MessagesRepository(Repositories repositories) {
+    public MessagesStorage(Repositories repositories) {
         super(repositories);
         this.dbHelper = DBHelper.getInstance(repositories);
         this.addingPublisher = PublishSubject.create();
@@ -67,7 +68,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
     private final Object messageAddLock = new Object();
 
     @Override
-    public Single<AppMessage> saveMessage(@NonNull final MessageBuilder builder) {
+    public Single<Msg> saveMessage(@NonNull final MessageBuilder builder) {
         return Single.create(e -> {
             // нельзя вставить более одного сообщения, только по очереди
             // потому что создаются и обновляются хидеры чатов
@@ -157,7 +158,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
 
                 int mid = Integer.parseInt(uri.getPathSegments().get(1));
 
-                AppMessage result = new AppMessage()
+                Msg result = new Msg()
                         .setId(mid)
                         .setAccountId(builder.getAccountId())
                         .setChatId(targetChatId)
@@ -180,7 +181,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
     }
 
     @Override
-    public Observable<AppMessage> createAddMessageObservable() {
+    public Observable<Msg> createAddMessageObservable() {
         return addingPublisher;
     }
 
@@ -202,7 +203,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
         statusChangePubisher.onNext(new Pair<>(messageId, update));
     }
 
-    private void notifyAboutNewMessageAdded(@NonNull AppMessage message) {
+    private void notifyAboutNewMessageAdded(@NonNull Msg message) {
         addingPublisher.onNext(message);
     }
 
@@ -232,7 +233,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
                 int messageStatus = update.getStatusUpdate().getStatus();
                 cv.put(MessagesColumns.STATUS, messageStatus);
 
-                if (messageStatus == AppMessage.STATUS_SENT) {
+                if (messageStatus == Msg.STATUS_SENT) {
                     // обновляем дату сообщения
                     cv.put(MessagesColumns.DATE, Unixtime.now());
                 }
@@ -256,11 +257,11 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
     }
 
     @Override
-    public Maybe<AppMessage> findLastMessage(int chatId) {
+    public Maybe<Msg> findLastMessage(int chatId) {
         return Maybe.create(e -> {
             Cursor cursor = getContentResolver().query(ChatContentProvider.MESSAGES_CONTENT_URI,
                     null, MessagesColumns.CHAT_ID + " = ?", new String[]{String.valueOf(chatId)}, MessagesColumns._ID + " DESC LIMIT 1");
-            AppMessage message = null;
+            Msg message = null;
 
             try {
                 if (cursor != null && cursor.moveToNext()) {
@@ -279,6 +280,37 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
     }
 
     @Override
+    public Completable updateStatus(int chatId, int from, int to) {
+        return Completable.create(emitter -> {
+            ContentValues cv = new ContentValues();
+            cv.put(MessagesColumns.STATUS, to);
+            String where = MessagesColumns.CHAT_ID + " = ? AND " + MessagesColumns.STATUS + " = ?";
+            String[] args = {String.valueOf(chatId), String.valueOf(from)};
+            getContentResolver().update(ChatContentProvider.MESSAGES_CONTENT_URI, cv, where, args);
+            emitter.onComplete();
+        });
+    }
+
+    @Override
+    public Single<Optional<Msg>> firstWithStatus(int status) {
+        return Single.create(emitter -> {
+            Cursor cursor = getContentResolver().query(ChatContentProvider.MESSAGES_CONTENT_URI,
+                    null, MessagesColumns.STATUS + " = ?", new String[]{String.valueOf(status)}, MessagesColumns._ID + " ASC LIMIT 1");
+            Msg message = null;
+
+            try {
+                if (cursor != null && cursor.moveToNext()) {
+                    message = map(cursor);
+                }
+            } finally {
+                safelyCloseCursor(cursor);
+            }
+
+            emitter.onSuccess(Optional.Companion.wrap(message));
+        });
+    }
+
+    @Override
     public Single<Boolean> deleteMessages(int chatId, Set<Integer> mids) {
         return Single.create(e -> {
             int count = getContentResolver().delete(ChatContentProvider.MESSAGES_CONTENT_URI,
@@ -291,7 +323,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
 
             notifyAboutMessagesDeleted(chatId, mids);
 
-            AppMessage message = findLastMessage(chatId).blockingGet();
+            Msg message = findLastMessage(chatId).blockingGet();
             if (message == null) {
                 getRepositories().getChats()
                         .removeChatWithMessages(chatId)
@@ -321,7 +353,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
     private static final String[] AVATARS_COLUMNS = {UsersColumns._ID, UsersColumns.PHOTO, UsersColumns.PHOTO_HASH};
 
     @Override
-    public Single<Pair<List<AppMessage>, List<AvatarResorce.Entry>>> load(MessageCriteria criteria) {
+    public Single<Pair<List<Msg>, List<AvatarResorce.Entry>>> load(MessageCriteria criteria) {
         if (criteria.getChatId() == null) {
             if (criteria.getAccountId() == null || criteria.getDestination() == null) {
                 return Single.error(new IllegalArgumentException("Invalid criteria"));
@@ -360,12 +392,12 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
                 contactIds = new HashSet<>();
             }
 
-            List<AppMessage> messages = new ArrayList<>(safeCountOf(cursor));
+            List<Msg> messages = new ArrayList<>(safeCountOf(cursor));
             if (cursor != null) {
                 while (cursor.moveToNext()) {
                     if (emitter.isDisposed()) break;
 
-                    AppMessage message = map(cursor);
+                    Msg message = map(cursor);
                     messages.add(message);
 
                     if (isEmpty(criteria.getIgnoreContactIds()) || !criteria.getIgnoreContactIds().contains(message.getSenderId())) {
@@ -404,11 +436,11 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
         });
     }
 
-    private static AppMessage map(Cursor cursor) {
+    private static Msg map(Cursor cursor) {
         int type = cursor.getInt(cursor.getColumnIndex(MessagesColumns.TYPE));
 
         AppFile file = null;
-        if (type == AppMessage.TYPE_INCOME_FILE || type == AppMessage.TYPE_OUTGOING_FILE) {
+        if (type == Msg.TYPE_INCOME_FILE || type == Msg.TYPE_OUTGOING_FILE) {
             String path = cursor.getString(cursor.getColumnIndex(MessagesColumns.ATTACHED_FILE_PATH));
 
             file = new AppFile(TextUtils.isEmpty(path) ? null : Uri.parse(path),
@@ -418,7 +450,7 @@ public class MessagesRepository extends AbsRepository implements IMessagesReposi
             file.description = cursor.getString(cursor.getColumnIndex(MessagesColumns.ATTACHED_FILE_DESCRIPTION));
         }
 
-        return new AppMessage()
+        return new Msg()
                 .setId(cursor.getInt(cursor.getColumnIndex(MessagesColumns._ID)))
                 .setAccountId(cursor.getInt(cursor.getColumnIndex(MessagesColumns.ACCOUNT_ID)))
                 .setChatId(cursor.getInt(cursor.getColumnIndex(MessagesColumns.CHAT_ID)))

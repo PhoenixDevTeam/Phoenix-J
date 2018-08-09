@@ -6,7 +6,7 @@ import biz.dealnote.xmpp.db.interfaces.IUsersStorage
 import biz.dealnote.xmpp.model.AccountId
 import biz.dealnote.xmpp.model.Contact
 import biz.dealnote.xmpp.model.User
-import biz.dealnote.xmpp.service.request.IXmppRxApi
+import biz.dealnote.xmpp.service.IXmppRxApi
 import biz.dealnote.xmpp.util.Optional
 import biz.dealnote.xmpp.util.RxUtils
 import io.reactivex.*

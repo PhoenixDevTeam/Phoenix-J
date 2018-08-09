@@ -19,8 +19,8 @@ import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.db.AppRoster;
 import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.MessageBuilder;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.exception.CustomRequestException;
@@ -85,7 +85,7 @@ public class RemoveContactOperation extends AbsXmppOperation {
                                 .setSenderJid(account.buildBareJid())
                                 .setDate(Unixtime.now())
                                 .setOut(true)
-                                .setType(AppMessage.TYPE_UNSUBSCRIBE))
+                                .setType(Msg.TYPE_UNSUBSCRIBE))
                         .blockingGet();
             }
 
@@ -100,7 +100,7 @@ public class RemoveContactOperation extends AbsXmppOperation {
                         .saveMessage(new MessageBuilder(account.id)
                                 .setDestination(jid)
                                 .setSenderJid(account.buildBareJid())
-                                .setType(AppMessage.TYPE_UNSUBSCRIBE)
+                                .setType(Msg.TYPE_UNSUBSCRIBE)
                                 .setOut(true)
                                 .setDate(Unixtime.now()))
                         .blockingGet();

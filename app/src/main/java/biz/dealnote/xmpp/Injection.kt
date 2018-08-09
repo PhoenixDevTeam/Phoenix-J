@@ -3,15 +3,15 @@ package biz.dealnote.xmpp
 import biz.dealnote.xmpp.db.Repositories
 import biz.dealnote.xmpp.repo.ContactsRepository
 import biz.dealnote.xmpp.repo.IContactsRepository
+import biz.dealnote.xmpp.repo.IMessageRepository
+import biz.dealnote.xmpp.repo.MessageRepository
 import biz.dealnote.xmpp.security.IOtrManager
 import biz.dealnote.xmpp.security.OTRManager
-import biz.dealnote.xmpp.service.IOldConnectionManager
-import biz.dealnote.xmpp.service.IXmppConnectionManager
-import biz.dealnote.xmpp.service.OldConnectionManager
-import biz.dealnote.xmpp.service.XmppConnectionManager
-import biz.dealnote.xmpp.service.request.XmppRxApiImpl
+import biz.dealnote.xmpp.service.*
 import biz.dealnote.xmpp.transfer.FileTransferer
 import biz.dealnote.xmpp.transfer.IFileTransferer
+import biz.dealnote.xmpp.util.AppPrefs
+import biz.dealnote.xmpp.util.IStanzaIdGenerator
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.concurrent.ExecutorService
@@ -49,6 +49,14 @@ object Injection {
     fun provideRepositories(): Repositories {
         return Repositories.instance
     }
+
+    val idGenerator: IStanzaIdGenerator by lazy {
+        object : IStanzaIdGenerator {
+            override fun next() = AppPrefs.generateMessageStanzaId(App.getInstance())
+        }
+    }
+
+    val messageRepository: IMessageRepository by lazy { MessageRepository(XmppRxApiImpl(xmppConnectionManager, xmppExecutor), otrManager, Repositories.instance, idGenerator) }
 
     val xmppConnectionManager: IXmppConnectionManager by lazy { XmppConnectionManager(App.getInstance(), Repositories.instance.accountsRepository) }
 

@@ -7,7 +7,7 @@ import android.os.Parcelable;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.util.ParcelUtils;
 
-public final class AppMessage implements Parcelable, Identificable {
+public final class Msg implements Parcelable, Identificable {
 
     public static final int UNKNOWN = 0;
 
@@ -37,15 +37,15 @@ public final class AppMessage implements Parcelable, Identificable {
     public static final int STATUS_ACCEPTED = 15;
     public static final int STATUS_DECLINED = 16;
 
-    public static final Creator<AppMessage> CREATOR = new Creator<AppMessage>() {
+    public static final Creator<Msg> CREATOR = new Creator<Msg>() {
         @Override
-        public AppMessage createFromParcel(Parcel in) {
-            return new AppMessage(in);
+        public Msg createFromParcel(Parcel in) {
+            return new Msg(in);
         }
 
         @Override
-        public AppMessage[] newArray(int size) {
-            return new AppMessage[size];
+        public Msg[] newArray(int size) {
+            return new Msg[size];
         }
     };
 
@@ -70,10 +70,10 @@ public final class AppMessage implements Parcelable, Identificable {
 
     private boolean selected;
 
-    public AppMessage() {
+    public Msg() {
     }
 
-    protected AppMessage(Parcel in) {
+    protected Msg(Parcel in) {
         id = in.readInt();
         accountId = in.readInt();
         chatId = in.readInt();
@@ -146,7 +146,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return attachedFile;
     }
 
-    public AppMessage setAttachedFile(AppFile file) {
+    public Msg setAttachedFile(AppFile file) {
         this.attachedFile = file;
         return this;
     }
@@ -155,7 +155,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return senderId;
     }
 
-    public AppMessage setSenderId(int senderId) {
+    public Msg setSenderId(int senderId) {
         this.senderId = senderId;
         return this;
     }
@@ -164,7 +164,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return accountId;
     }
 
-    public AppMessage setAccountId(int accountId) {
+    public Msg setAccountId(int accountId) {
         this.accountId = accountId;
         return this;
     }
@@ -173,7 +173,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return stanzaId;
     }
 
-    public AppMessage setStanzaId(String stanzaId) {
+    public Msg setStanzaId(String stanzaId) {
         this.stanzaId = stanzaId;
         return this;
     }
@@ -182,7 +182,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return type;
     }
 
-    public AppMessage setType(int type) {
+    public Msg setType(int type) {
         this.type = type;
         return this;
     }
@@ -191,7 +191,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return body;
     }
 
-    public AppMessage setBody(String body) {
+    public Msg setBody(String body) {
         this.body = body;
         return this;
     }
@@ -200,7 +200,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return status;
     }
 
-    public AppMessage setStatus(int status) {
+    public Msg setStatus(int status) {
         this.status = status;
         return this;
     }
@@ -209,7 +209,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return out;
     }
 
-    public AppMessage setOut(boolean out) {
+    public Msg setOut(boolean out) {
         this.out = out;
         return this;
     }
@@ -218,7 +218,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return date;
     }
 
-    public AppMessage setDate(long date) {
+    public Msg setDate(long date) {
         this.date = date;
         return this;
     }
@@ -227,7 +227,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return readState;
     }
 
-    public AppMessage setReadState(boolean readState) {
+    public Msg setReadState(boolean readState) {
         this.readState = readState;
         return this;
     }
@@ -236,7 +236,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return chatId;
     }
 
-    public AppMessage setChatId(int chatId) {
+    public Msg setChatId(int chatId) {
         this.chatId = chatId;
         return this;
     }
@@ -245,7 +245,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return senderJid;
     }
 
-    public AppMessage setSenderJid(String senderJid) {
+    public Msg setSenderJid(String senderJid) {
         this.senderJid = senderJid;
         return this;
     }
@@ -254,7 +254,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return destination;
     }
 
-    public AppMessage setDestination(String destination) {
+    public Msg setDestination(String destination) {
         this.destination = destination;
         return this;
     }
@@ -263,7 +263,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return progress;
     }
 
-    public AppMessage setProgress(int progress) {
+    public Msg setProgress(int progress) {
         this.progress = progress;
         return this;
     }
@@ -308,7 +308,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return selected;
     }
 
-    public AppMessage setSelected(boolean selected) {
+    public Msg setSelected(boolean selected) {
         this.selected = selected;
         return this;
     }
@@ -317,7 +317,7 @@ public final class AppMessage implements Parcelable, Identificable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AppMessage message = (AppMessage) o;
+        Msg message = (Msg) o;
         return id == message.id;
     }
 
@@ -331,7 +331,7 @@ public final class AppMessage implements Parcelable, Identificable {
         return id;
     }
 
-    public AppMessage setId(int id) {
+    public Msg setId(int id) {
         this.id = id;
         return this;
     }

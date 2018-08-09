@@ -16,6 +16,7 @@ import biz.dealnote.xmpp.loader.PhotoGalleryImageProvider
 import biz.dealnote.xmpp.model.*
 import biz.dealnote.xmpp.mvp.presenter.base.RequestSupportPresenter
 import biz.dealnote.xmpp.mvp.view.IChatView
+import biz.dealnote.xmpp.repo.IMessageRepository
 import biz.dealnote.xmpp.security.IOtrManager
 import biz.dealnote.xmpp.security.OtrState
 import biz.dealnote.xmpp.service.request.RequestFactory
@@ -52,7 +53,7 @@ class ChatPresenter(private val mAccountId: Int,
     private val mRecordTimeLookup: Lookup = Lookup(1000)
     private val mVoicePlayerLookup: Lookup
     private var mChatId: Int? = null
-    private val mData: MutableList<AppMessage> = ArrayList()
+    private val mData: MutableList<Msg> = ArrayList()
     private val mAvatarResorce: AvatarResorce = AvatarResorce()
     private var mEndOfContent: Boolean = false
     private val mVoicePlayer: VoicePlayer = VoicePlayer()
@@ -72,6 +73,8 @@ class ChatPresenter(private val mAccountId: Int,
 
     private val firstMessageId: Int?
         get() = if (isEmpty(mData)) null else mData[mData.size - 1].id
+
+    private val messageRepositories: IMessageRepository = Injection.messageRepository
 
     private val markedMessagesIds: Set<Int>
         get() {
@@ -168,7 +171,7 @@ class ChatPresenter(private val mAccountId: Int,
         }
     }
 
-    private fun applyUpdate(message: AppMessage, update: MessageUpdate): Boolean {
+    private fun applyUpdate(message: Msg, update: MessageUpdate): Boolean {
         var hasChanges = false
         if (update.statusUpdate != null) {
             message.status = update.statusUpdate.status
@@ -194,7 +197,7 @@ class ChatPresenter(private val mAccountId: Int,
         }
     }
 
-    private fun onNewMessageAdded(message: AppMessage) {
+    private fun onNewMessageAdded(message: Msg) {
         if (mChatId == null) {
             mChatId = message.chatId
         }
@@ -230,7 +233,7 @@ class ChatPresenter(private val mAccountId: Int,
                 .subscribe { pair -> onMessagesLoaded(pair.first, pair.second) })
     }
 
-    private fun onMessagesLoaded(messages: List<AppMessage>, entries: List<AvatarResorce.Entry>) {
+    private fun onMessagesLoaded(messages: List<Msg>, entries: List<AvatarResorce.Entry>) {
         changeLoadingNowState(false)
         mEndOfContent = messages.size < COUNT_PER_LOAD
 
@@ -350,7 +353,11 @@ class ChatPresenter(private val mAccountId: Int,
 
         val body = mDraftMessageText!!.trim { it <= ' ' }
 
-        val type = AppMessage.TYPE_CHAT
+        appendDisposable(messageRepositories.saveMessage(mAccountId, mDestination, body, Msg.TYPE_CHAT)
+                .fromIOToMain()
+                .subscribe(Consumer { executeSendRequestAndPlayRingtone(it) }, ignore()))
+        /*
+        val type = Msg.TYPE_CHAT
         val stanzaId = AppPrefs.generateMessageStanzaId(applicationContext)
 
         val builder = MessageBuilder(mAccountId)
@@ -364,7 +371,7 @@ class ChatPresenter(private val mAccountId: Int,
                 .setSenderId(if (mAccount == null) null else mMyUser!!.id)
                 .setOut(true)
 
-        saveNewOutMessageAndSent(builder)
+        saveNewOutMessageAndSent(builder)*/
 
         mDraftMessageText = null
         resolveDraftMessageText()
@@ -392,10 +399,10 @@ class ChatPresenter(private val mAccountId: Int,
                 .setSenderId(if (mMyUser == null) null else mMyUser!!.id)
                 .setSenderJid(mAccount!!.buildBareJid())
                 .setDate(Unixtime.now())
-                .setType(AppMessage.TYPE_OUTGOING_FILE)
+                .setType(Msg.TYPE_OUTGOING_FILE)
                 .setChatId(mChatId)
                 .setOut(true)
-                .setStatus(AppMessage.STATUS_WAITING_FOR_REASON)
+                .setStatus(Msg.STATUS_WAITING_FOR_REASON)
                 .setReadState(false)
 
         saveOutgoingFileMessageAndSend(builder)
@@ -415,7 +422,7 @@ class ChatPresenter(private val mAccountId: Int,
         }
     }
 
-    private fun onOutgoingFileMessageSaved(message: AppMessage) {
+    private fun onOutgoingFileMessageSaved(message: Msg) {
         saveChatId(message.chatId)
 
         val file = message.attachedFile
@@ -432,17 +439,19 @@ class ChatPresenter(private val mAccountId: Int,
                 .subscribe(Consumer { data -> sendMessageImpl(data) }, ignore())
     }
 
-    private fun sendMessageImpl(message: AppMessage) {
+    private fun sendMessageImpl(message: Msg) {
         saveChatId(message.chatId)
 
         executeSendRequestAndPlayRingtone(message)
     }
 
-    private fun executeSendRequestAndPlayRingtone(message: AppMessage) {
+    private fun executeSendRequestAndPlayRingtone(message: Msg) {
         val context = applicationContext
 
-        val request = RequestFactory.getSendMessageRequest(message)
-        executeRequest(request)
+        //val request = RequestFactory.getSendMessageRequest(message)
+        //executeRequest(request)
+
+        messageRepositories.startSendingQueue()
 
         val ringtoneUri = Uri.parse(NotificationHelper.getOutgoingRingtoneUri(context))
         val ringtone = RingtoneManager.getRingtone(context, ringtoneUri)
@@ -541,7 +550,7 @@ class ChatPresenter(private val mAccountId: Int,
         }
     }
 
-    fun fireFileTransferAcceptClick(message: AppMessage) {
+    fun fireFileTransferAcceptClick(message: Msg) {
         if (!AppPerms.hasWriteStoragePermision(applicationContext)) {
             view?.requestWriteStoragePermission()
             return
@@ -559,7 +568,7 @@ class ChatPresenter(private val mAccountId: Int,
         }
     }
 
-    fun fireFileTransferDeclineClick(message: AppMessage) {
+    fun fireFileTransferDeclineClick(message: Msg) {
         val request = RequestFactory.getCancelFileTranferRequest(message.id)
         executeRequest(request)
     }
@@ -568,13 +577,13 @@ class ChatPresenter(private val mAccountId: Int,
         sendFile(file)
     }
 
-    fun fireSubscriptionDeclineClick(message: AppMessage) {
+    fun fireSubscriptionDeclineClick(message: Msg) {
         val request = RequestFactory.getDeclineSubscriptionRequest(mAccount,
                 message.destination, message.id)
         executeRequest(request)
     }
 
-    fun fireSubscriptionAcceptClick(message: AppMessage) {
+    fun fireSubscriptionAcceptClick(message: Msg) {
         val request = RequestFactory.getAcceptSubscriptionRequest(mAccount, message.destination, message.id)
         executeRequest(request)
     }
@@ -602,10 +611,10 @@ class ChatPresenter(private val mAccountId: Int,
                 .setSenderId(if (mMyUser == null) null else mMyUser!!.id)
                 .setSenderJid(mAccount!!.buildBareJid())
                 .setDate(Unixtime.now())
-                .setType(AppMessage.TYPE_OUTGOING_FILE)
+                .setType(Msg.TYPE_OUTGOING_FILE)
                 .setChatId(mChatId)
                 .setOut(true)
-                .setStatus(AppMessage.STATUS_WAITING_FOR_REASON)
+                .setStatus(Msg.STATUS_WAITING_FOR_REASON)
                 .setReadState(false)
 
         saveOutgoingFileMessageAndSend(builder)
@@ -627,7 +636,7 @@ class ChatPresenter(private val mAccountId: Int,
         executeRequest(RequestFactory.getRefreshOTRRequest(mAccount, mDestination))
     }
 
-    fun fireMessageResentClick(message: AppMessage) {
+    fun fireMessageResentClick(message: Msg) {
         sendMessageImpl(message)
     }
 
@@ -692,14 +701,14 @@ class ChatPresenter(private val mAccountId: Int,
         }
     }
 
-    fun fireMessageLongClick(position: Int, message: AppMessage) {
+    fun fireMessageLongClick(position: Int, message: Msg) {
         message.isSelected = !message.isSelected
         resolveActionMode()
 
         view?.notifyItemChanged(position)
     }
 
-    fun fireMessageClick(position: Int, message: AppMessage) {
+    fun fireMessageClick(position: Int, message: Msg) {
         if (selectedMessagesCount > 0) {
             message.isSelected = !message.isSelected
             resolveActionMode()
@@ -707,7 +716,7 @@ class ChatPresenter(private val mAccountId: Int,
             return
         }
 
-        if (message.status == AppMessage.STATUS_ERROR) {
+        if (message.status == Msg.STATUS_ERROR) {
             view?.showReSentMessageDialog(message)
         }
     }
@@ -739,11 +748,11 @@ class ChatPresenter(private val mAccountId: Int,
         showOtrMenuImpl()
     }
 
-    fun fireAudioHolderCreate(holderId: Int, message: AppMessage) {
+    fun fireAudioHolderCreate(holderId: Int, message: Msg) {
         bindAudioHolderById(holderId, message)
     }
 
-    private fun bindAudioHolderById(holderId: Int, message: AppMessage) {
+    private fun bindAudioHolderById(holderId: Int, message: Msg) {
         val isCurrent = mVoicePlayer.playingVoiceId != null && message.id == mVoicePlayer.playingVoiceId
 
         view?.bindAudioViewHolderById(holderId, isCurrent, !mVoicePlayer.isSupposedToPlay,
@@ -754,7 +763,7 @@ class ChatPresenter(private val mAccountId: Int,
         view?.bindAllAudioViewHolders(mVoicePlayer.playingVoiceId, !mVoicePlayer.isSupposedToPlay, mVoicePlayer.duration, mVoicePlayer.position)
     }
 
-    fun fireAudioPlayButtonClick(holderId: Int, message: AppMessage) {
+    fun fireAudioPlayButtonClick(holderId: Int, message: Msg) {
         try {
             val uri = message.attachedFile.getUri()
 
@@ -772,7 +781,7 @@ class ChatPresenter(private val mAccountId: Int,
 
     }
 
-    fun fireAudioSeekBarMovedByUser(position: Int, message: AppMessage) {
+    fun fireAudioSeekBarMovedByUser(position: Int, message: Msg) {
         if (mVoicePlayer.playingVoiceId != null && mVoicePlayer.playingVoiceId == message.id) {
             mVoicePlayer.seekTo(position)
         }

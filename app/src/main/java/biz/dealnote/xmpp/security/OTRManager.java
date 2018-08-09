@@ -25,7 +25,7 @@ import java.util.Map;
 
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.AppMessage;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.RequestAdapter;
 import biz.dealnote.xmpp.service.request.RequestFactory;
@@ -177,7 +177,7 @@ public class OTRManager extends OtrCryptoEngineImpl implements OtrEngineHost, Ot
     }
 
     private void sendChatMessage(@NonNull Account account, @NonNull String userJid, String msg) {
-        Request request = RequestFactory.getMessageQuietSendRequest(account, userJid, msg, AppMessage.TYPE_CHAT);
+        Request request = RequestFactory.getMessageQuietSendRequest(account, userJid, msg, Msg.TYPE_CHAT);
         XmppRequestManager.from(context).execute(request, new RequestAdapter());
     }
 

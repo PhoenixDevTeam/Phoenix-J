@@ -1,9 +1,9 @@
-package biz.dealnote.xmpp.service.request
+package biz.dealnote.xmpp.service
 
-import biz.dealnote.xmpp.service.IXmppConnectionManager
 import biz.dealnote.xmpp.util.safelyWait
 import io.reactivex.Completable
 import io.reactivex.Single
+import org.jivesoftware.smack.packet.Message
 import org.jivesoftware.smackx.vcardtemp.VCardManager
 import org.jivesoftware.smackx.vcardtemp.packet.VCard
 import org.jxmpp.jid.impl.JidCreate
@@ -11,7 +11,8 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 
-class XmppRxApiImpl(private val connectionManager: IXmppConnectionManager, private val executor: ExecutorService) : IXmppRxApi {
+class XmppRxApiImpl(private val connectionManager: IXmppConnectionManager,
+                    private val executor: ExecutorService) : IXmppRxApi {
 
     override fun getVCard(acccount: Int, jid: String): Single<VCard> {
         return connectionManager.obtainConnected(acccount)
@@ -19,6 +20,15 @@ class XmppRxApiImpl(private val connectionManager: IXmppConnectionManager, priva
                     singleFromCallable(executor, Callable {
                         val entityBareJid = JidCreate.entityBareFrom(jid)
                         return@Callable VCardManager.getInstanceFor(connection).loadVCard(entityBareJid)
+                    })
+                }
+    }
+
+    override fun sendMessage(acccount: Int, message: Message): Completable {
+        return connectionManager.obtainConnected(acccount)
+                .flatMapCompletable { connection ->
+                    comletableFromRunnable(executor, Runnable {
+                        connection.sendStanza(message)
                     })
                 }
     }

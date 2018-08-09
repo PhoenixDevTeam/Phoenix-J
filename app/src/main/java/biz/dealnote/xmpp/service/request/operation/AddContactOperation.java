@@ -16,8 +16,8 @@ import org.jxmpp.stringprep.XmppStringprepException;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.MessageBuilder;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.exception.CustomRequestException;
@@ -45,8 +45,8 @@ public class AddContactOperation extends AbsXmppOperation {
         connection.sendStanza(subscribe);
 
         MessageBuilder subscribeBuilder = new MessageBuilder(account.id)
-                .setStatus(AppMessage.STATUS_WAITING_FOR_REASON)
-                .setType(AppMessage.TYPE_SUBSCRIBE)
+                .setStatus(Msg.STATUS_WAITING_FOR_REASON)
+                .setType(Msg.TYPE_SUBSCRIBE)
                 .setDestination(jid)
                 .setSenderJid(account.buildBareJid())
                 .setOut(true)
@@ -64,8 +64,8 @@ public class AddContactOperation extends AbsXmppOperation {
         connection.sendStanza(subscribed);
 
         MessageBuilder subscribedBuilder = new MessageBuilder(account.id)
-                .setStatus(AppMessage.STATUS_WAITING_FOR_REASON)
-                .setType(AppMessage.TYPE_SUBSCRIBED)
+                .setStatus(Msg.STATUS_WAITING_FOR_REASON)
+                .setType(Msg.TYPE_SUBSCRIBED)
                 .setDestination(jid)
                 .setSenderJid(account.buildBareJid())
                 .setOut(true)

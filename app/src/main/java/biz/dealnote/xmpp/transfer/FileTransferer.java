@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import biz.dealnote.xmpp.Injection;
-import biz.dealnote.xmpp.db.interfaces.IMessagesRepository;
-import biz.dealnote.xmpp.model.AppMessage;
+import biz.dealnote.xmpp.db.interfaces.IMessagesStorage;
 import biz.dealnote.xmpp.model.MessageUpdate;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.service.TransferNotFoundException;
 import biz.dealnote.xmpp.util.Logger;
 import io.reactivex.Observable;
@@ -48,12 +48,12 @@ public class FileTransferer implements IFileTransferer {
     private SparseArray<FileTransferRequest> incomeRequests;
     private List<Entry> activeTransfers;
     private PublishSubject<List<IProgressValue>> progressPublisher;
-    private IMessagesRepository repository;
+    private IMessagesStorage repository;
 
     private Observable<Long> repeater;
     private Disposable repeatDisposable;
 
-    public FileTransferer(Context context, IMessagesRepository repository) {
+    public FileTransferer(Context context, IMessagesStorage repository) {
         this.context = context.getApplicationContext();
         this.repository = repository;
         this.incomeRequests = new SparseArray<>(1);
@@ -78,7 +78,7 @@ public class FileTransferer implements IFileTransferer {
                 e.printStackTrace();
             } finally {
                 Logger.d(TAG, "Cancelled income, mid: " + messageId);
-                updateMessage(messageId, MessageUpdate.simpleStatusChange(AppMessage.STATUS_CANCELLED));
+                updateMessage(messageId, MessageUpdate.simpleStatusChange(Msg.STATUS_CANCELLED));
             }
 
             return;
@@ -90,7 +90,7 @@ public class FileTransferer implements IFileTransferer {
                 entry.cancel();
             } finally {
                 Logger.d(TAG, "Cancelled in-progress, mid: " + messageId);
-                updateMessage(messageId, MessageUpdate.simpleStatusChange(AppMessage.STATUS_CANCELLED));
+                updateMessage(messageId, MessageUpdate.simpleStatusChange(Msg.STATUS_CANCELLED));
             }
             return;
         }
@@ -135,7 +135,7 @@ public class FileTransferer implements IFileTransferer {
         activeTransfers.add(entry);
 
         try {
-            updateMessage(messageId, MessageUpdate.simpleStatusChange(AppMessage.STATUS_IN_PROGRESS));
+            updateMessage(messageId, MessageUpdate.simpleStatusChange(Msg.STATUS_IN_PROGRESS));
 
             InputStream is = context.getContentResolver().openInputStream(uri);
 
@@ -146,7 +146,7 @@ public class FileTransferer implements IFileTransferer {
                 throw new IOException("Unable to open stream");
             }
         } catch (IOException e) {
-            updateMessage(messageId, MessageUpdate.simpleStatusChange(AppMessage.STATUS_CANCELLED));
+            updateMessage(messageId, MessageUpdate.simpleStatusChange(Msg.STATUS_CANCELLED));
             activeTransfers.remove(messageId);
             throw e;
         }
@@ -205,7 +205,7 @@ public class FileTransferer implements IFileTransferer {
 
         if (success) {
             MessageUpdate update = new MessageUpdate()
-                    .setStatusUpdate(new MessageUpdate.StatusUpdate(AppMessage.STATUS_DONE));
+                    .setStatusUpdate(new MessageUpdate.StatusUpdate(Msg.STATUS_DONE));
 
             if (entry.income) {
                 context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, entry.file));
@@ -222,7 +222,7 @@ public class FileTransferer implements IFileTransferer {
                 }
             }
 
-            updateMessage(messageId, MessageUpdate.simpleStatusChange(AppMessage.STATUS_CANCELLED));
+            updateMessage(messageId, MessageUpdate.simpleStatusChange(Msg.STATUS_CANCELLED));
 
             Logger.d(TAG, "transfer was cancelled !!!, mid: " + messageId);
         }

@@ -33,8 +33,8 @@ import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.db.exception.AlreadyExistException;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AppFile;
-import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.MessageBuilder;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.security.IOtrManager;
 import biz.dealnote.xmpp.service.request.Request;
@@ -142,8 +142,8 @@ public class XmppService extends Service implements IXmppContext {
         MessageBuilder builder = new MessageBuilder(accountId)
                 .setDestination(request.getRequestor().asBareJid().toString())
                 .setSenderJid(request.getRequestor().asBareJid().toString())
-                .setType(AppMessage.TYPE_INCOME_FILE)
-                .setStatus(AppMessage.STATUS_WAITING_FOR_REASON)
+                .setType(Msg.TYPE_INCOME_FILE)
+                .setStatus(Msg.STATUS_WAITING_FOR_REASON)
                 .setAppFile(file)
                 .setUniqueServiceId(request.getStreamID())
                 .setOut(false)
@@ -183,7 +183,7 @@ public class XmppService extends Service implements IXmppContext {
                 .setDate(Unixtime.now())
                 .setOut(false)
                 .setReadState(false)
-                .setStatus(AppMessage.STATUS_SENT)
+                .setStatus(Msg.STATUS_SENT)
                 .setUniqueServiceId(message.getStanzaId())
                 .setWasEncrypted(encrypted);
 
@@ -229,7 +229,7 @@ public class XmppService extends Service implements IXmppContext {
                 .subscribe(this::notifyAboutNewMessage);
     }
 
-    private void notifyAboutNewMessage(@NonNull AppMessage message) {
+    private void notifyAboutNewMessage(@NonNull Msg message) {
         NotificationHelper.notifyAboutNewMessage(XmppService.this, message);
     }
 

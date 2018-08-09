@@ -21,7 +21,7 @@ import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.MainActivity;
 import biz.dealnote.xmpp.db.Repositories;
-import biz.dealnote.xmpp.model.AppMessage;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.place.AppPlace;
 import biz.dealnote.xmpp.place.PlaceFactory;
@@ -71,7 +71,7 @@ public class NotificationHelper {
                 .apply();
     }
 
-    public static void notifyAboutNewMessage(Context context, final AppMessage message) {
+    public static void notifyAboutNewMessage(Context context, final Msg message) {
         final long start = System.currentTimeMillis();
 
         // получаем информацию об отправителе и его аватар в отдельном потоке,
@@ -86,27 +86,27 @@ public class NotificationHelper {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, message.getSenderJid());
     }
 
-    private static void notifyAboutNewMessage(Context context, AppMessage message, Entry entry) {
+    private static void notifyAboutNewMessage(Context context, Msg message, Entry entry) {
         NotificationSettings.Value value;
 
         switch (message.getType()) {
-            case AppMessage.TYPE_NORMAL:
-            case AppMessage.TYPE_CHAT:
-            case AppMessage.TYPE_GROUP_CHAT:
-            case AppMessage.TYPE_HEADLINE:
-            case AppMessage.TYPE_ERROR:
+            case Msg.TYPE_NORMAL:
+            case Msg.TYPE_CHAT:
+            case Msg.TYPE_GROUP_CHAT:
+            case Msg.TYPE_HEADLINE:
+            case Msg.TYPE_ERROR:
                 value = NotificationHelper.load(context, NotificationHelper.KEY_INCOMING_MESSAGES);
                 break;
 
-            case AppMessage.TYPE_INCOME_FILE:
-            case AppMessage.TYPE_OUTGOING_FILE:
+            case Msg.TYPE_INCOME_FILE:
+            case Msg.TYPE_OUTGOING_FILE:
                 value = NotificationHelper.load(context, NotificationHelper.KEY_INCOMING_FILES);
                 break;
 
-            case AppMessage.TYPE_SUBSCRIBE:
-            case AppMessage.TYPE_SUBSCRIBED:
-            case AppMessage.TYPE_UNSUBSCRIBE:
-            case AppMessage.TYPE_UNSUBSCRIBED:
+            case Msg.TYPE_SUBSCRIBE:
+            case Msg.TYPE_SUBSCRIBED:
+            case Msg.TYPE_UNSUBSCRIBE:
+            case Msg.TYPE_UNSUBSCRIBED:
                 value = NotificationHelper.load(context, NotificationHelper.KEY_NEW_SUBSCRIPTIONS);
                 break;
 

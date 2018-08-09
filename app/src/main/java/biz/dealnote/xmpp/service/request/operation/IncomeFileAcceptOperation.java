@@ -14,11 +14,11 @@ import java.io.IOException;
 import biz.dealnote.xmpp.Constants;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.Injection;
-import biz.dealnote.xmpp.db.interfaces.IMessagesRepository;
+import biz.dealnote.xmpp.db.interfaces.IMessagesStorage;
 import biz.dealnote.xmpp.exception.Codes;
 import biz.dealnote.xmpp.exception.CustomAppException;
-import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.MessageUpdate;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.TransferNotFoundException;
 import biz.dealnote.xmpp.service.request.Request;
@@ -68,12 +68,12 @@ public class IncomeFileAcceptOperation extends AbsXmppOperation {
         int messageId = request.getInt(Extra.MESSAGE_ID);
 
         IFileTransferer transferer = Injection.INSTANCE.provideTransferer();
-        IMessagesRepository repository = Injection.INSTANCE.provideRepositories().getMessages();
+        IMessagesStorage repository = Injection.INSTANCE.provideRepositories().getMessages();
 
         FileTransferRequest transferRequest = transferer.findIncome(messageId);
 
         if (transferRequest == null) {
-            repository.updateMessage(messageId, MessageUpdate.simpleStatusChange(AppMessage.STATUS_CANCELLED))
+            repository.updateMessage(messageId, MessageUpdate.simpleStatusChange(Msg.STATUS_CANCELLED))
                     .blockingAwait();
 
             throw new CustomAppException("The request does not exist", Codes.FILE_TRANSFER_REQUEST_IS_OUT_OF_DATE);
@@ -87,12 +87,12 @@ public class IncomeFileAcceptOperation extends AbsXmppOperation {
         File file = generateFile(transferRequest.getFileName());
 
         try {
-            repository.updateMessage(messageId, MessageUpdate.simpleStatusChange(AppMessage.STATUS_IN_PROGRESS))
+            repository.updateMessage(messageId, MessageUpdate.simpleStatusChange(Msg.STATUS_IN_PROGRESS))
                     .blockingAwait();
 
             transferer.acceptIncomeRequest(messageId, file);
         } catch (TransferNotFoundException | IOException | SmackException e) {
-            repository.updateMessage(messageId, MessageUpdate.simpleStatusChange(AppMessage.STATUS_CANCELLED))
+            repository.updateMessage(messageId, MessageUpdate.simpleStatusChange(Msg.STATUS_CANCELLED))
                     .blockingAwait();
 
             throw new CustomAppException(e.getMessage());

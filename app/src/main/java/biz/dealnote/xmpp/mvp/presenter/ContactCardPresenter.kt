@@ -36,4 +36,8 @@ class ContactCardPresenter(val contact: Contact, savedState: Bundle?) : RxSuppor
         contact.user = user
         view?.displayUser(user)
     }
+
+    fun fireChatClick() {
+        view?.openChat(contact.accountId, contact.jid)
+    }
 }

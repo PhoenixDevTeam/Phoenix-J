@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import biz.dealnote.xmpp.R
-import biz.dealnote.xmpp.model.AppMessage
 import biz.dealnote.xmpp.model.Chat
+import biz.dealnote.xmpp.model.Msg
 import biz.dealnote.xmpp.util.Avatars
 import biz.dealnote.xmpp.util.RoundTransformation
 import biz.dealnote.xmpp.util.Utils
@@ -54,7 +54,7 @@ class ChatsAdapter(private var data: List<Chat>, private val context: Context) :
         holder.interlocutorName.text = interlocutor.dispayName
         holder.interlocutorName.setTypeface(null, if (chat.unreadCount > 0) Typeface.BOLD else Typeface.NORMAL)
 
-        val body = AppMessage.getMessageBody(context, chat.lastMessageType,
+        val body = Msg.getMessageBody(context, chat.lastMessageType,
                 chat.isLastMessageOut, chat.destination, chat.lastMessageText)
 
         holder.body.text = body

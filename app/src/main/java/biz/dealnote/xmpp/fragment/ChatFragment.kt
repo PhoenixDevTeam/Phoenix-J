@@ -25,7 +25,7 @@ import biz.dealnote.xmpp.adapter.MessagesAdapter
 import biz.dealnote.xmpp.callback.*
 import biz.dealnote.xmpp.fragment.base.BaseMvpFragment
 import biz.dealnote.xmpp.model.AppFile
-import biz.dealnote.xmpp.model.AppMessage
+import biz.dealnote.xmpp.model.Msg
 import biz.dealnote.xmpp.mvp.presenter.ChatPresenter
 import biz.dealnote.xmpp.mvp.view.IChatView
 import biz.dealnote.xmpp.util.AvatarResorce
@@ -120,11 +120,11 @@ class ChatFragment : BaseMvpFragment<ChatPresenter, IChatView>(), OnBackButtonCa
         return presenter?.onBackPressed() ?: true
     }
 
-    override fun onFileTransferAcceptClick(message: AppMessage) {
+    override fun onFileTransferAcceptClick(message: Msg) {
         presenter?.fireFileTransferAcceptClick(message)
     }
 
-    override fun onFileTransferDeclineClick(message: AppMessage) {
+    override fun onFileTransferDeclineClick(message: Msg) {
         presenter?.fireFileTransferDeclineClick(message)
     }
 
@@ -151,24 +151,24 @@ class ChatFragment : BaseMvpFragment<ChatPresenter, IChatView>(), OnBackButtonCa
         }
     }
 
-    override fun onMessageLongClick(position: Int, message: AppMessage): Boolean {
+    override fun onMessageLongClick(position: Int, message: Msg): Boolean {
         presenter?.fireMessageLongClick(position, message)
         return true
     }
 
-    override fun onSubscriptionAcceptClick(message: AppMessage) {
+    override fun onSubscriptionAcceptClick(message: Msg) {
         presenter?.fireSubscriptionAcceptClick(message)
     }
 
-    override fun onSubscriptionDeclineClick(message: AppMessage) {
+    override fun onSubscriptionDeclineClick(message: Msg) {
         presenter?.fireSubscriptionDeclineClick(message)
     }
 
-    override fun onMessageClicked(position: Int, message: AppMessage) {
+    override fun onMessageClicked(position: Int, message: Msg) {
         presenter?.fireMessageClick(position, message)
     }
 
-    override fun showReSentMessageDialog(message: AppMessage) {
+    override fun showReSentMessageDialog(message: Msg) {
         activity?.run {
             val items = arrayOf(getString(R.string.repeat))
             AlertDialog.Builder(this)
@@ -384,19 +384,19 @@ class ChatFragment : BaseMvpFragment<ChatPresenter, IChatView>(), OnBackButtonCa
         }
     }
 
-    override fun onHolderCreate(holderId: Int, message: AppMessage) {
+    override fun onHolderCreate(holderId: Int, message: Msg) {
         presenter?.fireAudioHolderCreate(holderId, message)
     }
 
-    override fun onPlayButtonClick(holderId: Int, message: AppMessage) {
+    override fun onPlayButtonClick(holderId: Int, message: Msg) {
         presenter?.fireAudioPlayButtonClick(holderId, message)
     }
 
-    override fun onSeekbarMovedByUser(position: Int, message: AppMessage) {
+    override fun onSeekbarMovedByUser(position: Int, message: Msg) {
         presenter?.fireAudioSeekBarMovedByUser(position, message)
     }
 
-    override fun displayMessages(messages: List<AppMessage>, avatarResorce: AvatarResorce) {
+    override fun displayMessages(messages: List<Msg>, avatarResorce: AvatarResorce) {
         mAdapter?.setData(messages, avatarResorce)
     }
 

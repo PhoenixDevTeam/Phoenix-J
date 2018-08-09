@@ -9,8 +9,8 @@ import org.jivesoftware.smack.XMPPException;
 
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.Injection;
-import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.MessageUpdate;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.TransferNotFoundException;
 import biz.dealnote.xmpp.service.request.Request;
@@ -32,7 +32,7 @@ public class DeclineFileTransferOperation extends AbsXmppOperation {
 
         Injection.INSTANCE.provideRepositories()
                 .getMessages()
-                .updateMessage(messageId, MessageUpdate.simpleStatusChange(AppMessage.STATUS_CANCELLED))
+                .updateMessage(messageId, MessageUpdate.simpleStatusChange(Msg.STATUS_CANCELLED))
                 .blockingAwait();
 
         return null;

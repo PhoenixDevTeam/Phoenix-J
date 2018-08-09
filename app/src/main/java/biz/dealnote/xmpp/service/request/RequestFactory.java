@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.AppMessage;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.service.StringArray;
 
 public class RequestFactory {
@@ -172,7 +172,7 @@ public class RequestFactory {
         return request;
     }
 
-    public static Request getSendMessageRequest(@NonNull AppMessage message) {
+    public static Request getSendMessageRequest(@NonNull Msg message) {
         Request request = new Request(REQUEST_SEND_MESSAGE);
         request.put(Extra.MESSAGE, message);
         return request;

@@ -35,8 +35,8 @@ import biz.dealnote.xmpp.adapter.IncomeFilesAdapter;
 import biz.dealnote.xmpp.db.ChatContentProvider;
 import biz.dealnote.xmpp.db.Repositories;
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
-import biz.dealnote.xmpp.model.AppMessage;
 import biz.dealnote.xmpp.model.IncomeFileItem;
+import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.util.Utils;
 
 public class IncomeFilesFragment extends Fragment implements IncomeFilesAdapter.ClickListener {
@@ -153,7 +153,7 @@ public class IncomeFilesFragment extends Fragment implements IncomeFilesAdapter.
 
         String[] columns = {MessagesColumns.ATTACHED_FILE_PATH};
         String where = MessagesColumns.TYPE + " = ? AND " + MessagesColumns.STATUS + " = ? AND " + MessagesColumns.DESTINATION + " LIKE ?";
-        String[] args = {String.valueOf(AppMessage.TYPE_INCOME_FILE), String.valueOf(AppMessage.STATUS_DONE), destnation};
+        String[] args = {String.valueOf(Msg.TYPE_INCOME_FILE), String.valueOf(Msg.STATUS_DONE), destnation};
 
         Cursor cursor = getActivity().getContentResolver().query(ChatContentProvider.MESSAGES_CONTENT_URI, columns, where, args, null);
         if (cursor == null) {
@@ -171,7 +171,7 @@ public class IncomeFilesFragment extends Fragment implements IncomeFilesAdapter.
 
     private boolean deleteFileImpl(IncomeFileItem fileItem) {
         String where = MessagesColumns.TYPE + " = ? AND " + MessagesColumns.ATTACHED_FILE_PATH + " LIKE ?";
-        String[] args = {String.valueOf(AppMessage.TYPE_INCOME_FILE), fileItem.file.getPath()};
+        String[] args = {String.valueOf(Msg.TYPE_INCOME_FILE), fileItem.file.getPath()};
         String[] columns = {MessagesColumns._ID, MessagesColumns.CHAT_ID};
 
         Cursor cursor = getActivity().getContentResolver().query(ChatContentProvider.MESSAGES_CONTENT_URI, columns, where, args, null);
