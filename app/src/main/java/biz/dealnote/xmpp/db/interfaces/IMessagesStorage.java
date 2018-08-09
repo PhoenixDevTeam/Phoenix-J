@@ -40,6 +40,8 @@ public interface IMessagesStorage {
 
     Completable updateStatus(int chatId, int from, int to);
 
+    Completable updateStatus(int from, int to);
+
     Single<Boolean> deleteMessages(int chatId, Set<Integer> mids);
 
     Single<Pair<List<Msg>, List<AvatarResorce.Entry>>> load(MessageCriteria criteria);

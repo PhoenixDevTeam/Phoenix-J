@@ -292,6 +292,18 @@ public class MessagesStorage extends AbsRepository implements IMessagesStorage {
     }
 
     @Override
+    public Completable updateStatus(int from, int to) {
+        return Completable.create(emitter -> {
+            ContentValues cv = new ContentValues();
+            cv.put(MessagesColumns.STATUS, to);
+            String where = MessagesColumns.STATUS + " = ?";
+            String[] args = {String.valueOf(from)};
+            getContentResolver().update(ChatContentProvider.MESSAGES_CONTENT_URI, cv, where, args);
+            emitter.onComplete();
+        });
+    }
+
+    @Override
     public Single<Optional<Msg>> firstWithStatus(int status) {
         return Single.create(emitter -> {
             Cursor cursor = getContentResolver().query(ChatContentProvider.MESSAGES_CONTENT_URI,

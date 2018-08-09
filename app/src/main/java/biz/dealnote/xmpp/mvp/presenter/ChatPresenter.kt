@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.support.v4.content.PermissionChecker
 import android.text.TextUtils
 import biz.dealnote.mvp.reflect.OnGuiCreated
-import biz.dealnote.xmpp.Constants
 import biz.dealnote.xmpp.Injection
 import biz.dealnote.xmpp.R
 import biz.dealnote.xmpp.db.Repositories
@@ -342,15 +341,6 @@ class ChatPresenter(private val mAccountId: Int,
             return
         }
 
-        if (Constants.FORCE_OTR) {
-            val otrStatus = otrManager.getSessionState(mAccountId, mDestination)
-            if (otrStatus != OtrState.ENCRYPTED) {
-                showLongToast(view, R.string.otr_session_does_not_active)
-                showOtrMenuImpl()
-                return
-            }
-        }
-
         val body = mDraftMessageText!!.trim { it <= ' ' }
 
         appendDisposable(messageRepositories.saveMessage(mAccountId, mDestination, body, Msg.TYPE_CHAT)
@@ -430,13 +420,6 @@ class ChatPresenter(private val mAccountId: Int,
 
         val request = RequestFactory.getSendFileRequest(mAccountId, message.id, mDestination, file.getUri(), file.getName(), mime)
         executeRequest(request)
-    }
-
-    private fun saveNewOutMessageAndSent(builder: MessageBuilder) {
-        Repositories.instance.messages
-                .saveMessage(builder)
-                .fromIOToMain()
-                .subscribe(Consumer { data -> sendMessageImpl(data) }, ignore())
     }
 
     private fun sendMessageImpl(message: Msg) {
