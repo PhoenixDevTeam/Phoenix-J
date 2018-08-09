@@ -22,4 +22,8 @@ interface IXmppConnectionManager {
     fun observePresenses(): Flowable<AccountAction<Presence>>
 
     fun obtainConnected(accountId: Int): Single<AbstractXMPPConnection>
+
+    fun observeKeepAlive(): Flowable<Int>
+
+    fun keepAlive()
 }

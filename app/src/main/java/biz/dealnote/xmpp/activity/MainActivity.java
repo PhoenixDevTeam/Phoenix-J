@@ -101,6 +101,34 @@ public class MainActivity extends AppCompatActivity implements OnPlaceOpenCallba
         }
 
         resolveNavigationIcon();
+
+        Injection.INSTANCE.getXmppConnectionManager()
+                .observeKeepAlive()
+                .subscribe(new Consumer<Integer>() {
+                    @Override
+                    public void accept(Integer integer) throws Exception {
+
+                        if (resumed) {
+                            Injection.INSTANCE.getXmppConnectionManager().keepAlive();
+                        }
+
+                        Logger.d("connectToActiveAccounts", "id: " + integer);
+                    }
+                });
+    }
+
+    private boolean resumed;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        resumed = true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        resumed = false;
     }
 
     private void attachMainTabsFragment() {

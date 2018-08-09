@@ -21,6 +21,7 @@ import io.reactivex.functions.Consumer
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import org.jivesoftware.smack.packet.Message
+import org.jxmpp.jid.impl.JidCreate
 import java.util.*
 
 class MessageRepository(private val api: IXmppRxApi,
@@ -34,8 +35,12 @@ class MessageRepository(private val api: IXmppRxApi,
     init {
         compositeDisposable.add(connectionManager.observeNewMessages()
                 .flatMapSingle {
-                    val accountId = it.account.id
+                    val account = it.account
                     val message = it.data
+
+                    if (account.buildBareJid() == message.from.asBareJid().toString()) {
+                        return@flatMapSingle Single.just(Optional.empty<Msg>())
+                    }
 
                     val body = message.body
                     val from = message.from.asBareJid().toString()
@@ -44,7 +49,7 @@ class MessageRepository(private val api: IXmppRxApi,
                         return@flatMapSingle Single.just(Optional.empty<Msg>())
                     }
 
-                    val encryptedBody = otr.handleInputMessage(accountId, from, body)
+                    val encryptedBody = otr.handleInputMessage(account.id, from, body)
                     if (encryptedBody.isNullOrEmpty()) {
                         return@flatMapSingle Single.just(Optional.empty<Msg>())
                     }
@@ -52,7 +57,7 @@ class MessageRepository(private val api: IXmppRxApi,
                     val encrypted = encryptedBody != body
                     val type = Messages.getAppTypeFrom(message.type)
 
-                    val builder = MessageBuilder(accountId)
+                    val builder = MessageBuilder(account.id)
                             .setDestination(from)
                             .setSenderJid(from)
                             .setType(type)
@@ -141,7 +146,7 @@ class MessageRepository(private val api: IXmppRxApi,
     }
 
     private fun sendImpl(message: Msg): Completable {
-        val dto = Message()
+        val dto = Message(JidCreate.from(message.destination), Messages.getTypeFrom(message.type))
         dto.body = message.body
         dto.stanzaId = message.stanzaId
 

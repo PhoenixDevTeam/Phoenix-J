@@ -8,7 +8,6 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Action
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.CountDownLatch
@@ -46,4 +45,4 @@ fun <T : Any> Flowable<T>.subscribeIgnoreErrors(consumer: Consumer<in T>): Dispo
 
 fun <T : Any> Single<T>.subscribeIgnoreErrors(consumer: Consumer<in T>): Disposable = subscribe(consumer, RxUtils.ignore())
 
-fun Completable.subscribeIOAndIgnoreResults(): Disposable = subscribeOn(Schedulers.io()).subscribe(Action {}, RxUtils.ignore())
+fun Completable.subscribeIOAndIgnoreResults(): Disposable = subscribeOn(Schedulers.io()).subscribe(RxUtils.dummy(), RxUtils.ignore())

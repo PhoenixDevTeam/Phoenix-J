@@ -1,10 +1,14 @@
 package biz.dealnote.xmpp.service
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import biz.dealnote.xmpp.Constants
 import biz.dealnote.xmpp.db.interfaces.IAccountsRepository
 import biz.dealnote.xmpp.model.Account
+import biz.dealnote.xmpp.util.subscribeIOAndIgnoreResults
 import de.duenndns.ssl.MemorizingTrustManager
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
@@ -33,6 +37,8 @@ import javax.net.ssl.X509TrustManager
 class XmppConnectionManager(private val context: Context,
                             private val accountsRepository: IAccountsRepository) : IXmppConnectionManager {
 
+    override fun observeKeepAlive(): Flowable<Int> = keepAliveProcessor.onBackpressureBuffer()
+
     private var sslContext: SSLContext
 
     private val rosterAddingPublisher: PublishProcessor<AccountAction<Collection<RosterEntry>>> = PublishProcessor.create()
@@ -41,6 +47,8 @@ class XmppConnectionManager(private val context: Context,
     private val rosterPresenseChangesPublisher: PublishProcessor<AccountAction<Presence>> = PublishProcessor.create()
     private val messagesAddingPublisher: PublishProcessor<AccountAction<Message>> = PublishProcessor.create()
     private val presensePublisher: PublishProcessor<AccountAction<Presence>> = PublishProcessor.create()
+    private val keepAliveProcessor = PublishProcessor.create<Int>()
+    private val handler = H(this)
 
     init {
         try {
@@ -87,6 +95,57 @@ class XmppConnectionManager(private val context: Context,
         }
     }
 
+    override fun keepAlive() {
+        handler.restartPreDestroy()
+
+        synchronized(entryMap) {
+            for ((_, entry) in entryMap) {
+                entry.connectIfWasDisconnected()
+            }
+        }
+    }
+
+    private fun sendPreDestroy() {
+        synchronized(entryMap) {
+            for ((accountId, _) in entryMap) {
+                keepAliveProcessor.onNext(accountId)
+            }
+        }
+    }
+
+    private fun destroy() {
+        synchronized(entryMap) {
+            for ((_, entry) in entryMap) {
+                entry.disconnect()
+            }
+        }
+    }
+
+    private class H(manager: XmppConnectionManager) : Handler(Looper.getMainLooper()) {
+
+        val reference = WeakReference(manager)
+
+        val preDestroy = 1
+        val destroy = 2
+
+        override fun handleMessage(msg: android.os.Message) {
+            when (msg.what) {
+                preDestroy -> {
+                    reference.get()?.sendPreDestroy()
+                    sendEmptyMessageDelayed(destroy, 5_000)
+                }
+
+                destroy -> reference.get()?.destroy()
+            }
+        }
+
+        fun restartPreDestroy() {
+            removeMessages(preDestroy)
+            removeMessages(destroy)
+            sendEmptyMessageDelayed(preDestroy, 5_000)
+        }
+    }
+
     private val emitters: MutableSet<EmitterWrapper> = Collections.synchronizedSet(HashSet())
     private val entryMap: MutableMap<Int, Entry> = HashMap()
 
@@ -94,6 +153,8 @@ class XmppConnectionManager(private val context: Context,
 
     override fun obtainConnected(accountId: Int): Single<AbstractXMPPConnection> {
         return Single.create { emitter ->
+            handler.restartPreDestroy()
+
             synchronized(entryMap) {
                 val entry = entryMap.getOrPut(accountId) { Entry(accountId, sslContext, accountsRepository, this@XmppConnectionManager) }
 
@@ -103,7 +164,7 @@ class XmppConnectionManager(private val context: Context,
                     val wrapper = EmitterWrapper(emitter, accountId)
                     emitter.setCancellable { emitters.remove(wrapper) }
                     emitters.add(wrapper)
-                    entry.connect()
+                    entry.connectAsync()
                 }
             }
         }
@@ -117,8 +178,18 @@ class XmppConnectionManager(private val context: Context,
         val compositeDisposable = CompositeDisposable()
         var connection: XMPPTCPConnection? = null
         val manager = WeakReference(connectionManager)
+        var wasDisconnected = false
 
-        fun connect() {
+        fun connectIfWasDisconnected() {
+            synchronized(this) {
+                if (wasDisconnected) {
+                    wasDisconnected = false
+                    connectAsync()
+                }
+            }
+        }
+
+        fun connectAsync() {
             synchronized(this) {
                 compositeDisposable.add(accounts.getById(accountId)
                         .subscribeOn(Schedulers.io())
@@ -177,6 +248,7 @@ class XmppConnectionManager(private val context: Context,
 
             return XMPPTCPConnection(conf).also { connection ->
                 connection.packetReplyTimeout = timeout.toLong()
+                connection.fromMode = XMPPConnection.FromMode.USER
 
                 val roster = Roster.getInstanceFor(connection)
                 roster.addRosterListener(object : RosterListener {
@@ -215,10 +287,20 @@ class XmppConnectionManager(private val context: Context,
             }
         }
 
-        fun release() {
-            connection?.disconnect()
-            connection = null
-            compositeDisposable.dispose()
+        fun disconnect() {
+            synchronized(this) {
+                connection?.run {
+                    Single.just(this)
+                            .flatMapCompletable {
+                                Completable.fromAction { it.disconnect() }
+                            }
+                            .subscribeIOAndIgnoreResults()
+                }
+
+                connection = null
+                wasDisconnected = true
+                compositeDisposable.clear()
+            }
         }
     }
 
