@@ -1,6 +1,5 @@
 package biz.dealnote.xmpp.repo
 
-import android.annotation.SuppressLint
 import biz.dealnote.xmpp.db.Repositories
 import biz.dealnote.xmpp.db.exception.RecordDoesNotExistException
 import biz.dealnote.xmpp.model.MessageBuilder
@@ -24,7 +23,7 @@ class MessageRepository(private val api: IXmppRxApi,
                         private val storages: Repositories,
                         private val idGenerator: IStanzaIdGenerator) : IMessageRepository {
 
-    private val chatIds: Map<String, Int> = Collections.synchronizedMap(HashMap())
+    private val chatIds: MutableMap<String, Int> = Collections.synchronizedMap(HashMap())
 
     override fun saveMessage(accountId: Int, destination: String, text: String, type: Int): Single<Msg> {
         return obtainSenderId(accountId)
@@ -44,17 +43,19 @@ class MessageRepository(private val api: IXmppRxApi,
                             }
 
                     return@flatMap storages.messages.saveMessage(builder)
+                            .doOnSuccess {
+                                chatIds[destination] = it.chatId
+                            }
                 }
     }
 
     @Volatile
     private var sending = false
 
-    @SuppressLint("CheckResult")
     override fun startSendingQueue() {
         if (sending) return
 
-        storages.messages.firstWithStatus(Msg.STATUS_IN_QUEUE)
+        val disposable = storages.messages.firstWithStatus(Msg.STATUS_IN_QUEUE)
                 .flatMap {
                     val message = it.get()
                             ?: return@flatMap Single.error<Msg>(RecordDoesNotExistException())
