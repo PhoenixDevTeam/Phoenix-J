@@ -343,7 +343,7 @@ class ChatPresenter(private val mAccountId: Int,
 
         val body = mDraftMessageText!!.trim { it <= ' ' }
 
-        appendDisposable(messageRepositories.saveMessage(mAccountId, mDestination, body, Msg.TYPE_CHAT)
+        appendDisposable(messageRepositories.saveTextMessage(mAccountId, mDestination, body, Msg.TYPE_CHAT)
                 .fromIOToMain()
                 .subscribe(Consumer { executeSendRequestAndPlayRingtone(it) }, ignore()))
         /*

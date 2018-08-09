@@ -24,6 +24,8 @@ public interface IOtrManager {
 
     String handleInputMessage(Account account, String from, String text);
 
+    String handleInputMessage(int accountId, String from, String text);
+
     Observable<ISessionStateChangeEvent> observeStateChanges();
 
     interface ISessionStateChangeEvent {

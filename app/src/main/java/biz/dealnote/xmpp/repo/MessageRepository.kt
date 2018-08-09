@@ -1,5 +1,6 @@
 package biz.dealnote.xmpp.repo
 
+import biz.dealnote.xmpp.db.Messages
 import biz.dealnote.xmpp.db.Repositories
 import biz.dealnote.xmpp.db.exception.RecordDoesNotExistException
 import biz.dealnote.xmpp.db.interfaces.IMessagesStorage
@@ -8,27 +9,82 @@ import biz.dealnote.xmpp.model.MessageUpdate
 import biz.dealnote.xmpp.model.Msg
 import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.security.IOtrManager
+import biz.dealnote.xmpp.service.IXmppConnectionManager
 import biz.dealnote.xmpp.service.IXmppRxApi
-import biz.dealnote.xmpp.util.IStanzaIdGenerator
-import biz.dealnote.xmpp.util.Unixtime
-import biz.dealnote.xmpp.util.fromIOToMain
+import biz.dealnote.xmpp.util.*
+import biz.dealnote.xmpp.util.Optional
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.Consumer
+import io.reactivex.processors.PublishProcessor
+import io.reactivex.schedulers.Schedulers
 import org.jivesoftware.smack.packet.Message
 import java.util.*
-import kotlin.collections.HashMap
-
 
 class MessageRepository(private val api: IXmppRxApi,
                         private val otr: IOtrManager,
                         private val storages: Repositories,
-                        private val idGenerator: IStanzaIdGenerator) : IMessageRepository {
+                        private val idGenerator: IStanzaIdGenerator,
+                        connectionManager: IXmppConnectionManager) : IMessageRepository {
+
+    private val compositeDisposable = CompositeDisposable()
+
+    init {
+        compositeDisposable.add(connectionManager.observeNewMessages()
+                .flatMapSingle {
+                    val accountId = it.account.id
+                    val message = it.data
+
+                    val body = message.body
+                    val from = message.from.asBareJid().toString()
+
+                    if (body.isNullOrEmpty()) {
+                        return@flatMapSingle Single.just(Optional.empty<Msg>())
+                    }
+
+                    val encryptedBody = otr.handleInputMessage(accountId, from, body)
+                    if (encryptedBody.isNullOrEmpty()) {
+                        return@flatMapSingle Single.just(Optional.empty<Msg>())
+                    }
+
+                    val encrypted = encryptedBody != body
+                    val type = Messages.getAppTypeFrom(message.type)
+
+                    val builder = MessageBuilder(accountId)
+                            .setDestination(from)
+                            .setSenderJid(from)
+                            .setType(type)
+                            .setBody(encryptedBody)
+                            .setDate(Unixtime.now())
+                            .setOut(false)
+                            .setReadState(false)
+                            .setStatus(Msg.STATUS_SENT)
+                            .setUniqueServiceId(message.stanzaId)
+                            .setWasEncrypted(encrypted)
+
+                    return@flatMapSingle messagesStorage.saveMessage(builder).map { msg -> Optional.wrap(msg) }
+                }
+                .subscribeOn(Schedulers.io())
+                .filter { it.nonEmpty() }
+                .map { it.get()!! }
+                .subscribe(Consumer { onIncomingMessage(it) }, RxUtils.ignore()))
+    }
+
+    private fun onIncomingMessage(message: Msg) {
+
+    }
+
+    private val messagesProcessor: PublishProcessor<Msg> = PublishProcessor.create()
+
+    override fun observeNewMessages(): Flowable<Msg> = messagesProcessor.onBackpressureBuffer()
 
     private val messagesStorage: IMessagesStorage get() = storages.messages
 
     private val chatIds: MutableMap<String, Int> = Collections.synchronizedMap(HashMap())
 
-    override fun saveMessage(accountId: Int, destination: String, text: String, type: Int): Single<Msg> {
+    override fun saveTextMessage(accountId: Int, destination: String, text: String, type: Int): Single<Msg> {
         return obtainSenderId(accountId)
                 .flatMap { user ->
                     val builder = MessageBuilder(accountId)

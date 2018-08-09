@@ -56,7 +56,7 @@ object Injection {
         }
     }
 
-    val messageRepository: IMessageRepository by lazy { MessageRepository(XmppRxApiImpl(xmppConnectionManager, xmppExecutor), otrManager, Repositories.instance, idGenerator) }
+    val messageRepository: IMessageRepository by lazy { MessageRepository(XmppRxApiImpl(xmppConnectionManager, xmppExecutor), otrManager, Repositories.instance, idGenerator, xmppConnectionManager) }
 
     val xmppConnectionManager: IXmppConnectionManager by lazy { XmppConnectionManager(App.getInstance(), Repositories.instance.accountsRepository) }
 

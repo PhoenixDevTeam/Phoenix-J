@@ -113,6 +113,35 @@ public class OTRManager extends OtrCryptoEngineImpl implements OtrEngineHost, Ot
     }
 
     @Override
+    public String handleInputMessage(int accountId, String from, String body) {
+        if (isEmpty(body)) {
+            return body;
+        }
+
+        String bareJid = Utils.getBareJid(from);
+        Session session = findSessionBy(accountId, bareJid);
+
+        if (session == null) {
+            return body;
+        }
+
+        try {
+            String encryptedBody = session.transformReceiving(body);
+            Logger.d(TAG, "procesInputMessage, encryptedBody: " + encryptedBody);
+
+            if (isEmpty(encryptedBody)) {
+                return null;
+            }
+
+            return encryptedBody;
+        } catch (OtrException e) {
+            Logger.e(TAG, "procesInputMessage, e: " + e);
+            e.printStackTrace();
+            return body;
+        }
+    }
+
+    @Override
     public Observable<ISessionStateChangeEvent> observeStateChanges() {
         return stateChangesPublisher;
     }
