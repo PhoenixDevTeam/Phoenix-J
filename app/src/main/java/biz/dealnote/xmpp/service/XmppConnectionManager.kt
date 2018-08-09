@@ -248,7 +248,6 @@ class XmppConnectionManager(private val context: Context,
 
             return XMPPTCPConnection(conf).also { connection ->
                 connection.packetReplyTimeout = timeout.toLong()
-                connection.fromMode = XMPPConnection.FromMode.USER
 
                 val roster = Roster.getInstanceFor(connection)
                 roster.addRosterListener(object : RosterListener {

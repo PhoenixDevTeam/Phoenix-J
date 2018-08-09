@@ -50,7 +50,7 @@ object Injection {
         return Repositories.instance
     }
 
-    val idGenerator: IStanzaIdGenerator by lazy {
+    private val idGenerator: IStanzaIdGenerator by lazy {
         object : IStanzaIdGenerator {
             override fun next() = AppPrefs.generateMessageStanzaId(App.getInstance())
         }
