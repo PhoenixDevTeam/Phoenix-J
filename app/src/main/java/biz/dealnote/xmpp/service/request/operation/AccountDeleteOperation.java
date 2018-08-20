@@ -10,7 +10,7 @@ import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPException;
 
 import biz.dealnote.xmpp.Extra;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.db.interfaces.IAccountsRepository;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.service.IOldConnectionManager;
@@ -39,7 +39,7 @@ public class AccountDeleteOperation extends AbsXmppOperation {
             }
         }
 
-        IAccountsRepository repository = Repositories.getInstance().getAccountsRepository();
+        IAccountsRepository repository = Storages.getINSTANCE().getAccounts();
 
         Account account = repository
                 .findById(accountId)

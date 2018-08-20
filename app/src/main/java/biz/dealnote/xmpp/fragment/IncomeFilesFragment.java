@@ -33,7 +33,7 @@ import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.ActivityUtils;
 import biz.dealnote.xmpp.adapter.IncomeFilesAdapter;
 import biz.dealnote.xmpp.db.ChatContentProvider;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
 import biz.dealnote.xmpp.model.IncomeFileItem;
 import biz.dealnote.xmpp.model.Msg;
@@ -195,7 +195,7 @@ public class IncomeFilesFragment extends Fragment implements IncomeFilesAdapter.
             cursor.close();
 
             for (Map.Entry<Integer, Set<Integer>> entry : map.entrySet()) {
-                Repositories.getInstance()
+                Storages.getINSTANCE()
                         .getMessages()
                         .deleteMessages(entry.getKey(), entry.getValue())
                         .blockingGet();

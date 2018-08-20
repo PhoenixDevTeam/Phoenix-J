@@ -29,7 +29,7 @@ import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.MainActivity;
 import biz.dealnote.xmpp.db.AppRoster;
 import biz.dealnote.xmpp.db.Messages;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.db.exception.AlreadyExistException;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AppFile;
@@ -150,7 +150,7 @@ public class XmppService extends Service implements IXmppContext {
                 .setReadState(false)
                 .setDate(Unixtime.now());
 
-        Repositories.getInstance()
+        Storages.getINSTANCE()
                 .getMessages()
                 .saveMessage(builder)
                 .compose(RxUtils.applySingleIOToMainSchedulers())
@@ -187,7 +187,7 @@ public class XmppService extends Service implements IXmppContext {
                 .setUniqueServiceId(message.getStanzaId())
                 .setWasEncrypted(encrypted);
 
-        Repositories.getInstance()
+        Storages.getINSTANCE()
                 .getMessages()
                 .saveMessage(builder)
                 .compose(RxUtils.applySingleIOToMainSchedulers())
@@ -222,7 +222,7 @@ public class XmppService extends Service implements IXmppContext {
                 .setSenderJid(from)
                 .setOut(false);
 
-        Repositories.getInstance()
+        Storages.getINSTANCE()
                 .getMessages()
                 .saveMessage(builder)
                 .compose(RxUtils.applySingleIOToMainSchedulers())

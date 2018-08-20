@@ -1,10 +1,11 @@
 package biz.dealnote.xmpp.repo
 
+import biz.dealnote.xmpp.db.Storages
 import biz.dealnote.xmpp.db.entity.ContactEntity
 import biz.dealnote.xmpp.db.entity.UserEntity
-import biz.dealnote.xmpp.db.interfaces.IUsersStorage
 import biz.dealnote.xmpp.model.AccountId
 import biz.dealnote.xmpp.model.Contact
+import biz.dealnote.xmpp.model.Msg
 import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.service.IXmppRxApi
 import biz.dealnote.xmpp.util.Optional
@@ -15,13 +16,29 @@ import io.reactivex.functions.Consumer
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import org.jivesoftware.smack.XMPPException
+import org.jivesoftware.smack.packet.Presence
 import org.jivesoftware.smack.packet.XMPPError
 import org.jivesoftware.smack.roster.RosterEntry
 import org.jivesoftware.smackx.vcardtemp.packet.VCard
 import org.jxmpp.jid.Jid
+import org.jxmpp.jid.impl.JidCreate
 import java.util.concurrent.Executors
 
-class ContactsRepository(private val api: IXmppRxApi, private val storage: IUsersStorage) : IContactsRepository {
+class ContactsRepository(private val api: IXmppRxApi,
+                         private val storages: Storages,
+                         private val messages: IMessageRepository) : IContactsRepository {
+
+    override fun addContact(accountId: Int, jid: String): Completable {
+        val bareJid = JidCreate.bareFrom(jid)
+        return storages.accounts.getById(accountId)
+                .flatMapCompletable {account ->
+                    api.addRosterEntry(accountId, bareJid, jid)
+                            .andThen(api.sendPresence(accountId, bareJid, Presence.Type.subscribe))
+                            .andThen(messages.saveOurgoindPresenceMessage(accountId, Msg.TYPE_SUBSCRIBE, bareJid.toString(), account.buildBareJid()))
+                            .andThen(api.sendPresence(accountId, bareJid, Presence.Type.subscribed))
+                            .andThen(messages.saveOurgoindPresenceMessage(accountId, Msg.TYPE_SUBSCRIBED, bareJid.toString(), account.buildBareJid()))
+                }
+    }
 
     private val contactDeletiongProcessor: PublishProcessor<List<String>> = PublishProcessor.create()
     private val contactsAddProcessor: PublishProcessor<List<String>> = PublishProcessor.create()
@@ -30,7 +47,7 @@ class ContactsRepository(private val api: IXmppRxApi, private val storage: IUser
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     override fun handleContactsAdded(account: Int, contacts: Collection<RosterEntry>): Completable {
-        return storage.putContacts(account, contacts)
+        return storages.users.putContacts(account, contacts)
                 .andThen(Single.just(contacts))
                 .map { entries -> entries.map { it.jid.asBareJid().toString() } }
                 .doOnSuccess { data ->
@@ -43,7 +60,7 @@ class ContactsRepository(private val api: IXmppRxApi, private val storage: IUser
     private fun startVcardsRefreshing() {
         val minUpdateTime = System.currentTimeMillis() - (12 * 60 * 60 * 1000) // 12 hours
 
-        compositeDisposable.add(storage.getContacts()
+        compositeDisposable.add(storages.users.getContacts()
                 .map { entities ->
                     entities.filter { entity ->
                         entity.user.lastVcardUpdateTime.let { it == null || it < minUpdateTime }
@@ -79,7 +96,7 @@ class ContactsRepository(private val api: IXmppRxApi, private val storage: IUser
     private fun actualizeUser(account: Int, jid: String): Single<UserEntity> {
         return getOptionalVcard(account, jid)
                 .flatMap {
-                    return@flatMap storage.upsert(jid, it.get())
+                    return@flatMap storages.users.upsert(jid, it.get())
                 }
     }
 
@@ -98,7 +115,7 @@ class ContactsRepository(private val api: IXmppRxApi, private val storage: IUser
 
     override fun handleContactsDeleted(account: Int, jids: Collection<Jid>): Completable {
         val strinsJids = jids.map { it -> it.asBareJid().toString() }
-        return storage.delete(account, strinsJids)
+        return storages.users.delete(account, strinsJids)
                 .doOnComplete { contactDeletiongProcessor.onNext(strinsJids) }
     }
 
@@ -155,7 +172,7 @@ class ContactsRepository(private val api: IXmppRxApi, private val storage: IUser
     }
 
     override fun getContacts(): Single<List<Contact>> {
-        return storage.getContacts()
+        return storages.users.getContacts()
                 .map { list ->
                     list.map {
                         entity2Model(it)

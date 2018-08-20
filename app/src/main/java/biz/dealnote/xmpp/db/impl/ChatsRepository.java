@@ -12,17 +12,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import biz.dealnote.xmpp.db.ChatContentProvider;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.db.columns.ChatsColumns;
 import biz.dealnote.xmpp.db.exception.DatabaseException;
 import biz.dealnote.xmpp.db.exception.RecordDoesNotExistException;
 import biz.dealnote.xmpp.db.interfaces.IChatsRepository;
 import biz.dealnote.xmpp.model.Chat;
 import biz.dealnote.xmpp.model.ChatUpdateModel;
-import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.model.HiddenUpdate;
 import biz.dealnote.xmpp.model.LastMessageUpdate;
 import biz.dealnote.xmpp.model.UnreadCountUpdate;
+import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.util.Exestime;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
@@ -42,8 +42,8 @@ public class ChatsRepository extends AbsRepository implements IChatsRepository {
     private final PublishSubject<ChatUpdateModel> updatesPublisher;
     private final PublishSubject<Integer> deletionPublisher;
 
-    public ChatsRepository(Repositories repositories) {
-        super(repositories);
+    public ChatsRepository(Storages storages) {
+        super(storages);
         this.creationPublisher = PublishSubject.create();
         this.updatesPublisher = PublishSubject.create();
         this.deletionPublisher = PublishSubject.create();
@@ -106,7 +106,7 @@ public class ChatsRepository extends AbsRepository implements IChatsRepository {
                         //.setTitle() // TODO: 23.12.2015
                         .setUnreadCount(targerUnreadCount)
                         .setInterlocutorId(request.getInterlocutorId())
-                        .setInterlocutor(getRepositories().getUsersStorage().findById(request.getInterlocutorId()).blockingGet().get())
+                        .setInterlocutor(getRepositories().getUsers().findById(request.getInterlocutorId()).blockingGet().get())
                         .setHidden(false)
                         .setLastMessageText(request.getLastMessageBody())
                         .setLastMessageTime(request.getLastMessageTime())
@@ -140,7 +140,7 @@ public class ChatsRepository extends AbsRepository implements IChatsRepository {
                 notifyAboutChatUpdate(update);
             }
 
-            //BusProvider.getInstance().post(new ChatUpdateEvent(targetChatId, lastMessageTime, isLastMessageOut, lastMessageBody, lastMessageType));
+            //BusProvider.getINSTANCE().post(new ChatUpdateEvent(targetChatId, lastMessageTime, isLastMessageOut, lastMessageBody, lastMessageType));
 
             Exestime.log("updateChatHeaderWith", start, request.getChatId());
             e.onSuccess(targetChatId);

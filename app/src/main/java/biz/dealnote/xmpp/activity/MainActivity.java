@@ -24,7 +24,7 @@ import biz.dealnote.xmpp.callback.AppStyleable;
 import biz.dealnote.xmpp.callback.OnBackButtonCallback;
 import biz.dealnote.xmpp.callback.OnPlaceOpenCallback;
 import biz.dealnote.xmpp.db.Accounts;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.fragment.AccountFragment;
 import biz.dealnote.xmpp.fragment.ChatFragment;
 import biz.dealnote.xmpp.fragment.ContactCardFragment;
@@ -172,8 +172,8 @@ public class MainActivity extends AppCompatActivity implements OnPlaceOpenCallba
         //Request request = RequestFactory.getConnectToAccountsRequest();
         //XmppRequestManager.from(this).execute(request, mRequestAdapter);
 
-        Repositories.getInstance()
-                .getAccountsRepository()
+        Storages.getINSTANCE()
+                .getAccounts()
                 .getAllActive()
                 .flatMapObservable(accounts -> Observable.fromIterable(accounts)
                         .flatMapSingle(account -> Injection.INSTANCE.getXmppConnectionManager().obtainConnected(account.id)))

@@ -10,7 +10,7 @@ import android.text.TextUtils
 import biz.dealnote.mvp.reflect.OnGuiCreated
 import biz.dealnote.xmpp.Injection
 import biz.dealnote.xmpp.R
-import biz.dealnote.xmpp.db.Repositories
+import biz.dealnote.xmpp.db.Storages
 import biz.dealnote.xmpp.loader.PhotoGalleryImageProvider
 import biz.dealnote.xmpp.model.*
 import biz.dealnote.xmpp.mvp.presenter.base.RequestSupportPresenter
@@ -112,18 +112,18 @@ class ChatPresenter(private val mAccountId: Int,
             mChatId = chatId
         }
 
-        appendDisposable(Repositories.instance.messages
+        appendDisposable(Storages.INSTANCE.messages
                 .createAddMessageObservable()
                 .filter { message -> message.accountId == mAccountId && message.destination == mDestination }
                 .toMainThread()
                 .subscribe(Consumer { message -> onNewMessageAdded(message) }, ignore()))
 
-        appendDisposable(Repositories.instance.messages
+        appendDisposable(Storages.INSTANCE.messages
                 .createMessageUpdateObservable()
                 .toMainThread()
                 .subscribe(Consumer { update -> onMessageUpdate(update) }, ignore()))
 
-        appendDisposable(Repositories.instance.messages
+        appendDisposable(Storages.INSTANCE.messages
                 .createMessageDeleteObservable()
                 .filter { integerSetPair -> chatId != null && Objects.equals(integerSetPair.first, chatId) }
                 .map { it -> it.second }
@@ -137,7 +137,7 @@ class ChatPresenter(private val mAccountId: Int,
         loadAtStart()
 
         if (chatId != null) {
-            Repositories.instance.chats
+            Storages.INSTANCE.chats
                     .setUnreadCount(chatId, 0)
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .subscribe()
@@ -226,7 +226,7 @@ class ChatPresenter(private val mAccountId: Int,
         }
 
         changeLoadingNowState(true)
-        appendDisposable(Repositories.instance.messages
+        appendDisposable(Storages.INSTANCE.messages
                 .load(criteria)
                 .fromIOToMain()
                 .subscribe { pair -> onMessagesLoaded(pair.first, pair.second) })
@@ -399,7 +399,7 @@ class ChatPresenter(private val mAccountId: Int,
     }
 
     private fun saveOutgoingFileMessageAndSend(builder: MessageBuilder) {
-        appendDisposable(Repositories.instance.messages
+        appendDisposable(Storages.INSTANCE.messages
                 .saveMessage(builder)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -504,8 +504,8 @@ class ChatPresenter(private val mAccountId: Int,
     }
 
     private fun loadMyInfo(): Single<Pair<Account, User>> {
-        val accounts = Repositories.instance.accountsRepository
-        val contacts = Repositories.instance.usersStorage
+        val accounts = Storages.INSTANCE.accounts
+        val contacts = Storages.INSTANCE.users
         return accounts
                 .findById(mAccountId)
                 .flatMapSingle { account ->
@@ -654,7 +654,7 @@ class ChatPresenter(private val mAccountId: Int,
 
         val start = System.currentTimeMillis()
 
-        val chatDeleted = Repositories.instance
+        val chatDeleted = Storages.INSTANCE
                 .messages
                 .deleteMessages(mChatId!!, mids)
                 .blockingGet()

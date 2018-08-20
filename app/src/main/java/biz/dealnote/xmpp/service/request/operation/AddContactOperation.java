@@ -14,7 +14,7 @@ import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import biz.dealnote.xmpp.Extra;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.MessageBuilder;
 import biz.dealnote.xmpp.model.Msg;
@@ -52,7 +52,7 @@ public class AddContactOperation extends AbsXmppOperation {
                 .setOut(true)
                 .setDate(Unixtime.now());
 
-        Repositories.getInstance()
+        Storages.getINSTANCE()
                 .getMessages()
                 .saveMessage(subscribeBuilder)
                 .blockingGet();
@@ -60,7 +60,7 @@ public class AddContactOperation extends AbsXmppOperation {
         // теперь отправляем subscribed
         Presence subscribed = new Presence(Presence.Type.subscribed);
         //subscribed.setFrom(account.buildBareJid());
-        subscribed.setTo(jid);
+        subscribed.setTo(JidCreate.bareFrom(jid));
         connection.sendStanza(subscribed);
 
         MessageBuilder subscribedBuilder = new MessageBuilder(account.id)
@@ -71,7 +71,7 @@ public class AddContactOperation extends AbsXmppOperation {
                 .setOut(true)
                 .setDate(Unixtime.now());
 
-        Repositories.getInstance()
+        Storages.getINSTANCE()
                 .getMessages()
                 .saveMessage(subscribedBuilder)
                 .blockingGet();

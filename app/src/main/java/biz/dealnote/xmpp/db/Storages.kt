@@ -16,15 +16,15 @@ import biz.dealnote.xmpp.db.interfaces.IUsersStorage
  * Created by ruslan.kolbasa on 01.11.2016.
  * phoenix_for_xmpp
  */
-class Repositories constructor(base: Context) : ContextWrapper(base) {
+class Storages constructor(base: Context) : ContextWrapper(base) {
 
-    val accountsRepository: IAccountsRepository by lazy { AccountsRepository(this) }
+    val accounts: IAccountsRepository by lazy { AccountsRepository(this) }
     val messages: IMessagesStorage by lazy { MessagesStorage(this) }
     val chats: IChatsRepository by lazy { ChatsRepository(this) }
-    val usersStorage: IUsersStorage = UsersStorage(this)
+    val users: IUsersStorage = UsersStorage(this)
 
     companion object {
         @JvmStatic
-        val instance: Repositories by lazy { Repositories(App.getInstance()) }
+        val INSTANCE: Storages by lazy { Storages(App.getInstance()) }
     }
 }

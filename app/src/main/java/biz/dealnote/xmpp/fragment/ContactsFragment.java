@@ -60,14 +60,14 @@ public class ContactsFragment extends BaseMvpFragment<ContactsPresenter, IContac
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        /*appendDisposable(Repositories.Companion.getInstance()
-                .getAccountsRepository()
+        /*appendDisposable(Storages.Companion.getINSTANCE()
+                .getAccounts()
                 .observeDeletion()
                 .observeOn(Injection.INSTANCE.provideMainThreadScheduler())
                 .subscribe(this::onAccountDelete));
 
-        appendDisposable(Repositories.Companion.getInstance()
-                .getUsersStorage()
+        appendDisposable(Storages.Companion.getINSTANCE()
+                .getUsers()
                 .observeUpdates()
                 .observeOn(Injection.INSTANCE.provideMainThreadScheduler())
                 .subscribe(this::handleContactUpdateEvent));*/
@@ -186,12 +186,7 @@ public class ContactsFragment extends BaseMvpFragment<ContactsPresenter, IContac
                 .setTitleRes(R.string.enter_nickname)
                 .setAllowEmpty(false)
                 .setInputType(InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS)
-                .setCallback(new InputTextDialog.Callback() {
-                    @Override
-                    public void onChanged(String newValue) {
-                        addToContactList(account, newValue);
-                    }
-                })
+                .setCallback(jid -> getPresenter().fireContactAddClick(account.id, jid))
                 .show();
     }
 
@@ -199,7 +194,7 @@ public class ContactsFragment extends BaseMvpFragment<ContactsPresenter, IContac
         ArrayList<AccountContactPair> data = Accounts.getAllPairs(getActivity());
         final AccountsListAdapter accountsListAdapter = new AccountsListAdapter(getActivity(), data);
 
-        new AlertDialog.Builder(getActivity())
+        new AlertDialog.Builder(requireActivity())
                 .setTitle(R.string.select_target_account)
                 .setAdapter(accountsListAdapter, new DialogInterface.OnClickListener() {
                     @Override

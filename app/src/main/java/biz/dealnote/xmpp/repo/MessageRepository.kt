@@ -1,7 +1,7 @@
 package biz.dealnote.xmpp.repo
 
 import biz.dealnote.xmpp.db.Messages
-import biz.dealnote.xmpp.db.Repositories
+import biz.dealnote.xmpp.db.Storages
 import biz.dealnote.xmpp.db.exception.RecordDoesNotExistException
 import biz.dealnote.xmpp.db.interfaces.IMessagesStorage
 import biz.dealnote.xmpp.model.MessageBuilder
@@ -26,9 +26,32 @@ import java.util.*
 
 class MessageRepository(private val api: IXmppRxApi,
                         private val otr: IOtrManager,
-                        private val storages: Repositories,
+                        private val storages: Storages,
                         private val idGenerator: IStanzaIdGenerator,
                         connectionManager: IXmppConnectionManager) : IMessageRepository {
+
+    override fun saveOurgoindPresenceMessage(accountId: Int, type: Int, destination: String, senderJid: String): Completable {
+        return obtainSenderId(accountId)
+                .flatMapCompletable { user ->
+                    val builder = MessageBuilder(accountId)
+                            .also {
+                                it.type = type
+                                it.destination = destination
+                                it.senderJid = user.jid
+                                it.senderId = user.id
+                                it.uniqueServiceId = idGenerator.next()
+                                it.chatId = chatIds[destination]
+                                it.isOut = true
+                                it.date = Unixtime.now()
+                                it.status = Msg.STATUS_WAITING_FOR_REASON
+                            }
+                    return@flatMapCompletable messagesStorage.saveMessage(builder)
+                            .doOnSuccess {
+                                chatIds[destination] = it.chatId
+                            }
+                            .ignoreElement()
+                }
+    }
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -162,9 +185,9 @@ class MessageRepository(private val api: IXmppRxApi,
     private fun changeStatus(id: Int, status: Int): Completable = messagesStorage.updateMessage(id, MessageUpdate.simpleStatusChange(status))
 
     private fun obtainSenderId(accountId: Int): Single<User> {
-        return storages.accountsRepository.getById(accountId)
+        return storages.accounts.getById(accountId)
                 .flatMap { account ->
-                    storages.usersStorage
+                    storages.users
                             .getByJid(account.buildBareJid())
                 }
     }

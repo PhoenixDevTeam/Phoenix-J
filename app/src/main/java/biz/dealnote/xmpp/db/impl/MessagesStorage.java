@@ -14,7 +14,7 @@ import java.util.Set;
 
 import biz.dealnote.xmpp.db.ChatContentProvider;
 import biz.dealnote.xmpp.db.DBHelper;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
 import biz.dealnote.xmpp.db.columns.UsersColumns;
 import biz.dealnote.xmpp.db.exception.AlreadyExistException;
@@ -57,9 +57,9 @@ public class MessagesStorage extends AbsRepository implements IMessagesStorage {
     private final PublishSubject<Pair<Integer, Set<Integer>>> deletionPublisher;
     private final DBHelper dbHelper;
 
-    public MessagesStorage(Repositories repositories) {
-        super(repositories);
-        this.dbHelper = DBHelper.getInstance(repositories);
+    public MessagesStorage(Storages storages) {
+        super(storages);
+        this.dbHelper = DBHelper.getInstance(storages);
         this.addingPublisher = PublishSubject.create();
         this.statusChangePubisher = PublishSubject.create();
         this.deletionPublisher = PublishSubject.create();
@@ -93,7 +93,7 @@ public class MessagesStorage extends AbsRepository implements IMessagesStorage {
                     }
                 }
 
-                IUsersStorage contactsRepository = getRepositories().getUsersStorage();
+                IUsersStorage contactsRepository = getRepositories().getUsers();
 
                 int targetInterlocutorId;
                 if (builder.getInterlocutorId() != null) {

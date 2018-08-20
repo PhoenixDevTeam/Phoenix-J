@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
 import biz.dealnote.mvp.reflect.OnGuiCreated
 import biz.dealnote.xmpp.Extra
-import biz.dealnote.xmpp.db.Repositories
+import biz.dealnote.xmpp.db.Storages
 import biz.dealnote.xmpp.model.Chat
 import biz.dealnote.xmpp.model.ChatUpdateModel
 import biz.dealnote.xmpp.mvp.presenter.base.RequestSupportPresenter
@@ -30,7 +30,7 @@ class ChatsPresenter(savedInstanceState: Bundle?) : RequestSupportPresenter<ICha
     init {
         loadAll()
 
-        val repositories = Repositories.instance
+        val repositories = Storages.INSTANCE
 
         appendDisposable(repositories.chats.observeChatUpdate()
                 .toMainThread()
@@ -44,7 +44,7 @@ class ChatsPresenter(savedInstanceState: Bundle?) : RequestSupportPresenter<ICha
                 .toMainThread()
                 .subscribe(this::onChatDelete))
 
-        appendDisposable(repositories.accountsRepository.observeDeletion()
+        appendDisposable(repositories.accounts.observeDeletion()
                 .toMainThread()
                 .subscribe(this::onAccountDelete))
     }
@@ -118,7 +118,7 @@ class ChatsPresenter(savedInstanceState: Bundle?) : RequestSupportPresenter<ICha
     }
 
     private fun findChatAndAdd(id: Int) {
-        appendDisposable(Repositories.instance.chats
+        appendDisposable(Storages.INSTANCE.chats
                 .findById(id)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -140,7 +140,7 @@ class ChatsPresenter(savedInstanceState: Bundle?) : RequestSupportPresenter<ICha
     }
 
     private fun loadAll() {
-        appendDisposable(Repositories.instance.chats
+        appendDisposable(Storages.INSTANCE.chats
                 .getAll(false)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

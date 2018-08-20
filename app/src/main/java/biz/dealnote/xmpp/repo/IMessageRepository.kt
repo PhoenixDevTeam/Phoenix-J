@@ -1,6 +1,7 @@
 package biz.dealnote.xmpp.repo
 
 import biz.dealnote.xmpp.model.Msg
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 
@@ -13,4 +14,6 @@ interface IMessageRepository {
     fun startSendingQueue()
 
     fun observeNewMessages(): Flowable<Msg>
+
+    fun saveOurgoindPresenceMessage(accountId: Int, type: Int, destination: String, senderJid: String): Completable
 }

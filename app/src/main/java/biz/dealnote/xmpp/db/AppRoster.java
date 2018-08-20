@@ -56,8 +56,8 @@ public class AppRoster {
 
         // если нет записей для обновления, то делаем вставку
         if (rows <= 0) {
-            int contactId = Repositories.getInstance()
-                    .getUsersStorage()
+            int contactId = Storages.getINSTANCE()
+                    .getUsers()
                     .getContactIdPutIfNotExist(bareJid)
                     .blockingGet();
 

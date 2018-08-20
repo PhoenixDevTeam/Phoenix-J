@@ -10,7 +10,7 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 
 import biz.dealnote.xmpp.Extra;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.MessageUpdate;
 import biz.dealnote.xmpp.model.Msg;
@@ -36,7 +36,7 @@ public class DeclineSubscriptionOperation extends AbsXmppOperation {
 
         connection.sendStanza(unsubscribed);
 
-        Repositories.getInstance()
+        Storages.getINSTANCE()
                 .getMessages()
                 .updateMessage(mid, MessageUpdate.simpleStatusChange(Msg.STATUS_DECLINED))
                 .blockingAwait();

@@ -110,8 +110,8 @@ public class Accounts {
         for (Account account : accounts) {
             AccountContactPair accountWithContact = new AccountContactPair(account);
 
-            accountWithContact.user = Repositories.getInstance()
-                    .getUsersStorage()
+            accountWithContact.user = Storages.getINSTANCE()
+                    .getUsers()
                     .findByJid(account.buildBareJid())
                     .blockingGet()
                     .get();

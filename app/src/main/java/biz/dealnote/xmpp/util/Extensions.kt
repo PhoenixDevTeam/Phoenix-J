@@ -18,6 +18,8 @@ fun <T : Any> Flowable<T>.toMainThread(): Flowable<T> = observeOn(AndroidSchedul
 
 fun <T : Any> Observable<T>.toMainThread(): Observable<T> = observeOn(AndroidSchedulers.mainThread())
 
+fun Completable.fromIOToMain(): Completable = subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+
 fun CountDownLatch.safelyWait(): Boolean {
     return try {
         this.await()

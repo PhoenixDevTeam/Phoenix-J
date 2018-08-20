@@ -16,7 +16,7 @@ import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 
 import biz.dealnote.xmpp.Extra;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.MessageBuilder;
 import biz.dealnote.xmpp.model.MessageUpdate;
@@ -44,7 +44,7 @@ public class AcceptSubscribeOperation extends AbsXmppOperation {
         subscribed.setTo(jid);
         connection.sendStanza(subscribed);
 
-        Repositories.getInstance()
+        Storages.getINSTANCE()
                 .getMessages()
                 .updateMessage(mid, MessageUpdate.simpleStatusChange(Msg.STATUS_ACCEPTED))
                 .blockingAwait();
@@ -67,7 +67,7 @@ public class AcceptSubscribeOperation extends AbsXmppOperation {
                     .setOut(true)
                     .setStatus(Msg.STATUS_WAITING_FOR_REASON);
 
-            Repositories.getInstance()
+            Storages.getINSTANCE()
                     .getMessages()
                     .saveMessage(builder)
                     .blockingGet();

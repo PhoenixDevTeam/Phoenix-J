@@ -3,7 +3,7 @@ package biz.dealnote.xmpp.db.impl
 import android.content.ContentValues
 import android.database.Cursor
 import biz.dealnote.xmpp.db.DBHelper
-import biz.dealnote.xmpp.db.Repositories
+import biz.dealnote.xmpp.db.Storages
 import biz.dealnote.xmpp.db.columns.AccountsColumns
 import biz.dealnote.xmpp.db.columns.RosterColumns
 import biz.dealnote.xmpp.db.columns.UsersColumns
@@ -24,11 +24,11 @@ import org.jivesoftware.smackx.vcardtemp.packet.VCard
  * Created by ruslan.kolbasa on 02.11.2016.
  * phoenix_for_xmpp
  */
-class UsersStorage(repositories: Repositories) : AbsRepository(repositories), IUsersStorage {
+class UsersStorage(storages: Storages) : AbsRepository(storages), IUsersStorage {
 
     private val addingPublisher: PublishProcessor<User> = PublishProcessor.create()
     private val updatesPublisher: PublishProcessor<User> = PublishProcessor.create()
-    private val dbHelper: DBHelper = DBHelper.getInstance(repositories)
+    private val dbHelper: DBHelper = DBHelper.getInstance(storages)
 
     override fun findById(id: Int): Single<Optional<User?>> {
         return Single.create { e ->

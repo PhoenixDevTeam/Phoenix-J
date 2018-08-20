@@ -4,7 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 
 /**
  * Created by ruslan.kolbasa on 01.11.2016.
@@ -14,24 +14,24 @@ public class AbsRepository {
 
     static final String SQL_FALSE = "0";
 
-    private final Repositories mRepositories;
+    private final Storages mStorages;
 
-    public AbsRepository(Repositories repositories) {
-        this.mRepositories = repositories;
+    public AbsRepository(Storages storages) {
+        this.mStorages = storages;
     }
 
     @NonNull
     Context getContext(){
-        return mRepositories.getApplicationContext();
+        return mStorages.getApplicationContext();
     }
 
     @NonNull
-    Repositories getRepositories(){
-        return mRepositories;
+    Storages getRepositories(){
+        return mStorages;
     }
 
     ContentResolver getContentResolver(){
-        return mRepositories.getContentResolver();
+        return mStorages.getContentResolver();
     }
 
 }

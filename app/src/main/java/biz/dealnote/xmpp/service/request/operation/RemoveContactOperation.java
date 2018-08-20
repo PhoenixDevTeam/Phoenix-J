@@ -17,7 +17,7 @@ import org.jxmpp.stringprep.XmppStringprepException;
 
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.db.AppRoster;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.MessageBuilder;
 import biz.dealnote.xmpp.model.Msg;
@@ -78,7 +78,7 @@ public class RemoveContactOperation extends AbsXmppOperation {
                 unsubcribed.setTo(jid);
                 connection.sendStanza(unsubcribed);
 
-                Repositories.getInstance()
+                Storages.getINSTANCE()
                         .getMessages()
                         .saveMessage(new MessageBuilder(account.id)
                                 .setDestination(jid)
@@ -95,7 +95,7 @@ public class RemoveContactOperation extends AbsXmppOperation {
                 unsubcribe.setTo(jid);
                 connection.sendStanza(unsubcribe);
 
-                Repositories.getInstance()
+                Storages.getINSTANCE()
                         .getMessages()
                         .saveMessage(new MessageBuilder(account.id)
                                 .setDestination(jid)

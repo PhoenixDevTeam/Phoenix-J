@@ -25,7 +25,7 @@ import biz.dealnote.xmpp.adapter.SettingsAdapter;
 import biz.dealnote.xmpp.callback.OnPlaceOpenCallback;
 import biz.dealnote.xmpp.callback.PicassoPauseOnScrollListener;
 import biz.dealnote.xmpp.db.Accounts;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.dialog.NotificationSettingsDialog;
 import biz.dealnote.xmpp.fragment.base.BaseFragment;
 import biz.dealnote.xmpp.model.AccountContactPair;
@@ -63,20 +63,20 @@ public class SettingsFragment extends BaseFragment implements SettingsAdapter.Ac
             restoreFromSavedInstanceState(savedInstanceState);
         }
 
-        appendDisposable(Repositories.Companion.getInstance()
-                .getAccountsRepository()
+        appendDisposable(Storages.Companion.getINSTANCE()
+                .getAccounts()
                 .observePasswordChanges()
                 .observeOn(Injection.INSTANCE.provideMainThreadScheduler())
                 .subscribe(pair -> onPasswordChange(pair.getFirst(), pair.getSecond())));
 
-        appendDisposable(Repositories.Companion.getInstance()
-                .getAccountsRepository()
+        appendDisposable(Storages.Companion.getINSTANCE()
+                .getAccounts()
                 .observeDeletion()
                 .observeOn(Injection.INSTANCE.provideMainThreadScheduler())
                 .subscribe(this::onAccountDelete));
 
-        appendDisposable(Repositories.Companion.getInstance()
-                .getUsersStorage()
+        appendDisposable(Storages.Companion.getINSTANCE()
+                .getUsers()
                 .observeUpdates()
                 .observeOn(Injection.INSTANCE.provideMainThreadScheduler())
                 .subscribe(this::handleContactUpdateEvent));

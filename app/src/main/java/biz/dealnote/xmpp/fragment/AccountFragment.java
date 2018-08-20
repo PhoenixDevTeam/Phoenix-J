@@ -35,7 +35,7 @@ import biz.dealnote.xmpp.activity.FileManagerActivity;
 import biz.dealnote.xmpp.adapter.UserAttributesRecyclerAdapter;
 import biz.dealnote.xmpp.callback.AppStyleable;
 import biz.dealnote.xmpp.callback.OnBackButtonCallback;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.dialog.ChangePasswordDialog;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.AccountContactPair;
@@ -410,8 +410,8 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
         @Override
         protected User doInBackground(Void... params) {
             String bareJid = accountContactPair.account.buildBareJid();
-            return Repositories.Companion.getInstance()
-                    .getUsersStorage()
+            return Storages.Companion.getINSTANCE()
+                    .getUsers()
                     .findByJid(bareJid)
                     .blockingGet()
                     .get();

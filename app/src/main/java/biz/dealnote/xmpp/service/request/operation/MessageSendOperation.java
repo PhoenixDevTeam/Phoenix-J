@@ -14,7 +14,7 @@ import org.jxmpp.jid.impl.JidCreate;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.Injection;
 import biz.dealnote.xmpp.db.Messages;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.exception.CustomAppException;
 import biz.dealnote.xmpp.model.Account;
 import biz.dealnote.xmpp.model.MessageUpdate;
@@ -59,7 +59,7 @@ public class MessageSendOperation extends AbsXmppOperation {
     }
 
     private void changeMessgeStatusImpl(Context context, Msg message, int newStatus) {
-        Repositories.getInstance()
+        Storages.getINSTANCE()
                 .getMessages()
                 .updateMessage(message.getId(), MessageUpdate.simpleStatusChange(newStatus))
                 .blockingAwait();

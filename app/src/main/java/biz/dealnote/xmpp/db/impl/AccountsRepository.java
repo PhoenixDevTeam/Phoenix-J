@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import biz.dealnote.xmpp.db.ChatContentProvider;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.db.columns.AccountsColumns;
 import biz.dealnote.xmpp.db.exception.RecordDoesNotExistException;
 import biz.dealnote.xmpp.db.interfaces.IAccountsRepository;
@@ -38,8 +38,8 @@ public class AccountsRepository extends AbsRepository implements IAccountsReposi
     private PublishSubject<Integer> deletionPublisher;
     private PublishSubject<Pair<Integer, String>> passwordChangePublisher;
 
-    public AccountsRepository(Repositories repositories) {
-        super(repositories);
+    public AccountsRepository(Storages storages) {
+        super(storages);
         this.deletionPublisher = PublishSubject.create();
         this.passwordChangePublisher = PublishSubject.create();
     }

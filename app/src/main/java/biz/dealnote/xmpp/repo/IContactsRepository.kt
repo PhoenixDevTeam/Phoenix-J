@@ -22,4 +22,6 @@ interface IContactsRepository {
     fun handleContactsAdded(account: Int, contacts: Collection<RosterEntry>): Completable
 
     fun handleContactsDeleted(account: Int, jids: Collection<Jid>): Completable
+
+    fun addContact(accountId: Int, jid: String): Completable
 }

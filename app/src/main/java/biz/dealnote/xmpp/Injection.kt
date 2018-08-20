@@ -1,6 +1,6 @@
 package biz.dealnote.xmpp
 
-import biz.dealnote.xmpp.db.Repositories
+import biz.dealnote.xmpp.db.Storages
 import biz.dealnote.xmpp.repo.ContactsRepository
 import biz.dealnote.xmpp.repo.IContactsRepository
 import biz.dealnote.xmpp.repo.IMessageRepository
@@ -25,10 +25,10 @@ object Injection {
 
     private val xmppExecutor: ExecutorService = Executors.newSingleThreadExecutor()
 
-    private val fileTransferer: IFileTransferer by lazy { FileTransferer(App.getInstance(), Repositories.instance.messages) }
+    private val fileTransferer: IFileTransferer by lazy { FileTransferer(App.getInstance(), Storages.INSTANCE.messages) }
     private val otrManager: IOtrManager by lazy { OTRManager(App.getInstance()) }
-    private val connectionManager: IOldConnectionManager by lazy { OldConnectionManager(App.getInstance(), Repositories.instance.accountsRepository) }
-    private val contactsStorage: Repositories by lazy { Repositories(App.getInstance()) }
+    private val connectionManager: IOldConnectionManager by lazy { OldConnectionManager(App.getInstance(), Storages.INSTANCE.accounts) }
+    private val STORAGE: Storages by lazy { Storages(App.getInstance()) }
 
     fun proviceContactsRepository() = contactsRepository
 
@@ -46,8 +46,8 @@ object Injection {
         return otrManager
     }
 
-    fun provideRepositories(): Repositories {
-        return Repositories.instance
+    fun provideRepositories(): Storages {
+        return Storages.INSTANCE
     }
 
     private val idGenerator: IStanzaIdGenerator by lazy {
@@ -56,9 +56,11 @@ object Injection {
         }
     }
 
-    val messageRepository: IMessageRepository by lazy { MessageRepository(XmppRxApiImpl(xmppConnectionManager, xmppExecutor), otrManager, Repositories.instance, idGenerator, xmppConnectionManager) }
+    val messageRepository: IMessageRepository by lazy { MessageRepository(XmppRxApiImpl(xmppConnectionManager, xmppExecutor), otrManager, Storages.INSTANCE, idGenerator, xmppConnectionManager) }
 
-    val xmppConnectionManager: IXmppConnectionManager by lazy { XmppConnectionManager(App.getInstance(), Repositories.instance.accountsRepository) }
+    val xmppConnectionManager: IXmppConnectionManager by lazy { XmppConnectionManager(App.getInstance(), Storages.INSTANCE.accounts) }
 
-    private val contactsRepository: IContactsRepository by lazy { ContactsRepository(XmppRxApiImpl(xmppConnectionManager, xmppExecutor), contactsStorage.usersStorage) }
+    private val contactsRepository: IContactsRepository by lazy {
+        ContactsRepository(XmppRxApiImpl(xmppConnectionManager, xmppExecutor), STORAGE, messageRepository)
+    }
 }

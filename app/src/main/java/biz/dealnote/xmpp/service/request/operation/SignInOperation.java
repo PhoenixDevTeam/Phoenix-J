@@ -21,7 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import biz.dealnote.xmpp.Constants;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.db.Accounts;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.exception.AccountAlreadyExistException;
 import biz.dealnote.xmpp.exception.CustomAppException;
 import biz.dealnote.xmpp.model.Account;
@@ -76,13 +76,13 @@ public class SignInOperation extends AbsXmppOperation {
                 myVCard = new VCard();
             }
 
-            Repositories.getInstance()
-                    .getUsersStorage()
+            Storages.getINSTANCE()
+                    .getUsers()
                     .upsert(account.buildBareJid(), myVCard)
                     .blockingGet();
 
-            User user = Repositories.getInstance()
-                    .getUsersStorage()
+            User user = Storages.getINSTANCE()
+                    .getUsers()
                     .findByJid(account.buildBareJid())
                     .blockingGet()
                     .get();

@@ -20,7 +20,7 @@ import java.io.IOException;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.MainActivity;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.place.AppPlace;
@@ -180,8 +180,8 @@ public class NotificationHelper {
         @Override
         protected Entry doInBackground(String... params) {
             String jid = params[0];
-            User user = Repositories.getInstance()
-                    .getUsersStorage()
+            User user = Storages.getINSTANCE()
+                    .getUsers()
                     .findByJid(jid)
                     .blockingGet()
                     .get();

@@ -10,7 +10,7 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.iqregister.AccountManager;
 
 import biz.dealnote.xmpp.Extra;
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.service.IXmppContext;
 import biz.dealnote.xmpp.service.request.Request;
 import biz.dealnote.xmpp.service.request.exception.CustomRequestException;
@@ -30,8 +30,8 @@ public class ChangePasswordOperation extends AbsXmppOperation {
         AccountManager accountManager = AccountManager.getInstance(connection);
         accountManager.changePassword(password);
 
-        Repositories.Companion.getInstance()
-                .getAccountsRepository()
+        Storages.Companion.getINSTANCE()
+                .getAccounts()
                 .changePassword(accountId, password)
                 .blockingAwait();
 

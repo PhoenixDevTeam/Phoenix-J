@@ -7,10 +7,7 @@ import biz.dealnote.xmpp.model.User
 import biz.dealnote.xmpp.mvp.presenter.base.RxSupportPresenter
 import biz.dealnote.xmpp.mvp.view.IContactsView
 import biz.dealnote.xmpp.repo.IContactsRepository
-import biz.dealnote.xmpp.util.Logger
-import biz.dealnote.xmpp.util.fromIOToMain
-import biz.dealnote.xmpp.util.subscribeIgnoreErrors
-import biz.dealnote.xmpp.util.toMainThread
+import biz.dealnote.xmpp.util.*
 import io.reactivex.functions.Consumer
 
 class ContactsPresenter(savedState: Bundle?) : RxSupportPresenter<IContactsView>(savedState) {
@@ -61,5 +58,15 @@ class ContactsPresenter(savedState: Bundle?) : RxSupportPresenter<IContactsView>
     override fun onGuiCreated(view: IContactsView) {
         super.onGuiCreated(view)
         view.displayContacts(contacts)
+    }
+
+    fun fireContactAddClick(accountId: Int, jid: String) {
+        appendDisposable(repository.addContact(accountId, jid)
+                .fromIOToMain()
+                .subscribe(RxUtils.dummy(), Consumer { onAddContactFail(it) }))
+    }
+
+    private fun onAddContactFail(throwable: Throwable){
+        showError(view, throwable)
     }
 }

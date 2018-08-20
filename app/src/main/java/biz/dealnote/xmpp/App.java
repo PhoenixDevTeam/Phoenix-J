@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.squareup.picasso.Picasso;
 
-import biz.dealnote.xmpp.db.Repositories;
+import biz.dealnote.xmpp.db.Storages;
 import biz.dealnote.xmpp.model.Msg;
 import biz.dealnote.xmpp.util.PicassoAvatarHandler;
 import biz.dealnote.xmpp.util.PicassoInstance;
@@ -36,12 +36,12 @@ public class App extends Application {
 
         Picasso picasso = new Picasso.Builder(this)
                 .addRequestHandler(new PicassoLocalPhotosHandler(this))
-                .addRequestHandler(new PicassoAvatarHandler(Repositories.getInstance().getUsersStorage()))
+                .addRequestHandler(new PicassoAvatarHandler(Storages.getINSTANCE().getUsers()))
                 .build();
 
         PicassoInstance.init(picasso);
 
-        Repositories.getInstance().getMessages()
+        Storages.getINSTANCE().getMessages()
                 .updateStatus(Msg.STATUS_SENDING, Msg.STATUS_ERROR)
                 .compose(RxUtils.applyCompletableIOToMainSchedulers())
                 .subscribe(RxUtils.dummy(), RxUtils.ignore());
