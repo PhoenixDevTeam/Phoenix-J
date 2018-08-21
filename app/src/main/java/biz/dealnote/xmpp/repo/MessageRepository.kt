@@ -30,7 +30,7 @@ class MessageRepository(private val api: IXmppRxApi,
                         private val idGenerator: IStanzaIdGenerator,
                         connectionManager: IXmppConnectionManager) : IMessageRepository {
 
-    override fun saveOurgoindPresenceMessage(accountId: Int, type: Int, destination: String, senderJid: String): Completable {
+    override fun saveOutgoindPresenceMessage(accountId: Int, type: Int, destination: String, senderJid: String): Completable {
         return obtainSenderId(accountId)
                 .flatMapCompletable { user ->
                     val builder = MessageBuilder(accountId)

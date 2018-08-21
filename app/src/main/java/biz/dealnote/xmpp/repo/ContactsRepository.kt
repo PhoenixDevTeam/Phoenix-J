@@ -16,7 +16,6 @@ import io.reactivex.functions.Consumer
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import org.jivesoftware.smack.XMPPException
-import org.jivesoftware.smack.packet.Presence
 import org.jivesoftware.smack.packet.XMPPError
 import org.jivesoftware.smack.roster.RosterEntry
 import org.jivesoftware.smackx.vcardtemp.packet.VCard
@@ -33,10 +32,10 @@ class ContactsRepository(private val api: IXmppRxApi,
         return storages.accounts.getById(accountId)
                 .flatMapCompletable {account ->
                     api.addRosterEntry(accountId, bareJid, jid)
-                            .andThen(api.sendPresence(accountId, bareJid, Presence.Type.subscribe))
-                            .andThen(messages.saveOurgoindPresenceMessage(accountId, Msg.TYPE_SUBSCRIBE, bareJid.toString(), account.buildBareJid()))
-                            .andThen(api.sendPresence(accountId, bareJid, Presence.Type.subscribed))
-                            .andThen(messages.saveOurgoindPresenceMessage(accountId, Msg.TYPE_SUBSCRIBED, bareJid.toString(), account.buildBareJid()))
+                            //.andThen(api.sendPresence(accountId, bareJid, Presence.Type.subscribe))
+                            .andThen(messages.saveOutgoindPresenceMessage(accountId, Msg.TYPE_SUBSCRIBE, bareJid.toString(), account.buildBareJid()))
+                    //.andThen(api.sendPresence(accountId, bareJid, Presence.Type.subscribed))
+                    //.andThen(messages.saveOutgoindPresenceMessage(accountId, Msg.TYPE_SUBSCRIBED, bareJid.toString(), account.buildBareJid()))
                 }
     }
 

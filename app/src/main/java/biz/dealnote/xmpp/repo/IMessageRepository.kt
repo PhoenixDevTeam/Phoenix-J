@@ -15,5 +15,5 @@ interface IMessageRepository {
 
     fun observeNewMessages(): Flowable<Msg>
 
-    fun saveOurgoindPresenceMessage(accountId: Int, type: Int, destination: String, senderJid: String): Completable
+    fun saveOutgoindPresenceMessage(accountId: Int, type: Int, destination: String, senderJid: String): Completable
 }

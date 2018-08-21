@@ -18,12 +18,12 @@ import java.util.concurrent.ExecutorService
 class XmppRxApiImpl(private val connectionManager: IXmppConnectionManager,
                     private val executor: ExecutorService) : IXmppRxApi {
 
-    override fun addRosterEntry(acccount: Int, jid: BareJid, name: String): Completable {
+    override fun addRosterEntry(acccount: Int, jid: BareJid, name: String, group: String?): Completable {
         return connectionManager.obtainConnected(acccount)
                 .flatMapCompletable { connection ->
                     comletableFromRunnable(executor, Runnable {
                         val roster = Roster.getInstanceFor(connection)
-                        roster.createEntry(jid, name, null)
+                        roster.createEntry(jid, name, if (group != null) arrayOf(group) else null)
                     })
                 }
     }
