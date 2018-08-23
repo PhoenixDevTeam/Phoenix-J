@@ -43,7 +43,7 @@ public class App extends Application {
 
         Storages.getINSTANCE().getMessages()
                 .updateStatus(Msg.STATUS_SENDING, Msg.STATUS_ERROR)
-                .compose(RxUtils.applyCompletableIOToMainSchedulers())
-                .subscribe(RxUtils.dummy(), RxUtils.ignore());
+                .compose(RxUtils.INSTANCE.applyCompletableIOToMainSchedulers())
+                .subscribe(RxUtils.INSTANCE.dummy(), RxUtils.INSTANCE.ignore());
     }
 }

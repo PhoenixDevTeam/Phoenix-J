@@ -98,6 +98,29 @@ class MessageRepository(private val api: IXmppRxApi,
                 .filter { it.nonEmpty() }
                 .map { it.get()!! }
                 .subscribe(Consumer { onIncomingMessage(it) }, RxUtils.ignore()))
+
+        compositeDisposable.add(connectionManager.observeRosterPresenses()
+                .flatMapSingle {
+                    val account = it.account
+                    val presence = it.data
+
+                    val type = Messages.appPresenseTypeFromApi(presence.type)
+                            ?: return@flatMapSingle Single.just(Optional.empty<Msg>())
+
+                    val from = presence.from.asBareJid().toString()
+                    val builder = MessageBuilder(account.id)
+                            .setType(type)
+                            .setDate(Unixtime.now())
+                            .setDestination(from)
+                            .setSenderJid(from)
+                            .setOut(false)
+
+                    return@flatMapSingle messagesStorage.saveMessage(builder).map { msg -> Optional.wrap(msg) }
+                }
+                .subscribeOn(Schedulers.io())
+                .filter { it.nonEmpty() }
+                .map { it.get()!! }
+                .subscribe(Consumer { onIncomingMessage(it) }, RxUtils.ignore()))
     }
 
     private fun onIncomingMessage(message: Msg) {

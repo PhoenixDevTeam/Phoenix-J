@@ -60,7 +60,7 @@ object Injection {
 
     val xmppConnectionManager: IXmppConnectionManager by lazy { XmppConnectionManager(App.getInstance(), Storages.INSTANCE.accounts) }
 
-    private val contactsRepository: IContactsRepository by lazy {
+    val contactsRepository: IContactsRepository by lazy {
         ContactsRepository(XmppRxApiImpl(xmppConnectionManager, xmppExecutor), STORAGE, messageRepository)
     }
 }

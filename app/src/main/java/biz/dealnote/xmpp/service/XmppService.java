@@ -153,7 +153,7 @@ public class XmppService extends Service implements IXmppContext {
         Storages.getINSTANCE()
                 .getMessages()
                 .saveMessage(builder)
-                .compose(RxUtils.applySingleIOToMainSchedulers())
+                .compose(RxUtils.INSTANCE.applySingleIOToMainSchedulers())
                 .doOnSuccess(message -> fileTransferer.registerIncomeRequest(message.getId(), request))
                 .subscribe(this::notifyAboutNewMessage);
     }
@@ -190,7 +190,7 @@ public class XmppService extends Service implements IXmppContext {
         Storages.getINSTANCE()
                 .getMessages()
                 .saveMessage(builder)
-                .compose(RxUtils.applySingleIOToMainSchedulers())
+                .compose(RxUtils.INSTANCE.applySingleIOToMainSchedulers())
                 .subscribe(this::notifyAboutNewMessage, this::onNewInputNormalMessageSaveError);
     }
 
@@ -225,7 +225,7 @@ public class XmppService extends Service implements IXmppContext {
         Storages.getINSTANCE()
                 .getMessages()
                 .saveMessage(builder)
-                .compose(RxUtils.applySingleIOToMainSchedulers())
+                .compose(RxUtils.INSTANCE.applySingleIOToMainSchedulers())
                 .subscribe(this::notifyAboutNewMessage);
     }
 

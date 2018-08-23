@@ -15,12 +15,14 @@ import biz.dealnote.xmpp.loader.PhotoGalleryImageProvider
 import biz.dealnote.xmpp.model.*
 import biz.dealnote.xmpp.mvp.presenter.base.RequestSupportPresenter
 import biz.dealnote.xmpp.mvp.view.IChatView
+import biz.dealnote.xmpp.repo.IContactsRepository
 import biz.dealnote.xmpp.repo.IMessageRepository
 import biz.dealnote.xmpp.security.IOtrManager
 import biz.dealnote.xmpp.security.OtrState
 import biz.dealnote.xmpp.service.request.RequestFactory
 import biz.dealnote.xmpp.util.*
 import biz.dealnote.xmpp.util.Objects
+import biz.dealnote.xmpp.util.RxUtils.dummy
 import biz.dealnote.xmpp.util.RxUtils.ignore
 import biz.dealnote.xmpp.util.Utils.*
 import biz.dealnote.xmpp.util.recorder.AudioRecordException
@@ -74,6 +76,7 @@ class ChatPresenter(private val mAccountId: Int,
         get() = if (isEmpty(mData)) null else mData[mData.size - 1].id
 
     private val messageRepositories: IMessageRepository = Injection.messageRepository
+    private val contactRepository: IContactsRepository = Injection.contactsRepository
 
     private val markedMessagesIds: Set<Int>
         get() {
@@ -566,9 +569,17 @@ class ChatPresenter(private val mAccountId: Int,
         executeRequest(request)
     }
 
-    fun fireSubscriptionAcceptClick(message: Msg) {
-        val request = RequestFactory.getAcceptSubscriptionRequest(mAccount, message.destination, message.id)
-        executeRequest(request)
+    fun fireSubscriptionAcceptClick(msg: Msg) {
+        appendDisposable(contactRepository.acceptSubscription(mAccountId, msg.senderJid, true)
+                .fromIOToMain()
+                .subscribe(dummy(), Consumer { onAcceptFail(it) }))
+
+        //val request = RequestFactory.getAcceptSubscriptionRequest(mAccount, message.destination, message.id)
+        //executeRequest(request)
+    }
+
+    private fun onAcceptFail(throwable: Throwable) {
+        showError(view, throwable)
     }
 
     fun fireInputStreamExist(uri: Uri, type: String?) {
