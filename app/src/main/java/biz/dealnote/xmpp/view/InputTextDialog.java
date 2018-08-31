@@ -2,13 +2,13 @@ package biz.dealnote.xmpp.view;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import biz.dealnote.xmpp.R;
 
 public class InputTextDialog {
@@ -31,7 +31,7 @@ public class InputTextDialog {
         builder.setTitle(titleRes);
         View view = View.inflate(context, R.layout.dialog_enter_text, null);
 
-        final EditText input = (EditText) view.findViewById(R.id.editText);
+        final EditText input = view.findViewById(R.id.editText);
         input.setText(value);
         input.setSelection(input.getText().length());
         input.setInputType(inputType);

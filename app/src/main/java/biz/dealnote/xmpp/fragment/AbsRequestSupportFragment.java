@@ -1,6 +1,7 @@
 package biz.dealnote.xmpp.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 import biz.dealnote.xmpp.fragment.base.BaseFragment;
 import biz.dealnote.xmpp.service.request.Request;
@@ -23,7 +24,7 @@ public abstract class AbsRequestSupportFragment extends BaseFragment implements 
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         requestManager.onSaveInstanceState(outState);
     }

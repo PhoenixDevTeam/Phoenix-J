@@ -5,16 +5,16 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.view.ActionMode
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.PopupMenu
-import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
+import androidx.appcompat.widget.PopupMenu
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import biz.dealnote.mvp.core.IPresenterFactory
 import biz.dealnote.xmpp.Constants
 import biz.dealnote.xmpp.Extra
@@ -66,9 +66,9 @@ class ChatFragment : BaseMvpFragment<ChatPresenter, IChatView>(), OnBackButtonCa
             }
         })
 
-        val manager = LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, true)
+        val manager = LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, true)
         recyclerView.layoutManager = manager
-        recyclerView.addOnScrollListener(PicassoPauseOnScrollListener(requireActivity(), Constants.PICASSO_TAG))
+        recyclerView.addOnScrollListener(PicassoPauseOnScrollListener(Constants.PICASSO_TAG))
         recyclerView.addOnScrollListener(object : EndlessRecyclerOnScrollListener(manager) {
             override fun onLoadMore() {
                 presenter.fireScrollToEnd()

@@ -8,7 +8,7 @@
     android:paddingRight="16dp"
     android:paddingTop="16dp">
 
-    <android.support.v7.widget.SwitchCompat
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/enable"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,7 +16,7 @@
         android:textColor="?attr/textColorPrimary"
         android:textSize="16sp" />
 
-    <android.support.v7.widget.SwitchCompat
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/vibration"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -25,7 +25,7 @@
         android:textColor="?attr/textColorPrimary"
         android:textSize="16sp" />
 
-    <android.support.v7.widget.SwitchCompat
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/light"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -34,7 +34,7 @@
         android:textColor="?attr/textColorPrimary"
         android:textSize="16sp" />
 
-    <android.support.v7.widget.SwitchCompat
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/sound"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -70,7 +70,7 @@
 
     </RelativeLayout>
 
-    <android.support.v7.widget.AppCompatButton
+    <Button
         android:id="@+id/ok"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="match_parent"

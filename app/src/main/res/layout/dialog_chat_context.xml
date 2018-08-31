@@ -73,14 +73,14 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <android.support.v7.widget.AppCompatTextView
+        <TextView
             android:id="@+id/messages_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/messages_count"
             android:textColor="?textColorSecondary" />
 
-        <android.support.v7.widget.AppCompatTextView
+        <TextView
             android:id="@+id/files_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -95,7 +95,7 @@
         android:layout_marginTop="8dp"
         android:orientation="horizontal">
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/button_delete"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
@@ -103,7 +103,7 @@
             android:layout_weight="1"
             android:text="@string/delete" />
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/button_hide"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"

@@ -1,7 +1,7 @@
 package biz.dealnote.xmpp.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +12,7 @@ import com.squareup.picasso.MemoryPolicy;
 
 import java.util.List;
 
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.model.LocalImageAlbum;
 import biz.dealnote.xmpp.util.PicassoInstance;
@@ -27,14 +28,14 @@ public class PhotoAlbumsRecyclerAdapter extends RecyclerView.Adapter<PhotoAlbums
         this.data = data;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.local_album_item, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        final Context context = holder.itemView.getContext();
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final LocalImageAlbum album = data.get(position);
 
         PicassoInstance.get()
@@ -45,12 +46,9 @@ public class PhotoAlbumsRecyclerAdapter extends RecyclerView.Adapter<PhotoAlbums
 
 
         holder.tvName.setText(album.getName().toUpperCase());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mClickListner != null) {
-                    mClickListner.onAlbumSelected(album);
-                }
+        holder.itemView.setOnClickListener(v -> {
+            if (mClickListner != null) {
+                mClickListner.onAlbumSelected(album);
             }
         });
     }
@@ -75,8 +73,8 @@ public class PhotoAlbumsRecyclerAdapter extends RecyclerView.Adapter<PhotoAlbums
 
         public ViewHolder(View itemView) {
             super(itemView);
-            photoImageView = (ImageView) itemView.findViewById(R.id.image);
-            tvName = (TextView) itemView.findViewById(R.id.title);
+            photoImageView = itemView.findViewById(R.id.image);
+            tvName = itemView.findViewById(R.id.title);
         }
     }
 }

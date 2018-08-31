@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.xmpp.Constants;
 import biz.dealnote.xmpp.Injection;
 import biz.dealnote.xmpp.R;
@@ -125,13 +125,13 @@ public class SettingsFragment extends BaseFragment implements SettingsAdapter.Ac
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        mRecyclerView = (RecyclerView) root.findViewById(R.id.list);
-        mRecyclerView.addOnScrollListener(new PicassoPauseOnScrollListener(getActivity(), Constants.PICASSO_TAG));
+        mRecyclerView = root.findViewById(R.id.list);
+        mRecyclerView.addOnScrollListener(new PicassoPauseOnScrollListener(Constants.PICASSO_TAG));
 
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false);
         mRecyclerView.setLayoutManager(manager);
 
         return root;
@@ -179,7 +179,7 @@ public class SettingsFragment extends BaseFragment implements SettingsAdapter.Ac
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(SAVE_DATA, data);
     }
@@ -230,7 +230,7 @@ public class SettingsFragment extends BaseFragment implements SettingsAdapter.Ac
         return super.onOptionsItemSelected(item);
     }
 
-    public void onAddNewAccountClick() {
+    private void onAddNewAccountClick() {
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         intent.putExtra(LoginActivity.EXTRA_START_MAIN_ACTIVITY_ON_SUCCESS, Boolean.FALSE);
         getActivity().startActivityForResult(intent, REQUEST_ADD_ACCOUNT);
@@ -247,7 +247,7 @@ public class SettingsFragment extends BaseFragment implements SettingsAdapter.Ac
     public void onNotificationClick(NotificationSettings settings) {
         NotificationSettingsDialog dialog = NotificationSettingsDialog.newInstance(settings.key);
         dialog.setTargetFragment(this, REQUEST_CHANGE_NOTIFICATION_SETTINGS);
-        dialog.show(getFragmentManager(), "notification_settings");
+        dialog.show(requireFragmentManager(), "notification_settings");
     }
 
 

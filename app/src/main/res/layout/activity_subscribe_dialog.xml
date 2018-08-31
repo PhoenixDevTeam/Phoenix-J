@@ -63,7 +63,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/accept_button"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"
@@ -72,7 +72,7 @@
             android:text="@string/accept"
             android:textAllCaps="true" />
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/decline_button"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="0dp"

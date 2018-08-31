@@ -3,8 +3,8 @@ package biz.dealnote.xmpp.view;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.widget.SeekBar;
 
+import androidx.appcompat.widget.AppCompatSeekBar;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.util.Utils;
 
@@ -12,7 +12,7 @@ import biz.dealnote.xmpp.util.Utils;
  * Created by admin on 13.11.2016.
  * phoenix-for-xmpp
  */
-public class LimitedWidthSeekbar extends SeekBar {
+public class LimitedWidthSeekbar extends AppCompatSeekBar {
 
     public LimitedWidthSeekbar(Context context) {
         super(context);

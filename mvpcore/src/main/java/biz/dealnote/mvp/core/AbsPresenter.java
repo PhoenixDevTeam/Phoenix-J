@@ -1,14 +1,14 @@
 package biz.dealnote.mvp.core;
 
 import android.os.Bundle;
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import biz.dealnote.mvp.reflect.AnnotatedHandlerFinder;
 import biz.dealnote.mvp.reflect.EventHandler;
 

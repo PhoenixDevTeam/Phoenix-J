@@ -42,21 +42,16 @@ public class ChangePasswordDialog extends AbsRequestSupportDialogFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         getDialog().setTitle(R.string.change_password);
 
         View root = inflater.inflate(R.layout.dialog_change_password, container, false);
-        etOldPassword = (EditText) root.findViewById(R.id.dialog_change_password_old);
-        etNewPassword = (EditText) root.findViewById(R.id.dialog_change_password_new);
-        etNewPasswordAgain = (EditText) root.findViewById(R.id.dialog_change_password_new_repeat);
+        etOldPassword = root.findViewById(R.id.dialog_change_password_old);
+        etNewPassword = root.findViewById(R.id.dialog_change_password_new);
+        etNewPasswordAgain = root.findViewById(R.id.dialog_change_password_new_repeat);
 
-        Button bConfirm = (Button) root.findViewById(R.id.dialog_change_password_confirm);
-        bConfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                confirm();
-            }
-        });
+        Button bConfirm = root.findViewById(R.id.dialog_change_password_confirm);
+        bConfirm.setOnClickListener(v -> confirm());
 
         return root;
     }

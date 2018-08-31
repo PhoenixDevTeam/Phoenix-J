@@ -5,8 +5,8 @@ import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.content.PermissionChecker
 import android.text.TextUtils
+import androidx.core.content.PermissionChecker
 import biz.dealnote.mvp.reflect.OnGuiCreated
 import biz.dealnote.xmpp.Injection
 import biz.dealnote.xmpp.R
@@ -344,11 +344,12 @@ class ChatPresenter(private val mAccountId: Int,
             return
         }
 
-        val body = mDraftMessageText!!.trim { it <= ' ' }
+        val body = mDraftMessageText!!.trim()
 
         appendDisposable(messageRepositories.saveTextMessage(mAccountId, mDestination, body, Msg.TYPE_CHAT)
                 .fromIOToMain()
-                .subscribe(Consumer { executeSendRequestAndPlayRingtone(it) }, ignore()))
+                .subscribe(Consumer { executeSendRequestAndPlayRingtone() }, ignore()))
+
         /*
         val type = Msg.TYPE_CHAT
         val stanzaId = AppPrefs.generateMessageStanzaId(applicationContext)
@@ -389,7 +390,7 @@ class ChatPresenter(private val mAccountId: Int,
         val builder = MessageBuilder(mAccountId)
                 .setAppFile(appFile)
                 .setDestination(mDestination)
-                .setSenderId(if (mMyUser == null) null else mMyUser!!.id)
+                .setSenderId(mMyUser!!.id)
                 .setSenderJid(mAccount!!.buildBareJid())
                 .setDate(Unixtime.now())
                 .setType(Msg.TYPE_OUTGOING_FILE)
@@ -427,11 +428,10 @@ class ChatPresenter(private val mAccountId: Int,
 
     private fun sendMessageImpl(message: Msg) {
         saveChatId(message.chatId)
-
-        executeSendRequestAndPlayRingtone(message)
+        executeSendRequestAndPlayRingtone()
     }
 
-    private fun executeSendRequestAndPlayRingtone(message: Msg) {
+    private fun executeSendRequestAndPlayRingtone() {
         val context = applicationContext
 
         //val request = RequestFactory.getSendMessageRequest(message)
@@ -510,8 +510,8 @@ class ChatPresenter(private val mAccountId: Int,
         val accounts = Storages.INSTANCE.accounts
         val contacts = Storages.INSTANCE.users
         return accounts
-                .findById(mAccountId)
-                .flatMapSingle { account ->
+                .getById(mAccountId)
+                .flatMap { account ->
                     contacts.getByJid(account.buildBareJid())
                             .map { contact -> Pair.create(account, contact) }
                 }

@@ -1,12 +1,12 @@
 package biz.dealnote.mvp.reflect;
 
-import android.support.annotation.NonNull;
-
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import androidx.annotation.NonNull;
 
 /**
  * Created by ruslan.kolbasa on 05.10.2016.

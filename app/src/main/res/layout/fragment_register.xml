@@ -10,14 +10,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <android.support.v7.widget.AppCompatTextView
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/sign_up"
             android:textColor="?textColorPrimary"
             android:textSize="24sp" />
 
-        <android.support.v7.widget.AppCompatEditText
+        <EditText
             android:id="@+id/host"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
@@ -26,7 +26,7 @@
             android:inputType="textVisiblePassword"
             android:textSize="14sp" />
 
-        <android.support.v7.widget.AppCompatEditText
+        <EditText
             android:id="@+id/login"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
@@ -34,7 +34,7 @@
             android:inputType="textVisiblePassword"
             android:textSize="14sp" />
 
-        <android.support.v7.widget.AppCompatEditText
+        <EditText
             android:id="@+id/password"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
             android:inputType="textWebPassword"
             android:textSize="14sp" />
 
-        <android.support.v7.widget.AppCompatEditText
+        <EditText
             android:id="@+id/password_again"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
             android:inputType="textWebPassword"
             android:textSize="14sp" />
 
-        <android.support.v7.widget.AppCompatButton
+        <Button
             android:id="@+id/button_sign_up"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -60,6 +60,5 @@
             android:text="@string/sign_me_up" />
 
     </LinearLayout>
-
 
 </LinearLayout>

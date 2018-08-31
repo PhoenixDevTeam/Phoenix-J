@@ -1,12 +1,11 @@
 package biz.dealnote.xmpp.activity;
 
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.fragment.AllNewLoginFragment;
 import biz.dealnote.xmpp.fragment.CreateAccountFragment;
@@ -24,11 +23,8 @@ public class LoginActivity extends AppCompatActivity implements SignInFragment.C
         setContentView(R.layout.activity_signin);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window w = getWindow();
-            w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
+        Window w = getWindow();
+        w.setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 
         if (savedInstanceState == null) {
             /*SignInFragment fragment = SignInFragment.newInstance();

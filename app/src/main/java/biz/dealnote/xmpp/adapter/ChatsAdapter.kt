@@ -2,12 +2,12 @@ package biz.dealnote.xmpp.adapter
 
 import android.content.Context
 import android.graphics.Typeface
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import biz.dealnote.xmpp.R
 import biz.dealnote.xmpp.model.Chat
 import biz.dealnote.xmpp.model.Msg

@@ -1,12 +1,12 @@
 package biz.dealnote.xmpp.fragment
 
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import biz.dealnote.mvp.core.IPresenterFactory
 import biz.dealnote.xmpp.Constants
 import biz.dealnote.xmpp.R
@@ -29,9 +29,9 @@ class ChatsFragment : BaseMvpFragment<ChatsPresenter, IChatsView>(), ChatsAdapte
         mEmptyText = view.findViewById(R.id.empty)
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.list)
-        recyclerView.addOnScrollListener(PicassoPauseOnScrollListener(requireActivity(), Constants.PICASSO_TAG))
+        recyclerView.addOnScrollListener(PicassoPauseOnScrollListener(Constants.PICASSO_TAG))
 
-        val manager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        val manager = LinearLayoutManager(activity, RecyclerView.VERTICAL, false)
         recyclerView.layoutManager = manager
 
         mAdapter = ChatsAdapter(emptyList(), activity!!)

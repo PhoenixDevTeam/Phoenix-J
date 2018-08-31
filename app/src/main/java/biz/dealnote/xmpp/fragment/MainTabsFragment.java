@@ -5,34 +5,33 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.material.tabs.TabLayout;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewpager.widget.ViewPager;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.ActivityUtils;
 import biz.dealnote.xmpp.callback.AppStyleable;
 import biz.dealnote.xmpp.db.Accounts;
 import biz.dealnote.xmpp.model.Account;
-import biz.dealnote.xmpp.model.Contact;
 import biz.dealnote.xmpp.mvp.presenter.ChatsPresenter;
 import biz.dealnote.xmpp.service.request.RequestAdapter;
-import biz.dealnote.xmpp.service.request.RequestFactory;
-import biz.dealnote.xmpp.service.request.XmppRequestManager;
 import biz.dealnote.xmpp.util.AppPrefs;
 
 import static biz.dealnote.xmpp.util.Utils.isEmpty;
@@ -76,29 +75,29 @@ public class MainTabsFragment extends Fragment {
             counters = new int[3];
         }
 
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mBroadcastReceiver,
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(mBroadcastReceiver,
                 new IntentFilter(ChatsPresenter.WHAT_UNREAD_CHATS_COUNT));
     }
 
     @Override
     public void onDestroy() {
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mBroadcastReceiver);
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(mBroadcastReceiver);
         super.onDestroy();
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putIntArray("counters", counters);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_main, container, false);
 
-        mTabLayout = (TabLayout) root.findViewById(R.id.tablayout);
+        mTabLayout = root.findViewById(R.id.tablayout);
 
-        viewPager = (ViewPager) root.findViewById(R.id.pager);
+        viewPager = root.findViewById(R.id.pager);
         viewPager.setOffscreenPageLimit(2);
         viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
@@ -130,15 +129,15 @@ public class MainTabsFragment extends Fragment {
     private void setupTabView(int index, int iconRes, int iconResDisable, boolean enabled, int counterValue){
         tabViews[index].findViewById(R.id.counter_root).setVisibility(counterValue > 0 ? View.VISIBLE : View.GONE);
 
-        ImageView icon = (ImageView) tabViews[index].findViewById(R.id.imageView);
+        ImageView icon = tabViews[index].findViewById(R.id.imageView);
         icon.setImageResource(enabled ? iconRes : iconResDisable);
 
-        TextView counter = (TextView) tabViews[index].findViewById(R.id.counter);
+        TextView counter = tabViews[index].findViewById(R.id.counter);
         counter.setText(String.valueOf(counterValue));
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         MyPagerAdapter myPagerAdapter = new MyPagerAdapter(getChildFragmentManager());
@@ -192,30 +191,8 @@ public class MainTabsFragment extends Fragment {
             List<Account> accounts = Accounts.getAll(getActivity());
             if (!isEmpty(accounts)) {
                 for (Account account : accounts) {
-                    XmppRequestManager.from(getActivity())
-                            .execute(RequestFactory.getSendPresenceRequest(account.id, account.buildBareJid(), null, Contact.PRESENCE_TYPE_AVAILABLE), DUMMMY);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // notifying nested fragments (support library bug fix)
-        // https://gist.github.com/artem-zinnatullin/6916740
-        final FragmentManager childFragmentManager = getChildFragmentManager();
-        if (childFragmentManager != null) {
-            final List<Fragment> nestedFragments = childFragmentManager.getFragments();
-            if (isEmpty(nestedFragments)) {
-                return;
-            }
-
-            for (Fragment childFragment : nestedFragments) {
-                //if (childFragment != null && !childFragment.isDetached() && !childFragment.isRemoving()) { // original, но я так не думаю
-                if (childFragment != null) {
-                    childFragment.onActivityResult(requestCode, resultCode, data);
+                    //XmppRequestManager.from(getActivity())
+                    //        .execute(RequestFactory.getSendPresenceRequest(account.id, account.buildBareJid(), null, Contact.PRESENCE_TYPE_AVAILABLE), DUMMMY);
                 }
             }
         }

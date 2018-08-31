@@ -3,12 +3,8 @@ package biz.dealnote.xmpp.fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +13,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.fragment.app.Fragment;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import biz.dealnote.xmpp.Constants;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.adapter.PhotoAlbumsRecyclerAdapter;
@@ -35,15 +36,15 @@ public class PhotosFragments extends Fragment implements LoaderManager.LoaderCal
     private ProgressDialog mLoadingProgressDialog;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_albums_gallery, container, false);
-        mRecyclerView = (RecyclerView) view.findViewById(android.R.id.list);
+        mRecyclerView = view.findViewById(android.R.id.list);
 
         StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(getResources().getInteger(R.integer.photos_albums_column_count), StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE || newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     PicassoInstance.get().resumeTag(Constants.PICASSO_TAG);
                 } else {
@@ -52,7 +53,7 @@ public class PhotosFragments extends Fragment implements LoaderManager.LoaderCal
             }
         });
 
-        mEmptyTextView = (TextView) view.findViewById(R.id.empty);
+        mEmptyTextView = view.findViewById(R.id.empty);
         return view;
     }
 
@@ -143,7 +144,11 @@ public class PhotosFragments extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onAlbumSelected(LocalImageAlbum album) {
         PhotoGalleryListFragment fragment = PhotoGalleryListFragment.newInstance(album.getId());
-        getChildFragmentManager().beginTransaction().replace(R.id.child_fragment, fragment).addToBackStack("album").commit();
+        getChildFragmentManager()
+                .beginTransaction()
+                .replace(R.id.child_fragment, fragment)
+                .addToBackStack("album")
+                .commit();
     }
 
     @Override

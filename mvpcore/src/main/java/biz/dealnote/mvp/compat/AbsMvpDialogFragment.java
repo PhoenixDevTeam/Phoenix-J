@@ -1,11 +1,12 @@
 package biz.dealnote.mvp.compat;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.loader.app.LoaderManager;
 import biz.dealnote.mvp.core.IMvpView;
 import biz.dealnote.mvp.core.IPresenter;
 import biz.dealnote.mvp.core.ViewHostDelegate;
@@ -21,7 +22,7 @@ public abstract class AbsMvpDialogFragment<P extends IPresenter<V>, V extends IM
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewHostDelegate.onCreate(requireActivity(), getPresenterViewHost(), this, getLoaderManager(), savedInstanceState);
+        mViewHostDelegate.onCreate(requireActivity(), getPresenterViewHost(), this, LoaderManager.getInstance(this), savedInstanceState);
     }
 
     @Override

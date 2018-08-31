@@ -30,7 +30,7 @@
             android:layout_toRightOf="@id/imageView"
             android:layout_marginLeft="-4dp">
 
-            <android.support.v7.widget.AppCompatTextView
+            <TextView
                 android:id="@+id/counter"
                 android:text="3"
                 android:textColor="#ffffff"

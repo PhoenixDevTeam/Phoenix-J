@@ -4,11 +4,11 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.widget.ImageView;
 
+import androidx.appcompat.widget.AppCompatImageView;
 import biz.dealnote.xmpp.R;
 
-public class AspectRatioImageView extends ImageView {
+public class AspectRatioImageView extends AppCompatImageView {
 
     private static final String TAG = AspectRatioImageView.class.getSimpleName();
     private static final int DEFAULT_PROPORTION_WIDTH = 16;

@@ -4,9 +4,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.mvp.core.IPresenterFactory;
 import biz.dealnote.xmpp.Constants;
 import biz.dealnote.xmpp.R;
@@ -97,10 +97,10 @@ public class ContactsFragment extends BaseMvpFragment<ContactsPresenter, IContac
         mEmptyText = view.findViewById(R.id.empty);
         RecyclerView mRecyclerView = view.findViewById(R.id.list);
 
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false);
 
         mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.addOnScrollListener(new PicassoPauseOnScrollListener(requireActivity(), Constants.PICASSO_TAG));
+        mRecyclerView.addOnScrollListener(new PicassoPauseOnScrollListener(Constants.PICASSO_TAG));
 
         mAdapter = new ContactsAdapter(Collections.emptyList(), getActivity());
         mAdapter.setClickListener(this);

@@ -30,7 +30,7 @@
             android:src="@drawable/ic_mic" />
     </RelativeLayout>
 
-    <android.support.v7.widget.AppCompatButton
+    <Button
         android:id="@+id/button_send"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

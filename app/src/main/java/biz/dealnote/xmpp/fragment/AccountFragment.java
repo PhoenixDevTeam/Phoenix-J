@@ -2,18 +2,12 @@ package biz.dealnote.xmpp.fragment;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,9 +20,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.io.File;
 import java.util.ArrayList;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.ActivityUtils;
 import biz.dealnote.xmpp.activity.FileManagerActivity;
@@ -92,30 +92,20 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_account, container, false);
 
-        mRecyclerView = (RecyclerView) root.findViewById(R.id.list);
-        LinearLayoutManager manager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        mRecyclerView = root.findViewById(R.id.list);
+        LinearLayoutManager manager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         mRecyclerView.setLayoutManager(manager);
 
         headerView = inflater.inflate(R.layout.header_account_avatar, mRecyclerView, false);
-        avatar = (ImageView) headerView.findViewById(R.id.avatar);
-        avaterLetter = (TextView) headerView.findViewById(R.id.avatar_letter);
-        headerView.findViewById(R.id.change_avatar_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onChangedAvatarClicked();
-            }
-        });
+        avatar = headerView.findViewById(R.id.avatar);
+        avaterLetter = headerView.findViewById(R.id.avatar_letter);
+        headerView.findViewById(R.id.change_avatar_button).setOnClickListener(v -> onChangedAvatarClicked());
 
         footerView = inflater.inflate(R.layout.footer_save, mRecyclerView, false);
-        footerView.findViewById(R.id.button_save).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveChanges(false);
-            }
-        });
+        footerView.findViewById(R.id.button_save).setOnClickListener(v -> saveChanges(false));
 
         return root;
     }
@@ -127,7 +117,7 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
             mAttributes = createAttributes(accountContactPair.user);
         }
 
-        mAdapter = new UserAttributesRecyclerAdapter(getActivity(), mAttributes);
+        mAdapter = new UserAttributesRecyclerAdapter(mAttributes);
         mAdapter.addHeader(headerView);
         mAdapter.setActionListener(this);
         mRecyclerView.setAdapter(mAdapter);
@@ -181,7 +171,7 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(SAVE_ATTRIBUTES, mAttributes);
         outState.putBoolean(SAVE_HAS_CHANGES, hasChanged);
@@ -230,7 +220,7 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
             case R.id.action_change_password:
                 ChangePasswordDialog dialog = ChangePasswordDialog.newInstance(accountContactPair.account);
                 dialog.setTargetFragment(this, REQUEST_CHANGE_PASSWORD);
-                dialog.show(getFragmentManager(), "change_password");
+                dialog.show(requireFragmentManager(), "change_password");
                 break;
         }
 
@@ -238,16 +228,11 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
     }
 
     private void showAccountDeletingDialog() {
-        new AlertDialog.Builder(getActivity())
+        new AlertDialog.Builder(requireActivity())
                 .setTitle(R.string.account_deleting_title)
                 .setMessage(R.string.account_deleting_summary)
                 .setNegativeButton(R.string.button_cancel, null)
-                .setPositiveButton(R.string.button_yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        delete();
-                    }
-                })
+                .setPositiveButton(R.string.button_yes, (dialog, which) -> delete())
                 .show();
     }
 
@@ -348,18 +333,7 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
     @Override
     public boolean onBackPressed() {
         if (hasChanged) {
-            ActivityUtils.showSaveChangesWarning(getActivity(), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    saveChanges(true);
-                }
-            }, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    getActivity().getSupportFragmentManager().popBackStack();
-                }
-            });
-
+            ActivityUtils.showSaveChangesWarning(getActivity(), (dialog, which) -> saveChanges(true), (dialog, which) -> requireActivity().onBackPressed());
             return false;
         }
 
@@ -406,7 +380,6 @@ public class AccountFragment extends AbsRequestSupportFragment implements UserAt
     }
 
     private class UpdateMyDataTask extends AsyncTask<Void, Void, User> {
-
         @Override
         protected User doInBackground(Void... params) {
             String bareJid = accountContactPair.account.buildBareJid();

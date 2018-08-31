@@ -6,9 +6,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v4.content.PermissionChecker;
 import android.widget.Toast;
 
+import androidx.core.content.PermissionChecker;
 import biz.dealnote.xmpp.R;
 
 public class AppPerms {

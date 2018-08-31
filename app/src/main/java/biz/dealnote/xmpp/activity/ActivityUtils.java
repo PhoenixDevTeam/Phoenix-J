@@ -2,15 +2,16 @@ package biz.dealnote.xmpp.activity;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import biz.dealnote.xmpp.R;
 
 public class ActivityUtils {
 
-    public static android.support.v7.app.ActionBar supportToolbarFor(Fragment fragment) {
+    public static ActionBar supportToolbarFor(Fragment fragment) {
         if (fragment.getActivity() == null) {
             return null;
         }

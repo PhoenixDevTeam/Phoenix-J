@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -23,6 +22,7 @@ import org.jxmpp.jid.Jid;
 
 import java.util.Collection;
 
+import androidx.core.app.NotificationCompat;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.Injection;
 import biz.dealnote.xmpp.R;

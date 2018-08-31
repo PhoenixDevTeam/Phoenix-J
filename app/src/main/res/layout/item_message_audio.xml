@@ -26,7 +26,7 @@
             android:layout_margin="8dp"
             android:background="@drawable/circle_red">
 
-            <android.support.v7.widget.AppCompatTextView
+            <TextView
                 android:id="@+id/avatar_letter"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -73,14 +73,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp">
 
-                <android.support.v7.widget.AppCompatTextView
+                <TextView
                     android:id="@+id/current_position"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0:00"
                     android:textColor="?attr/textColorSecondary" />
 
-                <android.support.v7.widget.AppCompatTextView
+                <TextView
                     android:id="@+id/duration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

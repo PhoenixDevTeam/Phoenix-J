@@ -1,1 +1,1 @@
-include ':app', ':memorizingtrustmanager', ':mvpcore'
+include ':app', ':mvpcore'

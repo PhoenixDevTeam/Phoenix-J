@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:windowActionBarOverlay">true</item>
 
         <item name="colorPrimary">#2196F3</item>
@@ -30,7 +30,7 @@
         <item name="android:textSize">@dimen/toolbar_subtitle_size</item>
     </style>
 
-    <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+    <style name="AppDialogTheme" parent="Theme.MaterialComponents.Light.Dialog">
         <item name="windowNoTitle">true</item>
     </style>
 

@@ -1,7 +1,7 @@
 package biz.dealnote.xmpp.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +11,7 @@ import com.squareup.picasso.MemoryPolicy;
 
 import java.util.List;
 
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.xmpp.Constants;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.model.LocalPhoto;
@@ -27,14 +28,14 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
         this.data = data;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.photo_item, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        final Context context = holder.itemView.getContext();
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         final LocalPhoto p = data.get(position);
 
         PicassoInstance.get()
@@ -44,12 +45,9 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
                 .placeholder(R.drawable.background_gray)
                 .into(holder.photoImageView);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (listener != null) {
-                    listener.onPhotoSelected(p);
-                }
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onPhotoSelected(p);
             }
         });
     }
@@ -73,7 +71,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.ViewHolder> 
 
         public ViewHolder(View itemView) {
             super(itemView);
-            photoImageView = (ImageView) itemView.findViewById(R.id.imageView);
+            photoImageView = itemView.findViewById(R.id.imageView);
         }
     }
 }

@@ -7,10 +7,8 @@ import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StatFs;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -30,6 +28,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.adapter.FileManagerAdapter;
 import biz.dealnote.xmpp.callback.OnBackButtonCallback;
@@ -120,19 +121,17 @@ public class FileManagerFragment extends Fragment implements FileManagerAdapter.
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_file_explorer, container, false);
 
-        mRecyclerView = (RecyclerView) root.findViewById(R.id.list);
-        empty = (TextView) root.findViewById(R.id.empty);
+        mRecyclerView = root.findViewById(R.id.list);
+        empty = root.findViewById(R.id.empty);
 
-        mLinearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        mLinearLayoutManager = new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false);
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mRecyclerView.getItemAnimator().setAddDuration(500);
-        mRecyclerView.setHasFixedSize(Boolean.TRUE);
 
         //ImageView btnSelectCurrentDir = (ImageView) root.findViewById(R.id.select_current_directory_button);
-        tvCurrentDir = (TextView) root.findViewById(R.id.current_path);
+        tvCurrentDir = root.findViewById(R.id.current_path);
 
         root.findViewById(R.id.relativeLayout3).setVisibility(currentAction == SELECT_DIRECTORY ? View.VISIBLE : View.GONE);
 

@@ -1,13 +1,12 @@
 package biz.dealnote.xmpp.adapter;
 
-import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
 import java.util.List;
 
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.adapter.bindable.RecyclerBindableAdapter;
 import biz.dealnote.xmpp.model.UserAttribute;
@@ -15,14 +14,12 @@ import biz.dealnote.xmpp.model.UserAttribute;
 public class UserAttributesRecyclerAdapter extends RecyclerBindableAdapter<UserAttribute, UserAttributesRecyclerAdapter.Holder> {
 
     private static final String EMPTY = "--";
-    private Context mContext;
     private List<UserAttribute> mData;
     private ActionListener actionListener;
 
-    public UserAttributesRecyclerAdapter(Context context, List<UserAttribute> items) {
+    public UserAttributesRecyclerAdapter(List<UserAttribute> items) {
         super(items);
         this.mData = items;
-        this.mContext = context;
     }
 
     @Override
@@ -58,15 +55,15 @@ public class UserAttributesRecyclerAdapter extends RecyclerBindableAdapter<UserA
         void onClick(UserAttribute attribute);
     }
 
-    public class Holder extends RecyclerView.ViewHolder {
+    class Holder extends RecyclerView.ViewHolder {
 
         TextView title;
         TextView value;
 
-        public Holder(View itemView) {
+        Holder(View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.title);
-            value = (TextView) itemView.findViewById(R.id.value);
+            title = itemView.findViewById(R.id.title);
+            value = itemView.findViewById(R.id.value);
         }
     }
 }

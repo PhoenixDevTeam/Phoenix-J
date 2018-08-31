@@ -4,10 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputLayout;
+
+import androidx.fragment.app.Fragment;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.activity.LoginActivity;
@@ -87,17 +89,17 @@ public class SignInFragment extends AbsRequestSupportFragment implements View.On
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_signin, container, false);
 
         root.findViewById(R.id.signin_button).setOnClickListener(this);
         root.findViewById(R.id.button_sign_up).setOnClickListener(this);
 
-        loginField = (EditText) root.findViewById(R.id.login);
-        passwordField = (EditText) root.findViewById(R.id.password);
-        hostField = (EditText) root.findViewById(R.id.host);
+        loginField = root.findViewById(R.id.login);
+        passwordField = root.findViewById(R.id.password);
+        hostField = root.findViewById(R.id.host);
 
-        TextInputLayout passwordFieldContainer = (TextInputLayout) root.findViewById(R.id.password_container);
+        TextInputLayout passwordFieldContainer = root.findViewById(R.id.password_container);
 
         passwordFieldContainer.setTypeface(Typeface.DEFAULT);
 

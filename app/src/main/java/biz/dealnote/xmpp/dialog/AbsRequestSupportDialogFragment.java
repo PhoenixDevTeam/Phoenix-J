@@ -1,8 +1,9 @@
 package biz.dealnote.xmpp.dialog;
 
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
+import android.support.annotation.NonNull;
 
+import androidx.fragment.app.DialogFragment;
 import biz.dealnote.xmpp.fragment.FragmentRequestManager;
 import biz.dealnote.xmpp.service.request.Request;
 
@@ -24,7 +25,7 @@ public abstract class AbsRequestSupportDialogFragment extends DialogFragment imp
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         requestManager.onSaveInstanceState(outState);
     }

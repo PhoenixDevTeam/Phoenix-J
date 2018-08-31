@@ -1,7 +1,7 @@
 package biz.dealnote.xmpp.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +13,7 @@ import com.squareup.picasso.Transformation;
 
 import java.util.List;
 
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.model.User;
 import biz.dealnote.xmpp.settings.AbsSettings;
@@ -37,8 +38,9 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.transformation = new RoundTransformation();
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_ACCOUNT:
                 return new AccountHolder(LayoutInflater.from(context).inflate(R.layout.item_account, parent, false));
@@ -46,12 +48,11 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 return new NotificationHolder(LayoutInflater.from(context).inflate(R.layout.item_notification, parent, false));
         }
 
-        return null;
+        throw new IllegalStateException();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         AbsSettings current = data.get(position);
         AbsSettings previous = position == 0 ? null : data.get(position - 1);
         AbsSettings next = position == data.size() - 1 ? null : data.get(position + 1);
@@ -91,12 +92,9 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.title.setText(setting.titleRes);
         holder.value.setVisibility(View.GONE);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (actionListener != null) {
-                    actionListener.onSimpleOptionClick(setting);
-                }
+        holder.itemView.setOnClickListener(v -> {
+            if (actionListener != null) {
+                actionListener.onSimpleOptionClick(setting);
             }
         });
     }
@@ -109,12 +107,9 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         holder.title.setText(settings.notifyTileRes);
         holder.value.setText(settings.value.buildInfoLine(context));
 
-        holder.contentRoot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (actionListener != null) {
-                    actionListener.onNotificationClick(settings);
-                }
+        holder.contentRoot.setOnClickListener(v -> {
+            if (actionListener != null) {
+                actionListener.onNotificationClick(settings);
             }
         });
     }
@@ -150,12 +145,9 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         Avatars.displayAvatar(context, holder, jid, photoHash, transformation);
 
-        holder.contentRoot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (actionListener != null) {
-                    actionListener.onAccountClick(settings);
-                }
+        holder.contentRoot.setOnClickListener(v -> {
+            if (actionListener != null) {
+                actionListener.onAccountClick(settings);
             }
         });
     }
@@ -213,16 +205,16 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         TextView jid;
         TextView name;
 
-        public AccountHolder(View itemView) {
+        AccountHolder(View itemView) {
             super(itemView);
             header = itemView.findViewById(R.id.header_root);
-            headerText = (TextView) itemView.findViewById(R.id.header_text);
+            headerText = itemView.findViewById(R.id.header_text);
 
             contentRoot = itemView.findViewById(R.id.content_root);
-            avatar = (ImageView) itemView.findViewById(R.id.avatar);
-            letter = (TextView) itemView.findViewById(R.id.avatar_letter);
-            jid = (TextView) itemView.findViewById(R.id.jid);
-            name = (TextView) itemView.findViewById(R.id.first_last_name);
+            avatar = itemView.findViewById(R.id.avatar);
+            letter = itemView.findViewById(R.id.avatar_letter);
+            jid = itemView.findViewById(R.id.jid);
+            name = itemView.findViewById(R.id.first_last_name);
         }
 
         @Override
@@ -255,13 +247,13 @@ public class SettingsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         TextView title;
         TextView value;
 
-        public NotificationHolder(View itemView) {
+        NotificationHolder(View itemView) {
             super(itemView);
             header = itemView.findViewById(R.id.header_root);
-            headerText = (TextView) itemView.findViewById(R.id.header_text);
+            headerText = itemView.findViewById(R.id.header_text);
             contentRoot = itemView.findViewById(R.id.content_root);
-            title = (TextView) itemView.findViewById(R.id.title);
-            value = (TextView) itemView.findViewById(R.id.value);
+            title = itemView.findViewById(R.id.title);
+            value = itemView.findViewById(R.id.value);
         }
 
         @Override

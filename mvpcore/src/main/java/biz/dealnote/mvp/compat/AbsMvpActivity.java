@@ -1,10 +1,11 @@
 package biz.dealnote.mvp.compat;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.loader.app.LoaderManager;
 import biz.dealnote.mvp.core.IMvpView;
 import biz.dealnote.mvp.core.IPresenter;
 import biz.dealnote.mvp.core.ViewHostDelegate;
@@ -20,7 +21,7 @@ public abstract class AbsMvpActivity<P extends IPresenter<V>, V extends IMvpView
     @Override
     protected final void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewHostDelegate.onCreate(this, getPresenterViewHost(), this, getSupportLoaderManager(), savedInstanceState);
+        mViewHostDelegate.onCreate(this, getPresenterViewHost(), this, LoaderManager.getInstance(this), savedInstanceState);
     }
 
     @Override

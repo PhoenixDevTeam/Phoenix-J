@@ -5,11 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +14,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.fragment.app.Fragment;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.xmpp.Constants;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.R;
@@ -58,16 +59,16 @@ public class PhotoGalleryListFragment extends Fragment implements
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
-        RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.list);
+        RecyclerView mRecyclerView = view.findViewById(R.id.list);
 
         GridLayoutManager manager = new GridLayoutManager(getActivity(), getResources().getInteger(R.integer.local_gallery_column_count));
         mRecyclerView.setLayoutManager(manager);
-        mRecyclerView.addOnScrollListener(new PicassoPauseOnScrollListener(getActivity(), Constants.PICASSO_TAG));
+        mRecyclerView.addOnScrollListener(new PicassoPauseOnScrollListener(Constants.PICASSO_TAG));
 
         mRecyclerView.setAdapter(mAdapter);
-        mEmptyTextView = (TextView) view.findViewById(R.id.empty);
+        mEmptyTextView = view.findViewById(R.id.empty);
 
         resolveEmptyText();
         return view;

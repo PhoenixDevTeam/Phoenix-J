@@ -22,9 +22,9 @@ import java.util.Map;
 
 import biz.dealnote.xmpp.db.columns.AccountsColumns;
 import biz.dealnote.xmpp.db.columns.ChatsColumns;
-import biz.dealnote.xmpp.db.columns.UsersColumns;
 import biz.dealnote.xmpp.db.columns.MessagesColumns;
 import biz.dealnote.xmpp.db.columns.RosterColumns;
+import biz.dealnote.xmpp.db.columns.UsersColumns;
 
 public class ChatContentProvider extends ContentProvider {
 

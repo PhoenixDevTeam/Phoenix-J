@@ -4,14 +4,14 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:scrollbars="vertical" />
 
-    <android.support.v7.widget.AppCompatTextView
+    <TextView
         android:id="@+id/empty"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

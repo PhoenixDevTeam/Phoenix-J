@@ -2,7 +2,7 @@ package biz.dealnote.xmpp.mvp.presenter
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.content.LocalBroadcastManager
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import biz.dealnote.mvp.reflect.OnGuiCreated
 import biz.dealnote.xmpp.Extra
 import biz.dealnote.xmpp.db.Storages

@@ -2,9 +2,8 @@ package biz.dealnote.xmpp.dialog;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +11,8 @@ import android.view.Window;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.fragment.app.DialogFragment;
 import biz.dealnote.xmpp.R;
 import biz.dealnote.xmpp.settings.NotificationSettings;
 import biz.dealnote.xmpp.util.NotificationHelper;
@@ -41,15 +42,15 @@ public class NotificationSettingsDialog extends DialogFragment implements Compou
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getDialog().setCanceledOnTouchOutside(false);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
         View root = inflater.inflate(R.layout.fragment_notification, container, false);
-        sEnable = (SwitchCompat) root.findViewById(R.id.enable);
-        sVibro = (SwitchCompat) root.findViewById(R.id.vibration);
-        sLight = (SwitchCompat) root.findViewById(R.id.light);
-        sSound = (SwitchCompat) root.findViewById(R.id.sound);
+        sEnable = root.findViewById(R.id.enable);
+        sVibro = root.findViewById(R.id.vibration);
+        sLight = root.findViewById(R.id.light);
+        sSound = root.findViewById(R.id.sound);
 
         NotificationSettings.Value value = NotificationHelper.load(getActivity(), key);
         setupViewsWith(value);
@@ -59,14 +60,9 @@ public class NotificationSettingsDialog extends DialogFragment implements Compou
         sLight.setOnCheckedChangeListener(this);
         sSound.setOnCheckedChangeListener(this);
 
-        tvRingtoneTitle = (TextView) root.findViewById(R.id.ringnote_title);
+        tvRingtoneTitle = root.findViewById(R.id.ringnote_title);
 
-        root.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        root.findViewById(R.id.ok).setOnClickListener(v -> dismiss());
 
         return root;
     }

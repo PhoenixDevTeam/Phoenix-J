@@ -1,8 +1,10 @@
 package biz.dealnote.xmpp.callback;
 
 import android.os.Handler;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.annotation.NonNull;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScrollListener {
 
@@ -16,7 +18,7 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
     }
 
     @Override
-    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
         if (!allowLoading) {
             return;
         }
@@ -26,12 +28,7 @@ public abstract class EndlessRecyclerOnScrollListener extends RecyclerView.OnScr
         if (need) {
             onLoadMore();
             allowLoading = false;
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    allowLoading = true;
-                }
-            }, 1000);
+            mHandler.postDelayed(() -> allowLoading = true, 1000);
         }
     }
 

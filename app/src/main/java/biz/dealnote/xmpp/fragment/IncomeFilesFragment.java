@@ -1,16 +1,11 @@
 package biz.dealnote.xmpp.fragment;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,6 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import biz.dealnote.xmpp.Constants;
 import biz.dealnote.xmpp.Extra;
 import biz.dealnote.xmpp.R;
@@ -64,11 +64,11 @@ public class IncomeFilesFragment extends Fragment implements IncomeFilesAdapter.
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_income_files, container, false);
 
-        mRecyclerView = (RecyclerView) root.findViewById(R.id.list);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        mRecyclerView = root.findViewById(R.id.list);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
 
         return root;
     }
@@ -220,18 +220,17 @@ public class IncomeFilesFragment extends Fragment implements IncomeFilesAdapter.
     @Override
     public void onClick(final int index, final IncomeFileItem item) {
         String[] options = {getString(R.string.open_file), getString(R.string.delete)};
-        new AlertDialog.Builder(getActivity()).setTitle(item.file.getName()).setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        Utils.openFile(getActivity(), item.file);
-                        break;
-                    case 1:
-                        deleteFile(index, item);
-                        break;
-                }
-            }
-        }).setNegativeButton(R.string.button_cancel, null).show();
+        new AlertDialog.Builder(requireActivity())
+                .setTitle(item.file.getName())
+                .setItems(options, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            Utils.openFile(getActivity(), item.file);
+                            break;
+                        case 1:
+                            deleteFile(index, item);
+                            break;
+                    }
+                }).setNegativeButton(R.string.button_cancel, null).show();
     }
 }
