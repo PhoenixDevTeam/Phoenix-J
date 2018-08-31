@@ -372,7 +372,7 @@ class ChatPresenter(private val mAccountId: Int,
     }
 
     private fun checkChatReady(): Boolean {
-        if (mAccount == null) {
+        if (mAccount == null || mMyUser == null) {
             showShortToast(view, R.string.chat_is_not_ready_yet)
             return false
         }
