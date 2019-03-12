@@ -129,7 +129,7 @@ class ChatPresenter(private val mAccountId: Int,
         appendDisposable(Storages.INSTANCE.messages
                 .createMessageDeleteObservable()
                 .filter { integerSetPair -> chatId != null && Objects.equals(integerSetPair.first, chatId) }
-                .map { it -> it.second }
+                .map { it.second }
                 .toMainThread()
                 .subscribe(Consumer { deletion -> onMessagesRemoved(deletion) }, ignore()))
 
@@ -149,7 +149,7 @@ class ChatPresenter(private val mAccountId: Int,
         appendDisposable(otrManager.observeStateChanges()
                 .filter { event -> event.accountId == mAccountId && mDestination == event.bareJid }
                 .observeOn(Injection.provideMainThreadScheduler())
-                .subscribe { _ -> resolveOptionMenu() })
+                .subscribe { resolveOptionMenu() })
     }
 
     @OnGuiCreated
@@ -573,9 +573,6 @@ class ChatPresenter(private val mAccountId: Int,
         appendDisposable(contactRepository.acceptSubscription(mAccountId, msg.senderJid, true)
                 .fromIOToMain()
                 .subscribe(dummy(), Consumer { onAcceptFail(it) }))
-
-        //val request = RequestFactory.getAcceptSubscriptionRequest(mAccount, message.destination, message.id)
-        //executeRequest(request)
     }
 
     private fun onAcceptFail(throwable: Throwable) {
@@ -589,12 +586,10 @@ class ChatPresenter(private val mAccountId: Int,
     fun fireInputStreamUploadConfirmed(uri: Uri, mime: String?) {
         val localFilePath = PhotoGalleryImageProvider.getRealPathFromURI(applicationContext, uri)
 
-        val fileName: String
-        if (TextUtils.isEmpty(localFilePath)) {
-            fileName = "file_" + uri.lastPathSegment + "." + Utils.getImageExt(mime)
+        val fileName = if (TextUtils.isEmpty(localFilePath)) {
+            "file_" + uri.lastPathSegment + "." + Utils.getImageExt(mime)
         } else {
-            val file = File(localFilePath!!)
-            fileName = file.name
+            File(localFilePath!!).name
         }
 
         val appFile = AppFile(uri, fileName)

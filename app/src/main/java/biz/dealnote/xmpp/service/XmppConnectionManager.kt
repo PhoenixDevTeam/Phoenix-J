@@ -186,7 +186,7 @@ class XmppConnectionManager(private val context: Context,
                     released = false
                     compositeDisposable.add(accounts.getById(accountId)
                             .subscribeOn(Schedulers.io())
-                            .subscribe({ account -> onAccountFound(account) }, { _ -> onAccountNotFound() }))
+                            .subscribe({ account -> onAccountFound(account) }, { onAccountNotFound() }))
                 }
             }
         }
@@ -260,7 +260,7 @@ class XmppConnectionManager(private val context: Context,
                     }
                 })
 
-                connection.addAsyncStanzaListener({ packet -> manager.get()?.notifyStanza(account, packet) }, { it -> it is Message || it is Presence })
+                connection.addAsyncStanzaListener({ packet -> manager.get()?.notifyStanza(account, packet) }, { it is Message || it is Presence })
 
                 connection.addConnectionListener(object : AbstractConnectionListener() {
                     override fun connected(connection: XMPPConnection) {
